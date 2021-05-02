@@ -185,7 +185,7 @@ def load_image(image_path):
 def main():
     N = 7 * 7
     #NW = 8
-    #N = 5000
+    # N = 5000
     #NW = 70
 
     points_2d,_ = eye_centers(N)
