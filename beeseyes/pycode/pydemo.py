@@ -151,23 +151,32 @@ def one_hexagonal_rays(pindex, hexa_verts_table, points_xyz, normals_xyz):
 '''
      Based on `derive_formulas.py`
 '''
-def ray_cast(U,V,D,O):
+def ray_cast(U,V,C0, D,O):
+   # vectorised
    dx,dy,dz = D[:,0], D[:,1], D[:,2]
    ox,oy,oz = O[:,0], O[:,1], O[:,2]
-   ux,uy,uz = U
-   vx,vy,vz = V
-   denom =  dx*uy*vz - dx*uz*vy - dy*ux*vz + dy*uz*vx + dz*ux*vy - dz*uy*vx
-   a = (dx*oy*vz - dx*oz*vy - dy*ox*vz + dy*oz*vx + dz*ox*vy - dz*oy*vx) / denom
-   b = (-dx*oy*uz + dx*oz*uy + dy*ox*uz - dy*oz*ux - dz*ox*uy + dz*oy*ux) / denom
-   # t = (-ox*uy*vz + ox*uz*vy + oy*ux*vz - oy*uz*vx - oz*ux*vy + oz*uy*vx) / denom
 
+   # simple value
+   ux,uy,uz = float(U[0]),  float(U[1]), float(U[2])
+   vx,vy,vz = float(V[0]),  float(V[1]), float(V[2])
+   x0,y0,z0 = float(C0[0]), float(C0[1]), float(C0[2])
+
+   # solution: u,v
+   denom =  dx*uy*vz - dx*uz*vy - dy*ux*vz + dy*uz*vx + dz*ux*vy - dz*uy*vx
+   a = dx*oy*vz - dx*oz*vy + dx*vy*z0 - dx*vz*y0 - dy*ox*vz + dy*oz*vx - dy*vx*z0 + dy*vz*x0 + dz*ox*vy - dz*oy*vx + dz*vx*y0 - dz*vy*x0 / denom
+   b = -dx*oy*uz + dx*oz*uy - dx*uy*z0 + dx*uz*y0 + dy*ox*uz - dy*oz*ux + dy*ux*z0 - dy*uz*x0 - dz*ox*uy + dz*oy*ux - dz*ux*y0 + dz*uy*x0 / denom
+   # t = -ox*uy*vz + ox*uz*vy + oy*ux*vz - oy*uz*vx - oz*ux*vy + oz*uy*vx + ux*vy*z0 - ux*vz*y0 - uy*vx*z0 + uy*vz*x0 + uz*vx*y0 - uz*vy*x0 / denom
+
+   print(a)
+   print(b)
 
 import scipy.misc
 import imageio
 def load_image(image_path):
    img = imageio.imread(image_path)
    pict_array2d = np.asarray(img)
-   pict_array2d = scipy.misc.imresize(pict_array2d, FIXED_SIZE[0:2])
+   #pict_array2d = numpy.array(Image.fromarray(pict_array2d).resize())
+   #pict_array2d = scipy.misc.imresize(pict_array2d, FIXED_SIZE[0:2])
 
 def main():
     points_2d,_ = eye_centers(50)
@@ -198,6 +207,16 @@ def main():
     ax3d.scatter(points_xyz[:,0],points_xyz[:,1],points_xyz[:,2], marker='.')
 
     texture = load_image(BLUE_FLOWER)
+
+    # centimeters
+    plane = {
+       'U': (30,0,0),
+       'V': (0,30,0),
+       'C0': (0,0,0),
+    }
+    O = points_xyz
+    D = normals_xyz
+    ray_cast(plane['U'],plane['V'],plane['C0'], D,O)
 
     plt.show()
 
