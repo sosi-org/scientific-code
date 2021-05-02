@@ -217,9 +217,33 @@ def main():
        'C0': (0,0,0),
     }
 
+    def tuple3_to_np(pxyz):
+       x,y,z = pxyz
+       return np.array([x,y,z])[None, :]
+
+    def normalise_np(pxyz):
+       return pxyz * 1.0 / np.linalg.norm(pxyz, axis=0, keepdims=True)
+
+    def rotation_matrix(bee):
+       w = np.cross(tuple3_to_np(bee['u']), tuple3_to_np(bee['v']))
+       w = normalise_np(w)
+       return np.eye(3)
+
+    bee = {
+      'pos': (15.0, 15.0, -10.0),
+      'u': (15.0, 15.0, -10.0),
+      'v': (0,1,0),
+    }
+    bee_R = rotation_matrix(bee)
+
+    bee_pos = tuple3_to_np(bee['pos'])
+
     # O = points_xyz / 7.0 * 0.1/70  # in cm
-    O = points_xyz / 7.0 * 0.1/70.0 + 0*np.array([15.0,15.0,-10.0])[None, :]  # in cm
-    D = normals_xyz
+    eye_points = points_xyz / 7.0 * 0.1/70.0 + 0 * tuple3_to_np((15.0,15.0,-10.0))  # in cm
+    eye_points = eye_points * 10
+
+    O = np.dot(bee_R, eye_points.T).T + bee_pos * 0
+    D = np.dot(bee_R, normals_xyz.T).T
     (u,v) = ray_cast(plane['U'],plane['V'],plane['C0'], D,O)
 
     # print(texture.shape, 'sss') #  (192, 256, 3)
