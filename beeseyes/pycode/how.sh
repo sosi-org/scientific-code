@@ -6,7 +6,10 @@ virtualenv -v --python=python3 p3
 source ./p3/bin/activate
 pip install scipy
 pip install matplotlib
+pip install imageio
 
+
+# 
 # level 2
 source ./p3/bin/activate
 python pydemo.py
