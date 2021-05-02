@@ -273,8 +273,8 @@ def main():
     bee = {
       'pos': (15.0, 15.0, -10.0),
       #'u': (15.0, 15.0, -10.0),
-      'u': (1,0,0),
-      'v': (0,1,0),
+      'u': (1,0,-0.2), # Bee's right hand
+      'v': (0,1,0),  # Bee's top
     }
     bee_R = rotation_matrix(bee)
 
