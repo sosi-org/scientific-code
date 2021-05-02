@@ -25,6 +25,8 @@ def eye_centers(n):
   eta = (np.random.rand(*c_xyi.shape)-0.5) * 0.2
   c_xy  = c_xyi + eta # + m_odd * 0.2
 
+  c_xy = c_xy / float(nx)
+
   # indices: (0:nx, 0:nx, ...) x ny
   return c_xy, (nx,ny)
 
@@ -117,12 +119,12 @@ def show_hexagons(points_xy):
     #print(tri.vertex_neighbor_vertices)  # (indptr, indices)
 
 
-def eye_attribs(points_xy):
+def eye_attribs(points_xy, z_offset):
     n = points_xy.shape[0]
     zc = np.zeros((n, 1))
     cxyz = np.concatenate((points_xy, zc), axis=1)
     z0 = np.zeros((n, 1))
-    normals = np.concatenate((z0+0.0, z0+0.0, z0 + 1.0 ), axis=1)
+    normals = np.concatenate((z0+0.0, z0+0.0, z0 + z_offset ), axis=1)
 
     return cxyz, normals
 
@@ -181,15 +183,23 @@ def load_image(image_path):
    return pict_array2d
 
 def main():
-    points_2d,_ = eye_centers(50)
-    #v=eye_attribs_demo(points_2d)
+    N = 7 * 7
+    #NW = 8
+    #N = 5000
+    #NW = 70
+
+    points_2d,_ = eye_centers(N)
+    #v, _ = eye_attribs_demo(points_2d, 1.0)
     show_hexagons(points_2d)
     #show_hexagons(v)
 
-    v=eye_attribs_demo(points_2d)
-
     hexa_verts_table = all_hexa_verts(points_2d)
-    (points_xyz, normals_xyz) = eye_attribs(points_2d)
+
+    '''
+    v, _ = eye_attribs_demo(points_2d, 1.0)
+    '''
+
+    (points_xyz, normals_xyz) = eye_attribs(points_2d, 1.0)
     pindex = 35
     rays_origins, rays_dirs = one_hexagonal_rays(pindex, hexa_verts_table, points_xyz, normals_xyz)
 
@@ -239,10 +249,12 @@ def main():
     bee_pos = tuple3_to_np(bee['pos'])
 
     # O = points_xyz / 7.0 * 0.1/70  # in cm
-    eye_points = points_xyz / 7.0 * 0.1/70.0 + 0 * tuple3_to_np((15.0,15.0,-10.0))  # in cm
-    eye_points = eye_points * 10
 
-    O = np.dot(bee_R, eye_points.T).T + bee_pos * 0
+    EYE_SIZE = 0.1*10 # cm
+    eye_points = points_xyz * EYE_SIZE \
+      + 0 * tuple3_to_np((15.0,15.0,-10.0))  # in cm
+
+    O = np.dot(bee_R, eye_points.T).T + bee_pos
     D = np.dot(bee_R, normals_xyz.T).T
     (u,v) = ray_cast(plane['U'],plane['V'],plane['C0'], D,O)
 
