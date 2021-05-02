@@ -266,7 +266,6 @@ def main():
         ax3d.scatter(points_xyz[:,0],points_xyz[:,1],points_xyz[:,2], marker='.')
 
         visualise_plane(ax3d, plane)
-    visuaise_3d(rays_origins, rays_dirs,points_xyz, plane)
 
     bee = {
       'pos': (15.0, 15.0, -10.0),
@@ -289,6 +288,10 @@ def main():
     (u,v) = ray_cast(plane['U'],plane['V'],plane['C0'], D,O)
 
     # print(texture.shape, 'sss') #  (192, 256, 3)
+
+    visuaise_3d(rays_origins, rays_dirs, points_xyz, plane)
+
+    # visuaise_3d(O, D, O, plane)
 
     axes2 = plt.figure()
     plt.imshow(texture, extent=(0.0,1.0,0.0,1.0), alpha=0.6)
