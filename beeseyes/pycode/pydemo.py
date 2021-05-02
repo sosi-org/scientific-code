@@ -250,19 +250,22 @@ def main():
          pu*U[:,2]+pv*V[:,2] + C0[:,2],
          marker='.', color='g')
 
-    def visuaise_3d(rays_origins, rays_dirs,points_xyz, plane):
-        SZ=8.0*1.2
-        ax3d = plt.figure().add_subplot(projection='3d', autoscale_on=False, xlim=(0, +SZ), ylim=(0, +SZ), zlim=(-SZ/2.0, +SZ/2.0))
+    def visuaise_3d(rays_origins, rays_dirs, points_xyz, plane):
+        SZ=8.0*1.2 * 3
+        ax3d = plt.figure().add_subplot(projection='3d', autoscale_on=False,
+           xlim=(0, +SZ), ylim=(0, +SZ), zlim=(-SZ/2.0, +SZ/2.0))
         # ax3d = Axes3D(fig)
         # ax = fig.gca(projection='3d')
         #ax3d.set_aspect('equal')
         #ax3d.set_aspect(1)
 
+        # only a single hex being casted
         ax3d.quiver( \
          rays_origins[:,0],rays_origins[:,1],rays_origins[:,2], \
          rays_dirs[:,0],rays_dirs[:,1],rays_dirs[:,2], \
          pivot='tail', length=1.0, normalize=True, color='r'
         )
+        # All ommatidia
         ax3d.scatter(points_xyz[:,0],points_xyz[:,1],points_xyz[:,2], marker='.')
 
         visualise_plane(ax3d, plane)
@@ -289,9 +292,12 @@ def main():
 
     # print(texture.shape, 'sss') #  (192, 256, 3)
 
-    visuaise_3d(rays_origins, rays_dirs, points_xyz, plane)
+    #visuaise_3d(rays_origins, rays_dirs, points_xyz, plane)
 
     # visuaise_3d(O, D, O, plane)
+    rays_origins_transformed = np.dot(bee_R, (rays_origins * EYE_SIZE).T).T + bee_pos
+    rays_dirs_transformed = np.dot(bee_R, rays_dirs.T).T
+    visuaise_3d(rays_origins_transformed, rays_dirs_transformed, O, plane)
 
     axes2 = plt.figure()
     plt.imshow(texture, extent=(0.0,1.0,0.0,1.0), alpha=0.6)
