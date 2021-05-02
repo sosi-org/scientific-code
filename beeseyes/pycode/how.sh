@@ -9,7 +9,6 @@ pip install matplotlib
 pip install imageio
 
 
-# 
 # level 2
 source ./p3/bin/activate
 python pydemo.py

@@ -148,6 +148,20 @@ def one_hexagonal_rays(pindex, hexa_verts_table, points_xyz, normals_xyz):
     # return rays
     return (rays_origins, rays_dirs)
 
+'''
+     Based on `derive_formulas.py`
+'''
+def ray_cast(U,V,D,O):
+   dx,dy,dz = D[:,0], D[:,1], D[:,2]
+   ox,oy,oz = O[:,0], O[:,1], O[:,2]
+   ux,uy,uz = U
+   vx,vy,vz = V
+   denom =  dx*uy*vz - dx*uz*vy - dy*ux*vz + dy*uz*vx + dz*ux*vy - dz*uy*vx
+   a = (dx*oy*vz - dx*oz*vy - dy*ox*vz + dy*oz*vx + dz*ox*vy - dz*oy*vx) / denom
+   b = (-dx*oy*uz + dx*oz*uy + dy*ox*uz - dy*oz*ux - dz*ox*uy + dz*oy*ux) / denom
+   # t = (-ox*uy*vz + ox*uz*vy + oy*ux*vz - oy*uz*vx - oz*ux*vy + oz*uy*vx) / denom
+
+
 import scipy.misc
 import imageio
 def load_image(image_path):
