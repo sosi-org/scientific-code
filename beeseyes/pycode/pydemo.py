@@ -216,8 +216,9 @@ def main():
        'V': (0,30,0),
        'C0': (0,0,0),
     }
+
     # O = points_xyz / 7.0 * 0.1/70  # in cm
-    O = points_xyz / 7.0 * 0.1/70*10  # in cm
+    O = points_xyz / 7.0 * 0.1/70.0 + 0*np.array([15.0,15.0,-10.0])[None, :]  # in cm
     D = normals_xyz
     (u,v) = ray_cast(plane['U'],plane['V'],plane['C0'], D,O)
 
