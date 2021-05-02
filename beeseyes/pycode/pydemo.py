@@ -1,0 +1,192 @@
+from scipy.spatial import Voronoi, voronoi_plot_2d
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.spatial import Delaunay
+
+HEX6 = 6
+
+
+# https://en.wikipedia.org/wiki/Blue_flower#/media/File:Bachelor's_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpg
+# https://en.wikipedia.org/wiki/Blue_flower
+BLUE_FLOWER = "../art/256px-Bachelor's_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpeg"
+
+def eye_centers(n):
+  nx = int(np.sqrt(n)+1) +2
+  ny = int(np.sqrt(n)) + 2
+
+  xa = np.linspace(0,nx-1,nx)
+  ya = np.linspace(0,ny-1,ny)
+  [X,Y] = np.meshgrid(xa,ya)
+  X[0::2] += 0.5 # shift
+  xc = X.ravel()[:,None]
+  yc = Y.ravel()[:,None]
+  print(xc.shape, yc.shape) # (56, 1) (56, 1)
+  c_xyi = np.concatenate((xc, yc), axis=1)
+  eta = (np.random.rand(*c_xyi.shape)-0.5) * 0.2
+  c_xy  = c_xyi + eta # + m_odd * 0.2
+
+  # indices: (0:nx, 0:nx, ...) x ny
+  return c_xy, (nx,ny)
+
+''' By james-porter, https://stackoverflow.com/questions/12374781/how-to-find-all-neighbors-of-a-given-point-in-a-delaunay-triangulation-using-sci '''
+
+def find_neighbors(pindex, triang):
+    neighbors = list()
+    for simplex in triang.vertices:
+        if pindex in simplex:
+            neighbors.extend([simplex[i] for i in range(len(simplex)) if simplex[i] != pindex])
+
+            # this is a one liner for if a simplex contains the point we`re interested in,
+            # extend the neighbors list by appending all the *other* point indices in the simplex
+
+    # now we just have to strip out all the dulicate indices and return the neighbors list:
+    return list(set(neighbors))
+
+'''
+  ret[vert_index] = array of len 6 of vert_index.
+  Padded with NO_VERT=-1
+
+  Not very fast
+'''
+def all_hexa_verts(points_xy):
+    n = points_xy.shape[0]
+    tri = Delaunay(points_xy)
+    NO_VERT = -1
+    hexa_verts = np.zeros((n,6), dtype=int)
+
+    for pindex in range(n):
+       # find 6 neighbours
+       nl = find_neighbors(pindex, tri)
+       nla = np.array(nl)
+       padlen = 6 - len(nl)
+       if padlen > 0:
+          nla = np.pad(nla, (0,padlen,), 'constant', constant_values=(NO_VERT, NO_VERT,))
+          nla = nla[:6] * 0 + NO_VERT
+       if padlen < 0:
+          nla = nla[:6] * 0 + NO_VERT
+
+       #print(nla)
+       hexa_verts[pindex, :] = nla
+    print(hexa_verts)
+    return hexa_verts
+
+def eye_attribs_demo(points_xy):
+    n = points_xy.shape[0]
+    zc = np.zeros((n, 1))
+    cxyz = np.concatenate((points_xy, zc), axis=1)
+    z0 = np.zeros((n, 1))
+    normals = np.concatenate((z0+0.0, z0+0.0, z0 + 1.0 ), axis=1)
+
+    vor = Voronoi(points_xy)
+    print(vor.vertices)
+    print(vor.vertices.shape)
+    # return vor.vertices
+
+    tri = Delaunay(points_xy)
+    pindex = 35
+    nl = find_neighbors(pindex, tri)
+    print('find_neighbors', nl)
+
+    plt.plot(points_xy[nl,0], points_xy[nl,1], 'g*')
+    plt.plot(points_xy[pindex,0], points_xy[pindex,1], 'go')
+
+    all_hexa_verts(points_xy)
+    return vor.vertices
+
+def show_hexagons(points_xy):
+    #def hexagons(points_xy):
+    vor = Voronoi(points_xy)
+    if True:
+       fig = voronoi_plot_2d(vor, show_vertices=False, line_colors='orange',
+                    line_width=2, line_alpha=0.6, point_size=2)
+
+
+    tri = Delaunay(points_xy)
+    # https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Delaunay.html
+
+    # the dual (of voronoi)
+    if True:
+       plt.triplot(points_xy[:,0], points_xy[:,1], tri.simplices)
+       plt.plot(points_xy[:,0], points_xy[:,1], 'o')
+
+    #print('simpices', tri.simplices)
+
+    #print('tri', dir(tri))
+    # # print(tri.vertex_to_simplex)
+    #print()
+    #print(tri.vertex_neighbor_vertices)  # (indptr, indices)
+
+
+def eye_attribs(points_xy):
+    n = points_xy.shape[0]
+    zc = np.zeros((n, 1))
+    cxyz = np.concatenate((points_xy, zc), axis=1)
+    z0 = np.zeros((n, 1))
+    normals = np.concatenate((z0+0.0, z0+0.0, z0 + 1.0 ), axis=1)
+
+    return cxyz, normals
+
+def one_hexagonal_rays(pindex, hexa_verts_table, points_xyz, normals_xyz):
+    # ray shoot: origin, dir
+    # rays =
+    #rays_origins = np.zeros((HEX6, 3))
+    #rays_dirs = np.zeros((HEX6, 3))
+
+
+    indices = hexa_verts_table[pindex, :]
+    rays_origins = points_xyz[indices, :]
+    # centre = points_xyz[pindex, :] # not used
+    # deliberately incorrect:
+    centre_normal = normals_xyz[pindex, :][None, :]
+    rays_normals = (normals_xyz[indices, :] + centre_normal ) * 0.5
+
+    #for i in range(HEX6):
+    #   rays_normals = rays_normals
+    #points_xyz =
+
+    rays_dirs = rays_normals
+    # return rays
+    return (rays_origins, rays_dirs)
+
+import scipy.misc
+import imageio
+def load_image(image_path):
+   img = imageio.imread(image_path)
+   pict_array2d = np.asarray(img)
+   pict_array2d = scipy.misc.imresize(pict_array2d, FIXED_SIZE[0:2])
+
+def main():
+    points_2d,_ = eye_centers(50)
+    #v=eye_attribs_demo(points_2d)
+    show_hexagons(points_2d)
+    #show_hexagons(v)
+
+    v=eye_attribs_demo(points_2d)
+
+    hexa_verts_table = all_hexa_verts(points_2d)
+    (points_xyz, normals_xyz) = eye_attribs(points_2d)
+    pindex = 35
+    rays_origins, rays_dirs = one_hexagonal_rays(pindex, hexa_verts_table, points_xyz, normals_xyz)
+
+
+    SZ=8.0*1.2
+    ax3d = plt.figure().add_subplot(projection='3d', autoscale_on=False, xlim=(0, +SZ), ylim=(0, +SZ), zlim=(-SZ/2.0, +SZ/2.0))
+    # ax3d = Axes3D(fig)
+    # ax = fig.gca(projection='3d')
+    #ax3d.set_aspect('equal')
+    #ax3d.set_aspect(1)
+
+    ax3d.quiver( \
+     rays_origins[:,0],rays_origins[:,1],rays_origins[:,2], \
+     rays_dirs[:,0],rays_dirs[:,1],rays_dirs[:,2], \
+     pivot='tail', length=1.0, normalize=True, color='r'
+    )
+    ax3d.scatter(points_xyz[:,0],points_xyz[:,1],points_xyz[:,2], marker='.')
+
+    texture = load_image(BLUE_FLOWER)
+
+    plt.show()
+
+
+
+main()
