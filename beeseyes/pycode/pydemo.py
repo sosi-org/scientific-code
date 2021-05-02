@@ -169,6 +169,7 @@ def ray_cast(U,V,C0, D,O):
 
    print(a)
    print(b)
+   return (a,b)
 
 import scipy.misc
 import imageio
@@ -177,6 +178,7 @@ def load_image(image_path):
    pict_array2d = np.asarray(img)
    #pict_array2d = numpy.array(Image.fromarray(pict_array2d).resize())
    #pict_array2d = scipy.misc.imresize(pict_array2d, FIXED_SIZE[0:2])
+   return pict_array2d
 
 def main():
     points_2d,_ = eye_centers(50)
@@ -214,9 +216,17 @@ def main():
        'V': (0,30,0),
        'C0': (0,0,0),
     }
-    O = points_xyz
+    O = points_xyz * 0.01
     D = normals_xyz
-    ray_cast(plane['U'],plane['V'],plane['C0'], D,O)
+    (u,v) = ray_cast(plane['U'],plane['V'],plane['C0'], D,O)
+
+    print(texture.shape, 'sss')
+
+    axes2 = plt.figure()
+    plt.imshow(texture, extent=(0.0,1.0,0.0,1.0), alpha=0.6)
+    #plt.imshow(extent=(0.0,1.0,0.0,1.0), url=BLUE_FLOWER)
+    #axes2.hold(True)
+    plt.plot(u,v, '.')
 
     plt.show()
 
