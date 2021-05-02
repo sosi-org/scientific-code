@@ -67,7 +67,7 @@ def all_hexa_verts(points_xy):
 
        #print(nla)
        hexa_verts[pindex, :] = nla
-    print(hexa_verts)
+    #print(hexa_verts)
     return hexa_verts
 
 def eye_attribs_demo(points_xy):
@@ -167,8 +167,8 @@ def ray_cast(U,V,C0, D,O):
    b = -dx*oy*uz + dx*oz*uy - dx*uy*z0 + dx*uz*y0 + dy*ox*uz - dy*oz*ux + dy*ux*z0 - dy*uz*x0 - dz*ox*uy + dz*oy*ux - dz*ux*y0 + dz*uy*x0 / denom
    # t = -ox*uy*vz + ox*uz*vy + oy*ux*vz - oy*uz*vx - oz*ux*vy + oz*uy*vx + ux*vy*z0 - ux*vz*y0 - uy*vx*z0 + uy*vz*x0 + uz*vx*y0 - uz*vy*x0 / denom
 
-   print(a)
-   print(b)
+   #print(a)
+   #print(b)
    return (a,b)
 
 import scipy.misc
@@ -216,11 +216,12 @@ def main():
        'V': (0,30,0),
        'C0': (0,0,0),
     }
-    O = points_xyz * 0.01
+    # O = points_xyz / 7.0 * 0.1/70  # in cm
+    O = points_xyz / 7.0 * 0.1/70*10  # in cm
     D = normals_xyz
     (u,v) = ray_cast(plane['U'],plane['V'],plane['C0'], D,O)
 
-    print(texture.shape, 'sss')
+    # print(texture.shape, 'sss') #  (192, 256, 3)
 
     axes2 = plt.figure()
     plt.imshow(texture, extent=(0.0,1.0,0.0,1.0), alpha=0.6)
