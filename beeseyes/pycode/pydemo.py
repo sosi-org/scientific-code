@@ -169,6 +169,7 @@ def ray_cast(U,V,C0, D,O):
    b = (-dx*oy*uz + dx*oz*uy - dx*uy*z0 + dx*uz*y0 + dy*ox*uz - dy*oz*ux + dy*ux*z0 - dy*uz*x0 - dz*ox*uy + dz*oy*ux - dz*ux*y0 + dz*uy*x0) / denom
    # t = (-ox*uy*vz + ox*uz*vy + oy*ux*vz - oy*uz*vx - oz*ux*vy + oz*uy*vx + ux*vy*z0 - ux*vz*y0 - uy*vx*z0 + uy*vz*x0 + uz*vx*y0 - uz*vy*x0) / denom
 
+   # todo: remove negative `t`
    #print(a)
    #print(b)
    return (a,b)
@@ -308,11 +309,29 @@ def main():
     rays_dirs_transformed = np.dot(bee_R, rays_dirs.T).T
     visuaise_3d(rays_origins_transformed, rays_dirs_transformed, O, plane)
 
+    (u6,v6) = ray_cast(plane['U'],plane['V'],plane['C0'], rays_dirs_transformed,rays_origins_transformed)
+
     axes2 = plt.figure()
     plt.imshow(texture, extent=(0.0,1.0,0.0,1.0), alpha=0.6)
     #plt.imshow(extent=(0.0,1.0,0.0,1.0), url=BLUE_FLOWER)
     #axes2.hold(True)
     plt.plot(u,v, '.')
+    plt.plot(u6,v6, 'r.')
+
+    '''
+    Samples the area in the image (pixels)
+    inside the given 6-points (hexagon)
+    that is casted on the image.
+    The image coords (and u,v) are within [0,1]x[0,1]
+    6-point area/pixel sampling
+    '''
+    def sample_hex(u6,v6, texture):
+        (w,h,rgb3) = texture.shape # (192, 256, 3)
+        print(u6*w)
+        print(v6*h)
+        pass
+
+    sample_hex(u6,v6, texture)
 
     plt.show()
 
