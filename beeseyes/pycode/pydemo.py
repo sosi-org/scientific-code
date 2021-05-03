@@ -225,12 +225,16 @@ def main():
        return pxyz * 1.0 / (np.linalg.norm(pxyz, axis=0, keepdims=True) + 0.0000001)
 
     def rotation_matrix(bee):
+       # right hand
        U = tuple3_to_np(bee['u'])
+       # top
        V = tuple3_to_np(bee['v'])
        U = normalise_np(U)
-       W = np.cross(U, V)
+       # straight ahead: into the plane
+       W = -np.cross(U, V)
        W = normalise_np(W)
-       V = -np.cross(U, W)
+       # again re-create the "top" direction
+       V = np.cross(U, W)
        V = normalise_np(V)
        # return np.eye(3)
        # [U,V,W] concat as rows
@@ -260,11 +264,16 @@ def main():
         #ax3d.set_aspect(1)
 
         # only a single hex being casted
-        ax3d.quiver( \
+        qv = ax3d.quiver( \
          rays_origins[:,0],rays_origins[:,1],rays_origins[:,2], \
          rays_dirs[:,0],rays_dirs[:,1],rays_dirs[:,2], \
          pivot='tail', length=1.0, normalize=True, color='r'
         )
+        '''
+        ax3.quiverkey(qv, 0.9, 0.9, 1, r'$xxxx$', labelpos='E',
+                   coordinates='figure')
+        '''
+
         # All ommatidia
         ax3d.scatter(points_xyz[:,0],points_xyz[:,1],points_xyz[:,2], marker='.')
 
