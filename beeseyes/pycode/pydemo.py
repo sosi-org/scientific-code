@@ -125,6 +125,8 @@ def eye_attribs(points_xy, z_offset):
     cxyz = np.concatenate((points_xy, zc), axis=1)
     z0 = np.zeros((n, 1))
     normals = np.concatenate((z0+0.0, z0+0.0, z0 + z_offset ), axis=1)
+    eta = (np.random.rand(*normals.shape)-0.5) * 0.003
+    normals = normals + eta
 
     return cxyz, normals
 
@@ -208,6 +210,8 @@ def main():
 
     texture = load_image(BLUE_FLOWER)
 
+
+
     # centimeters
     # todo: rename U -> A, a->uz
     plane = {
@@ -215,6 +219,21 @@ def main():
        'V': (0,30,0),
        'C0': (0,0,0),
     }
+    '''
+        x = u * U + v * V + C0
+        x = t * N + P0 + Bee.pos
+        (t,u,v)
+
+            0 < u < 1
+            0 < v < 1
+            t > 0
+
+        [plane1, plane2, ]
+        Planes:
+          * decision wall:  50x40
+          * side wall:  50x100
+          * floor & ceiling:  ...
+    '''
 
 
 
@@ -283,7 +302,7 @@ def main():
     bee = {
       'pos': (15.0, 15.0, -10.0),
       #'u': (15.0, 15.0, -10.0),
-      'u': (1,0,-0.2), # Bee's right hand
+      'u': (1, 0.1,-0.2), # Bee's right hand  (1,0,-0.2)
       'v': (0,1,0),  # Bee's top
     }
     bee_R = rotation_matrix(bee)
