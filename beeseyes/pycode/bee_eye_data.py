@@ -150,6 +150,8 @@ def load_relevant(idx):
    BeeID = a['BeeID'][0,idx]
    return (normals, sphereIntersect, sphereIntersectBorders, HeadCenter, BeeID)
 
+from scipy.spatial import SphericalVoronoi
+
 def eyes_demo():
    bee_idx = 1
 
@@ -161,7 +163,7 @@ def eyes_demo():
 
    print('HeadCenter', HeadCenter) # [[1627.86042584 1256.85655492  782.86597872]]
 
-   SZ=8.0*1.2 * 3
+   SZ=8.0*1.2 * 3 
 
    ax3d = plt.figure() \
       .add_subplot(
@@ -175,6 +177,35 @@ def eyes_demo():
      pivot='tail', length=0.1, normalize=True, color='b'
     )
 
+   # voronoi  https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.SphericalVoronoi.html
+
+   radius = 1
+   center = np.array([0, 0, 0])
+   sv = SphericalVoronoi(sphereIntersect, radius, center)
+   sv.sort_vertices_of_regions()
+   ax3d.scatter(sv.vertices[:, 0], sv.vertices[:, 1], sv.vertices[:, 2],
+                   c='g')
+
+   sides_l = []
+   for region in sv.regions:
+      n = len(region)
+      # print(n)
+      sides_l.append(n)
+      for i in range(n):
+          polygon = sv.vertices[region]
+          # print(polygon.shape) # (n, 3)
+
+          start = sv.vertices[region][i]
+          end = sv.vertices[region][(i + 1) % n]
+          '''
+          result = geometric_slerp(start, end, t_vals)
+          ax.plot(result[..., 0],
+                  result[..., 1],
+                  result[..., 2],
+                  c='k')
+          '''
+   plt.figure()
+   plt.hist(np.array(sides_l)+0.2, bins=range(2,11))
    plt.show()
 
 def main():
