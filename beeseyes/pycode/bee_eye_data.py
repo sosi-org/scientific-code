@@ -153,6 +153,16 @@ def load_relevant(idx):
 from scipy.spatial import SphericalVoronoi
 
 def eyes_demo():
+   '''
+     0: 3187
+     1: 3250
+     2: 2873
+     3: 3239
+     4: 4300
+     5: 4827
+     6: 1889
+     7: 2105
+   '''
    bee_idx = 1
 
    (normals, sphereIntersect, sphereIntersectBorders, HeadCenter, BeeID) = \
@@ -163,7 +173,7 @@ def eyes_demo():
 
    print('HeadCenter', HeadCenter) # [[1627.86042584 1256.85655492  782.86597872]]
 
-   SZ=8.0*1.2 * 3 
+   SZ=8.0*1.2 * 3
 
    ax3d = plt.figure() \
       .add_subplot(
@@ -179,7 +189,7 @@ def eyes_demo():
 
    # voronoi  https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.SphericalVoronoi.html
 
-   radius = 1
+   radius = 1.0
    center = np.array([0, 0, 0])
    sv = SphericalVoronoi(sphereIntersect, radius, center)
    sv.sort_vertices_of_regions()
@@ -204,6 +214,9 @@ def eyes_demo():
                   result[..., 2],
                   c='k')
           '''
+
+   print('regions:', len(sv.regions)) # 3250
+   print('eyes:', (sphereIntersect.shape))  # (3250, 3)
    plt.figure()
    plt.hist(np.array(sides_l)+0.2, bins=range(2,11))
    plt.show()
