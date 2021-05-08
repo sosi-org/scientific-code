@@ -250,6 +250,19 @@ def load_image(image_path):
    #pict_array2d = scipy.misc.imresize(pict_array2d, FIXED_SIZE[0:2])
    return pict_array2d
 
+'''
+Samples the area in the image (pixels)
+inside the given 6-points (hexagon)
+that is casted on the image.
+The image coords (and u,v) are within [0,1]x[0,1]
+6-point area/pixel sampling
+'''
+def sample_hex(u6,v6, texture):
+    (w,h,rgb3) = texture.shape # (192, 256, 3)
+    print(u6*w)
+    print(v6*h)
+    pass
+
 def demo_lattice_eyes():
     #N = 7 * 7
     #NW = 8
@@ -347,18 +360,6 @@ def main():
     plt.plot(u,v, '.')
     plt.plot(u6,v6, 'r.')
 
-    '''
-    Samples the area in the image (pixels)
-    inside the given 6-points (hexagon)
-    that is casted on the image.
-    The image coords (and u,v) are within [0,1]x[0,1]
-    6-point area/pixel sampling
-    '''
-    def sample_hex(u6,v6, texture):
-        (w,h,rgb3) = texture.shape # (192, 256, 3)
-        print(u6*w)
-        print(v6*h)
-        pass
 
     sample_hex(u6,v6, texture)
 
