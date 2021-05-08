@@ -338,20 +338,30 @@ def main():
     eye_points = points_xyz * EYE_SIZE \
       + 0 * tuple3_to_np((15.0,15.0,-10.0))  # in cm
 
-    O = np.dot(bee_R, eye_points.T).T + bee_pos
-    D = np.dot(bee_R, normals_xyz.T).T
-    (u,v) = ray_cast(plane['U'],plane['V'],plane['C0'], D,O)
+    def ccc4(bee_R, eye_points, rays_dirs):
+       O = np.dot(bee_R, eye_points.T).T + bee_pos
+       D = np.dot(bee_R, rays_dirs.T).T
+       (u,v) = ray_cast(plane['U'],plane['V'],plane['C0'], D,O)
+       return O,D,(u,v)
+    def ccc(bee_R, eye_points, rays_dirs, bee_pos, plane):
+       O = np.dot(bee_R, eye_points.T).T + bee_pos
+       D = np.dot(bee_R, rays_dirs.T).T
+       (u6,v6) = ray_cast(plane['U'],plane['V'],plane['C0'], D,O)
+       return O, D, (u6,v6)
+
+    O,D,(u,v) = ccc4(bee_R, eye_points, normals_xyz)
 
     # print(texture.shape, 'sss') #  (192, 256, 3)
 
     #visuaise_3d(rays_origins, rays_dirs, points_xyz, plane)
 
+    rays_origins_e = rays_origins * EYE_SIZE
     # visuaise_3d(O, D, O, plane)
-    rays_origins_transformed = np.dot(bee_R, (rays_origins * EYE_SIZE).T).T + bee_pos
-    rays_dirs_transformed = np.dot(bee_R, rays_dirs.T).T
+
+
+    (rays_origins_transformed, rays_dirs_transformed, (u6,v6)) = ccc(bee_R, rays_origins_e, rays_dirs, bee_pos, plane)
     visuaise_3d(rays_origins_transformed, rays_dirs_transformed, O, plane)
 
-    (u6,v6) = ray_cast(plane['U'],plane['V'],plane['C0'], rays_dirs_transformed,rays_origins_transformed)
 
     axes2 = plt.figure()
     plt.imshow(texture, extent=(0.0,1.0,0.0,1.0), alpha=0.6)
@@ -359,7 +369,6 @@ def main():
     #axes2.hold(True)
     plt.plot(u,v, '.')
     plt.plot(u6,v6, 'r.')
-
 
     sample_hex(u6,v6, texture)
 
