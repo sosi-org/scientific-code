@@ -378,6 +378,9 @@ def polygon_points(sphereIntersect, normals, maxsides, default=0.0):
    # polyg: (3250, 6, 3)
    return regions_fast, regions_side_count, polyg
 
+'''
+returns (3250, MAX_SIDES, 3)
+'''
 def ommatidia_polygons():
 
    MAX_SIDES = 6 #14 # 6
@@ -389,7 +392,7 @@ def ommatidia_polygons():
       polygon_points(sphereIntersect, normals, maxsides=MAX_SIDES)
 
    # (3250, MAX_SIDES, 3)
-   return polyg
+   return polyg, regions_side_count
 
 
 def main():

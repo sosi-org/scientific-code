@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 
+from bee_eye_data import ommatidia_polygons
+
 HEX6 = 6
 
 
@@ -354,6 +356,13 @@ def main():
 
     plt.show()
 
+def xxx5():
+    ommatidia_polygons1, regions_side_count = \
+       ommatidia_polygons()
+    # (3250, MAX_SIDES, 3)
 
+    print('.')
+
+xxx5()
 
 main()
