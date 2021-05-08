@@ -287,11 +287,33 @@ def demo_lattice_eyes():
 
     return points_xyz, normals_xyz, rays_origins, rays_dirs
 
-def ccc(bee_R, eye_points, rays_dirs, bee_pos, plane):
+def raycastOmmatidium(eye_points, rays_dirs, bee_R, bee_pos, plane):
    O = np.dot(bee_R, eye_points.T).T + bee_pos
    D = np.dot(bee_R, rays_dirs.T).T
    (u,v) = ray_cast(plane['U'],plane['V'],plane['C0'], D,O)
    return O, D, (u,v)
+
+class Plane:
+    def __init__(self):
+        pass
+
+
+class BeeHead:
+    def __init__(self):
+        bee = {
+          'pos': (15.0, 15.0, -10.0),
+          #'u': (15.0, 15.0, -10.0),
+          'u': (1, 0.1,-0.2), # Bee's right hand  (1,0,-0.2)
+          'v': (0,1,0),  # Bee's top
+        }
+        bee_R = rotation_matrix(bee)
+
+        bee_pos = tuple3_to_np(bee['pos'])
+        # self.np = {}
+
+        self.R = bee_R
+        self.pos = bee_pos
+
 
 def main():
 
@@ -328,15 +350,10 @@ def main():
 
 
 
-    bee = {
-      'pos': (15.0, 15.0, -10.0),
-      #'u': (15.0, 15.0, -10.0),
-      'u': (1, 0.1,-0.2), # Bee's right hand  (1,0,-0.2)
-      'v': (0,1,0),  # Bee's top
-    }
-    bee_R = rotation_matrix(bee)
 
-    bee_pos = tuple3_to_np(bee['pos'])
+    beeHead = BeeHead()
+    beeHead.pos
+    beeHead.R
 
     # O = points_xyz / 7.0 * 0.1/70  # in cm
 
@@ -346,7 +363,7 @@ def main():
 
 
 
-    O,D,(u,v) = ccc(bee_R, eye_points, normals_xyz, bee_pos, plane)
+    O,D,(u,v) = raycastOmmatidium(eye_points, normals_xyz, beeHead.R, beeHead.pos, plane)
 
     # print(texture.shape, 'sss') #  (192, 256, 3)
 
@@ -356,7 +373,7 @@ def main():
     # visuaise_3d(O, D, O, plane)
 
 
-    (rays_origins_transformed, rays_dirs_transformed, (u6,v6)) = ccc(bee_R, rays_origins_e, rays_dirs, bee_pos, plane)
+    (rays_origins_transformed, rays_dirs_transformed, (u6,v6)) = raycastOmmatidium(rays_origins_e, rays_dirs, beeHead.R, beeHead.pos, plane)
     visuaise_3d(rays_origins_transformed, rays_dirs_transformed, O, plane)
 
 
