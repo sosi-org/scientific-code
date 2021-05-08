@@ -232,10 +232,10 @@ def eyes_demo():
    print('sv.regions', len(sv.regions), '  [0]->  ', sv.regions[0])
    # 3250   [0]->   [1146, 3039, 3040, 1979, 1147, 5258, 5259, 4273]
 
-   # regions_fast, _ = make_fast_regions(sv.regions, default=NULL_INDEX)
+   # regions_fast, _ = make_fast_regions(sv.regions, maxsides=MAX_SIDES, default=NULL_INDEX)
 
-   regions_fast, regions_side_count = make_fast_regions(sv.regions)
-   print('regions_fast')
+   regions_fast, regions_side_count = make_fast_regions(sv.regions, maxsides=MAX_SIDES)
+   print('regions_fast***', regions_fast.shape)
    print(regions_fast)
    print('regions_side_count', regions_side_count)
    polyg = spread1(sv.vertices, regions_fast, default=0.0)
@@ -292,19 +292,19 @@ NULL_VALUE = np.NaN
 regions: list of polygon_t
 polygon_t: list of int
 '''
-def make_fast_regions(regions, default=NULL_INDEX):
-   MAX_SIDES = 6 #14 # 6
-   regions_fast = np.full((len(regions), MAX_SIDES), default, dtype=np.intp)
+def make_fast_regions(regions, maxsides, default=NULL_INDEX):
+   regions_fast = np.full((len(regions), maxsides), default, dtype=np.intp)
    regions_side_count = np.full((len(regions), ), 0, dtype=np.intp)
    for ri,reg_verts in enumerate(regions):
-       nl = min(len(reg_verts), MAX_SIDES)
-       regions_fast[ri, 0:len(reg_verts)] = reg_verts[:MAX_SIDES]
+       nl = min(len(reg_verts), maxsides)
+       regions_fast[ri, 0:len(reg_verts)] = reg_verts[:maxsides]
        regions_side_count[ri] = nl
    return regions_fast, regions_side_count
 
 def test1():
+   MAX_SIDES = 6 #14 # 6
    regions = [[0,1,2], [1,2,3,4]]
-   regions_fast, _ = make_fast_regions(regions)
+   regions_fast, _ = make_fast_regions(regions, maxsides=MAX_SIDES)
    print('regions_fast', regions_fast)
 
    #vertices = np.random.randn(10, 3)
@@ -326,12 +326,71 @@ def spread1(vertices, regions_fast, default=NULL_VALUE):
    return polyg
 
 def test2():
+    MAX_SIDES = 6
     regions = [[0,1,2], [1,2,3,4]]
-    regions_fast, _ = make_fast_regions(regions)
+    regions_fast, _ = make_fast_regions(regions,maxsides=MAX_SIDES)
     print(regions_fast)
     vertices = np.arange(10) + 0.5
     polyg = spread1(vertices, regions_fast)
     print(polyg)
+
+
+def load_eyes():
+   '''
+     0: 3187
+     1: 3250
+     2: 2873
+     3: 3239
+     4: 4300
+     5: 4827
+     6: 1889
+     7: 2105
+   '''
+   bee_idx = 1
+
+   (normals, sphereIntersect, sphereIntersectBorders, HeadCenter, BeeID) = \
+      load_relevant(bee_idx)
+   print(BeeID)
+
+   print(normals.shape) # (3250, 3)
+
+   print('HeadCenter', HeadCenter) # [[1627.86042584 1256.85655492  782.86597872]]
+   return (sphereIntersect, normals, HeadCenter, BeeID)
+
+def polygon_points(sphereIntersect, normals, maxsides, default=0.0):
+   # sphereIntersect[:,0],sphereIntersect[:,1],sphereIntersect[:,2]
+   # normals[:,0],normals[:,1],normals[:,2]
+
+   radius = 1.0
+   center = np.array([0, 0, 0])
+   sv = SphericalVoronoi(sphereIntersect, radius, center)
+   sv.sort_vertices_of_regions()
+
+   regions_fast, regions_side_count = make_fast_regions(sv.regions, maxsides=maxsides)
+
+   # Delanuey polygons:
+   polyg = spread1(sv.vertices, regions_fast, default=default)
+   # polyg  # (3250, MAX_SIDES, 3)
+
+   # print(regions_fast.shape, regions_side_count.shape, polyg.shape)
+   # regions_fast: (3250, 6)
+   # regions_side_count: (3250,)
+   # polyg: (3250, 6, 3)
+   return regions_fast, regions_side_count, polyg
+
+def ommatidia_polygons():
+
+   MAX_SIDES = 6 #14 # 6
+
+   (sphereIntersect, normals, HeadCenter, BeeID) = \
+      load_eyes()
+
+   (regions_fast, regions_side_count, polyg) = \
+      polygon_points(sphereIntersect, normals, maxsides=MAX_SIDES)
+
+   # (3250, MAX_SIDES, 3)
+   return polyg
+
 
 def main():
    #test_data()
@@ -340,6 +399,8 @@ def main():
    #test1()
    #test2()
    #exit()
-   eyes_demo()
+   #eyes_demo()
 
-main()
+   ommatidia_polygons()
+
+#main()
