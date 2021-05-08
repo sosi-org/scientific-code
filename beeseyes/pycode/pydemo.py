@@ -338,18 +338,14 @@ def main():
     eye_points = points_xyz * EYE_SIZE \
       + 0 * tuple3_to_np((15.0,15.0,-10.0))  # in cm
 
-    def ccc4(bee_R, eye_points, rays_dirs, bee_pos, plane):
-       O = np.dot(bee_R, eye_points.T).T + bee_pos
-       D = np.dot(bee_R, rays_dirs.T).T
-       (u,v) = ray_cast(plane['U'],plane['V'],plane['C0'], D,O)
-       return O, D, (u,v)
+
     def ccc(bee_R, eye_points, rays_dirs, bee_pos, plane):
        O = np.dot(bee_R, eye_points.T).T + bee_pos
        D = np.dot(bee_R, rays_dirs.T).T
        (u,v) = ray_cast(plane['U'],plane['V'],plane['C0'], D,O)
        return O, D, (u,v)
 
-    O,D,(u,v) = ccc4(bee_R, eye_points, normals_xyz, bee_pos, plane)
+    O,D,(u,v) = ccc(bee_R, eye_points, normals_xyz, bee_pos, plane)
 
     # print(texture.shape, 'sss') #  (192, 256, 3)
 
