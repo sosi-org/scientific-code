@@ -178,6 +178,69 @@ def ray_cast(U,V,C0, D,O):
    #print(b)
    return (a,b)
 
+def tuple3_to_np(pxyz):
+   x,y,z = pxyz
+   return np.array([x,y,z], dtype=float)[None, :]
+
+def normalise_np(pxyz):
+   return pxyz * 1.0 / (np.linalg.norm(pxyz, axis=0, keepdims=True) + 0.0000001)
+
+def rotation_matrix(bee):
+   # right hand
+   U = tuple3_to_np(bee['u'])
+   # top
+   V = tuple3_to_np(bee['v'])
+   U = normalise_np(U)
+   # straight ahead: into the plane
+   W = -np.cross(U, V)
+   W = normalise_np(W)
+   # again re-create the "top" direction
+   V = np.cross(U, W)
+   V = normalise_np(V)
+   # return np.eye(3)
+   # [U,V,W] concat as rows
+   return np.concatenate((U,V,W), axis=0)
+
+def visualise_plane(ax3d, plane):
+     # visulaise the plane in 3d
+    [pu,pv] = np.meshgrid(np.linspace(0,1,50),np.linspace(0,1,50))
+    pu = pu.ravel()
+    pv = pv.ravel()
+    U = tuple3_to_np(plane['U'])
+    V = tuple3_to_np(plane['V'])
+    C0 = tuple3_to_np(plane['C0'])
+    ax3d.scatter(
+     pu*U[:,0]+pv*V[:,0] + C0[:,0],
+     pu*U[:,1]+pv*V[:,1] + C0[:,1],
+     pu*U[:,2]+pv*V[:,2] + C0[:,2],
+     marker='.', color='g')
+
+def visuaise_3d(rays_origins, rays_dirs, points_xyz, plane):
+    SZ=8.0*1.2 * 3
+    ax3d = plt.figure().add_subplot(projection='3d', autoscale_on=False,
+       xlim=(0, +SZ), ylim=(0, +SZ), zlim=(-SZ/2.0, +SZ/2.0))
+    # ax3d = Axes3D(fig)
+    # ax = fig.gca(projection='3d')
+    #ax3d.set_aspect('equal')
+    #ax3d.set_aspect(1)
+
+    # only a single hex being casted
+    qv = ax3d.quiver( \
+     rays_origins[:,0],rays_origins[:,1],rays_origins[:,2], \
+     rays_dirs[:,0],rays_dirs[:,1],rays_dirs[:,2], \
+     pivot='tail', length=1.0, normalize=True, color='r'
+    )
+    '''
+    ax3.quiverkey(qv, 0.9, 0.9, 1, r'$xxxx$', labelpos='E',
+               coordinates='figure')
+    '''
+
+    # All ommatidia
+    ax3d.scatter(points_xyz[:,0],points_xyz[:,1],points_xyz[:,2], marker='.')
+
+    visualise_plane(ax3d, plane)
+
+
 import scipy.misc
 import imageio
 def load_image(image_path):
@@ -239,67 +302,6 @@ def main():
 
 
 
-    def tuple3_to_np(pxyz):
-       x,y,z = pxyz
-       return np.array([x,y,z], dtype=float)[None, :]
-
-    def normalise_np(pxyz):
-       return pxyz * 1.0 / (np.linalg.norm(pxyz, axis=0, keepdims=True) + 0.0000001)
-
-    def rotation_matrix(bee):
-       # right hand
-       U = tuple3_to_np(bee['u'])
-       # top
-       V = tuple3_to_np(bee['v'])
-       U = normalise_np(U)
-       # straight ahead: into the plane
-       W = -np.cross(U, V)
-       W = normalise_np(W)
-       # again re-create the "top" direction
-       V = np.cross(U, W)
-       V = normalise_np(V)
-       # return np.eye(3)
-       # [U,V,W] concat as rows
-       return np.concatenate((U,V,W), axis=0)
-
-    def visualise_plane(ax3d, plane):
-         # visulaise the plane in 3d
-        [pu,pv] = np.meshgrid(np.linspace(0,1,50),np.linspace(0,1,50))
-        pu = pu.ravel()
-        pv = pv.ravel()
-        U = tuple3_to_np(plane['U'])
-        V = tuple3_to_np(plane['V'])
-        C0 = tuple3_to_np(plane['C0'])
-        ax3d.scatter(
-         pu*U[:,0]+pv*V[:,0] + C0[:,0],
-         pu*U[:,1]+pv*V[:,1] + C0[:,1],
-         pu*U[:,2]+pv*V[:,2] + C0[:,2],
-         marker='.', color='g')
-
-    def visuaise_3d(rays_origins, rays_dirs, points_xyz, plane):
-        SZ=8.0*1.2 * 3
-        ax3d = plt.figure().add_subplot(projection='3d', autoscale_on=False,
-           xlim=(0, +SZ), ylim=(0, +SZ), zlim=(-SZ/2.0, +SZ/2.0))
-        # ax3d = Axes3D(fig)
-        # ax = fig.gca(projection='3d')
-        #ax3d.set_aspect('equal')
-        #ax3d.set_aspect(1)
-
-        # only a single hex being casted
-        qv = ax3d.quiver( \
-         rays_origins[:,0],rays_origins[:,1],rays_origins[:,2], \
-         rays_dirs[:,0],rays_dirs[:,1],rays_dirs[:,2], \
-         pivot='tail', length=1.0, normalize=True, color='r'
-        )
-        '''
-        ax3.quiverkey(qv, 0.9, 0.9, 1, r'$xxxx$', labelpos='E',
-                   coordinates='figure')
-        '''
-
-        # All ommatidia
-        ax3d.scatter(points_xyz[:,0],points_xyz[:,1],points_xyz[:,2], marker='.')
-
-        visualise_plane(ax3d, plane)
 
     bee = {
       'pos': (15.0, 15.0, -10.0),
