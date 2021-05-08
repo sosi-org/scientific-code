@@ -206,9 +206,9 @@ def visualise_plane(ax3d, plane):
     [pu,pv] = np.meshgrid(np.linspace(0,1,50),np.linspace(0,1,50))
     pu = pu.ravel()
     pv = pv.ravel()
-    U = tuple3_to_np(plane['U'])
-    V = tuple3_to_np(plane['V'])
-    C0 = tuple3_to_np(plane['C0'])
+    U = tuple3_to_np(plane.U)
+    V = tuple3_to_np(plane.V)
+    C0 = tuple3_to_np(plane.C0)
     ax3d.scatter(
      pu*U[:,0]+pv*V[:,0] + C0[:,0],
      pu*U[:,1]+pv*V[:,1] + C0[:,1],
@@ -263,7 +263,7 @@ def sample_hex(u6,v6, texture):
     print(v6*h)
     pass
 
-def demo_lattice_eyes():
+def demo_lattice_eyes(EYE_SIZE):
     #N = 7 * 7
     #NW = 8
     #N = 5000
@@ -285,17 +285,46 @@ def demo_lattice_eyes():
     pindex = 35
     rays_origins, rays_dirs = one_hexagonal_rays(pindex, hexa_verts_table, points_xyz, normals_xyz)
 
-    return points_xyz, normals_xyz, rays_origins, rays_dirs
+    rays_origins_e = rays_origins * EYE_SIZE
+    eye_points = points_xyz * EYE_SIZE \
+      + 0 * tuple3_to_np((15.0,15.0,-10.0))  # in cm
+
+    return eye_points, normals_xyz, rays_origins_e, rays_dirs
 
 def raycastOmmatidium(eye_points, rays_dirs, bee_R, bee_pos, plane):
    O = np.dot(bee_R, eye_points.T).T + bee_pos
    D = np.dot(bee_R, rays_dirs.T).T
-   (u,v) = ray_cast(plane['U'],plane['V'],plane['C0'], D,O)
+   (u,v) = ray_cast(plane.U,plane.V,plane.C0, D,O)
    return O, D, (u,v)
 
 class Plane:
     def __init__(self):
-        pass
+       # centimeters
+       # todo: rename U -> A, a->uz
+       plane = {
+          'U': (30,0,0),
+          'V': (0,30,0),
+          'C0': (0,0,0),
+       }
+       '''
+           x = u * U + v * V + C0
+           x = t * N + P0 + Bee.pos
+           (t,u,v)
+
+               0 < u < 1
+               0 < v < 1
+               t > 0
+
+           [plane1, plane2, ]
+           Planes:
+             * decision wall:  50x40
+             * side wall:  50x100
+             * floor & ceiling:  ...
+       '''
+       self.U = plane['U']
+       self.V = plane['V']
+       self.C0 = plane['C0']
+
 
 
 class BeeHead:
@@ -307,7 +336,6 @@ class BeeHead:
           'v': (0,1,0),  # Bee's top
         }
         bee_R = rotation_matrix(bee)
-
         bee_pos = tuple3_to_np(bee['pos'])
         # self.np = {}
 
@@ -317,61 +345,19 @@ class BeeHead:
 
 def main():
 
-    points_xyz, normals_xyz, rays_origins, rays_dirs \
-       = demo_lattice_eyes()
+    EYE_SIZE = 0.1*10 # cm
+    eye_points, normals_xyz, rays_origins_e, rays_dirs \
+       = demo_lattice_eyes(EYE_SIZE)
+
 
     texture = load_image(BLUE_FLOWER)
+    #  (192, 256, 3)
 
-
-
-    # centimeters
-    # todo: rename U -> A, a->uz
-    plane = {
-       'U': (30,0,0),
-       'V': (0,30,0),
-       'C0': (0,0,0),
-    }
-    '''
-        x = u * U + v * V + C0
-        x = t * N + P0 + Bee.pos
-        (t,u,v)
-
-            0 < u < 1
-            0 < v < 1
-            t > 0
-
-        [plane1, plane2, ]
-        Planes:
-          * decision wall:  50x40
-          * side wall:  50x100
-          * floor & ceiling:  ...
-    '''
-
-
-
-
+    plane = Plane()
 
     beeHead = BeeHead()
-    beeHead.pos
-    beeHead.R
-
-    # O = points_xyz / 7.0 * 0.1/70  # in cm
-
-    EYE_SIZE = 0.1*10 # cm
-    eye_points = points_xyz * EYE_SIZE \
-      + 0 * tuple3_to_np((15.0,15.0,-10.0))  # in cm
-
-
 
     O,D,(u,v) = raycastOmmatidium(eye_points, normals_xyz, beeHead.R, beeHead.pos, plane)
-
-    # print(texture.shape, 'sss') #  (192, 256, 3)
-
-    #visuaise_3d(rays_origins, rays_dirs, points_xyz, plane)
-
-    rays_origins_e = rays_origins * EYE_SIZE
-    # visuaise_3d(O, D, O, plane)
-
 
     (rays_origins_transformed, rays_dirs_transformed, (u6,v6)) = raycastOmmatidium(rays_origins_e, rays_dirs, beeHead.R, beeHead.pos, plane)
     visuaise_3d(rays_origins_transformed, rays_dirs_transformed, O, plane)
@@ -379,8 +365,6 @@ def main():
 
     axes2 = plt.figure()
     plt.imshow(texture, extent=(0.0,1.0,0.0,1.0), alpha=0.6)
-    #plt.imshow(extent=(0.0,1.0,0.0,1.0), url=BLUE_FLOWER)
-    #axes2.hold(True)
     plt.plot(u,v, '.')
     plt.plot(u6,v6, 'r.')
 
