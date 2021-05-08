@@ -250,7 +250,7 @@ def load_image(image_path):
    #pict_array2d = scipy.misc.imresize(pict_array2d, FIXED_SIZE[0:2])
    return pict_array2d
 
-def main():
+def demo_lattice_eyes():
     #N = 7 * 7
     #NW = 8
     #N = 5000
@@ -272,6 +272,12 @@ def main():
     pindex = 35
     rays_origins, rays_dirs = one_hexagonal_rays(pindex, hexa_verts_table, points_xyz, normals_xyz)
 
+    return points_xyz, normals_xyz, rays_origins, rays_dirs
+
+def main():
+
+    points_xyz, normals_xyz, rays_origins, rays_dirs \
+       = demo_lattice_eyes()
 
     texture = load_image(BLUE_FLOWER)
 
