@@ -217,13 +217,128 @@ def eyes_demo():
 
    print('regions:', len(sv.regions)) # 3250
    print('eyes:', (sphereIntersect.shape))  # (3250, 3)
+   print()
+
+   # sv.regions = sv.regions[:10]
+
    plt.figure()
+   plt.title('Number of sides: Delanuey')
    plt.hist(np.array(sides_l)+0.2, bins=range(2,11))
+
+   print('sv.points', sv.points.shape)  # (3250, 3)
+   print('sv.radius', sv.radius) #  1.0
+   print('sv.center', sv.center) # [0,0,0]
+   print('sv.vertices', sv.vertices.shape) # (6496, 3)
+   print('sv.regions', len(sv.regions), '  [0]->  ', sv.regions[0])
+   # 3250   [0]->   [1146, 3039, 3040, 1979, 1147, 5258, 5259, 4273]
+
+   # regions_fast, _ = make_fast_regions(sv.regions, default=NULL_INDEX)
+
+   regions_fast, regions_side_count = make_fast_regions(sv.regions)
+   print('regions_fast')
+   print(regions_fast)
+   print('regions_side_count', regions_side_count)
+   polyg = spread1(sv.vertices, regions_fast, default=0.0)
+   print('polyg.shape') # (3250, MAX_SIDES, 3)
+   print(polyg.shape)
+   print(polyg)
+   midpoints = np.sum(polyg, axis=1) / regions_side_count.astype(polyg.dtype)[:,None]
+   print(midpoints)
+   print(midpoints.shape) # (3250, 3)
+
+   # standard deviations
+   polyg_d = polyg - midpoints[:,None,:]
+   var_s = np.sum(np.sum(polyg_d * polyg_d ,axis=1),axis=1) / regions_side_count.astype(polyg.dtype)
+   print('var_s', var_s.shape)
+   sd_s = np.power(var_s, 0.5)
+
+   plt.figure()
+   plt.title('standard deviations')
+   plt.hist(sd_s, bins=np.arange(0,3,0.1))
+   print('max:', np.max(sd_s)) # 1.914556928682494
+
+   #regions_fast =
+
+   plt.figure()
+   ax3d2 = plt.figure() \
+      .add_subplot(
+         projection='3d', autoscale_on=True,
+      )
+
+   ax3d.scatter(midpoints[:,0], midpoints[:,1], midpoints[:,2], marker='.', color='k')
+   #§ax3d2.scatter(midpoints[:,0], midpoints[:,1], midpoints[:,2], marker='.', color='k')
+   ax3d2.scatter(midpoints[:,0], midpoints[:,1], midpoints[:,2], marker='.', color='k')
+
+   #rf3 = np.tile(regions_fast[:,:,None], (1,1,3))
+
+   if False:
+       #rf1 = regions_fast[:,:,None]
+       rf3x = sv.vertices[regions_fast, 0]
+       rf3y = sv.vertices[regions_fast, 1]
+       rf3z = sv.vertices[regions_fast, 2]
+       #ommatidia = sv.regions
+       #for ommatidium in ommatidia:
+       pass
+
+
+
    plt.show()
+
+
+NULL_INDEX = -1
+NULL_VALUE = np.NaN
+
+'''
+regions: list of polygon_t
+polygon_t: list of int
+'''
+def make_fast_regions(regions, default=NULL_INDEX):
+   MAX_SIDES = 6 #14 # 6
+   regions_fast = np.full((len(regions), MAX_SIDES), default, dtype=np.intp)
+   regions_side_count = np.full((len(regions), ), 0, dtype=np.intp)
+   for ri,reg_verts in enumerate(regions):
+       nl = min(len(reg_verts), MAX_SIDES)
+       regions_fast[ri, 0:len(reg_verts)] = reg_verts[:MAX_SIDES]
+       regions_side_count[ri] = nl
+   return regions_fast, regions_side_count
+
+def test1():
+   regions = [[0,1,2], [1,2,3,4]]
+   regions_fast, _ = make_fast_regions(regions)
+   print('regions_fast', regions_fast)
+
+   #vertices = np.random.randn(10, 3)
+   #vertices = np.tile(np.arange(10)[:,None], (1,3)) + 0.5
+   #vertices = np.arange(10)[:,None] + 0.5
+   #polyg = vertices[regions_fast, :]
+   vertices = np.arange(10) + 0.5
+   vertices[-1] = NULL_VALUE
+   polyg = vertices[regions_fast]
+   print('polyg', polyg)
+
+def spread1(vertices, regions_fast, default=NULL_VALUE):
+   # assert len(vertices.shape) == 2
+   last_row = np.zeros((1, *vertices.shape[1:]), dtype=vertices.dtype)
+   vertices_augmented = np.concatenate((vertices, last_row), axis=0)
+   vertices_augmented[-1] = default  # [-1,:,:,...] = default
+   polyg = vertices_augmented[regions_fast]
+   # polyg.shape: (3250, MAX_SIDES, 3)
+   return polyg
+
+def test2():
+    regions = [[0,1,2], [1,2,3,4]]
+    regions_fast, _ = make_fast_regions(regions)
+    print(regions_fast)
+    vertices = np.arange(10) + 0.5
+    polyg = spread1(vertices, regions_fast)
+    print(polyg)
 
 def main():
    #test_data()
    #main_data()
+   #exit()
+   #test1()
+   #test2()
    #exit()
    eyes_demo()
 
