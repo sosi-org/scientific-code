@@ -343,7 +343,7 @@ class Plane:
 class BeeHead:
     def __init__(self):
         bee = {
-          'pos': (15.0, 15.0, -10.0),
+          'pos': (15.0, 15.0, -10.0/3),
           #'u': (15.0, 15.0, -10.0),
           'u': (1, 0.1,-0.2), # Bee's right hand  (1,0,-0.2)
           'v': (0,1,0),  # Bee's top
