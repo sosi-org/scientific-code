@@ -365,10 +365,13 @@ def polygon_points(sphereIntersect, normals):
    radius = 1.0
    center = np.array([0, 0, 0])
    sv = SphericalVoronoi(sphereIntersect, radius, center)
-   print(dir(sv))
    sv.sort_vertices_of_regions()
    print(dir(sv))
    num_vertices = sv.vertices.shape[0]
+
+   #sv.regions = sv.regions[:10]
+   #normals = normals[:10]
+
    three_corners = three_neighbnours(sv.points, sv.regions, num_vertices)
    a3 = three_corners_claculat(sv.points, three_corners, num_vertices)
    print(sv.vertices)
@@ -377,14 +380,14 @@ def polygon_points(sphereIntersect, normals):
    assert sv.points.shape == normals.shape
    n3 = three_corners_claculat(normals, three_corners, num_vertices)
 
-   ax3d = ax3dCreate()
-   print('111')
+   #ax3d = ax3dCreate()
+   #print('111')
    ##visualise_all(ax3d, sv.vertices, normals)
    #print('2222')
    ##visualise_all(ax3d, sphereIntersect, n3)
 
    #visualise_all(ax3d, sv.vertices, n3, 'r')  # corners
-   print('2222')
+   #print('2222')
    #visualise_all(ax3d, sphereIntersect, normals, 'b') # centers
    #plt.show()
    return sv.vertices, sv.regions, n3
@@ -406,7 +409,7 @@ def three_neighbnours(points, regions, num_vertices):
            three[vi, regions_side_count[vi]] = ci
            regions_side_count[vi] += 1
    print(three)
-   assert np.sum(regions_side_count-3) == 0, 'exctly three pints for ech vertex'
+   assert np.sum(regions_side_count-3) == 0, 'Must have exactly three points for each vertex'
    # return three[:,;3]
    # three_corners
    return three
@@ -436,7 +439,12 @@ def ax3dCreate():
       .add_subplot(
          projection='3d', autoscale_on=True,
          #xlim=(0, +SZ), ylim=(0, +SZ), zlim=(-SZ/2.0, +SZ/2.0)
+         #xlim=(0.7, 1.0),  ylim=(-0.3, 0.15),zlim=(-0.2, 0.25)
+         xlim=(0, +SZ), ylim=(0, +SZ), zlim=(-SZ/2.0, +SZ/2.0)
       )
+   ax3d.set_xlabel('x')
+   ax3d.set_ylabel('y')
+   ax3d.set_zlabel('z')
    return ax3d
 
 def visualise_all(ax3d, X, N, color='b'):
@@ -446,7 +454,7 @@ def visualise_all(ax3d, X, N, color='b'):
    qv = ax3d.quiver( \
      X[:,0], X[:,1], X[:,2], \
      N[:,0],N[:,1],N[:,2], \
-     pivot='tail', length=0.1, normalize=True, color=color
+     pivot='tail', length=0.1/10, normalize=True, color=color
     )
    #plt.show()
 
@@ -459,13 +467,15 @@ def ommatidia_polygons():
    (sphereIntersect, normals, HeadCenter, BeeID) = \
       load_eyes()
 
+   #sphereIntersect = sphereIntersect[:100]
+   #normals = normals[:100]
    #sphereIntersect = np.random.randn(150,3)
    #sphereIntersect = sphereIntersect / np.linalg.norm(sphereIntersect, axis=1, ord=2)[:,None]
    #normals = sphereIntersect / np.linalg.norm(sphereIntersect, axis=1, ord=2)[:,None]
 
    (sv_vertices, sv_regions, n3) = \
       polygon_points(sphereIntersect, normals)
-   return sv_vertices, sv_regions, normals, n3
+   return sv_vertices, sv_regions, normals, n3, sphereIntersect
 
 def ommatidia_polygons2(sv_vertices, sv_regions):
    MAX_SIDES = 6 #14 # 6

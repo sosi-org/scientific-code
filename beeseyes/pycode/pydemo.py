@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 
 from bee_eye_data import ommatidia_polygons, ommatidia_polygons2
+from bee_eye_data import ax3dCreate, visualise_all
 
 HEX6 = 6
 
@@ -203,8 +204,10 @@ def rotation_matrix(bee):
    return np.concatenate((U,V,W), axis=0)
 
 def visualise_plane(ax3d, plane):
-     # visulaise the plane in 3d
-    [pu,pv] = np.meshgrid(np.linspace(0,1,50),np.linspace(0,1,50))
+    # visulaise the plane in 3d
+    NU = 10
+    NV = 10
+    [pu,pv] = np.meshgrid(np.linspace(0, 1, NU),np.linspace(0, 1, NV))
     pu = pu.ravel()
     pv = pv.ravel()
     U = tuple3_to_np(plane.U)
@@ -382,7 +385,14 @@ def xxx5():
     #  (192, 256, 3)
 
 
-    sv_vertices, sv_regions,normals_, n3 = ommatidia_polygons()
+    sv_vertices, sv_regions,normals_, n3, sphereIntersect = ommatidia_polygons()
+
+    ax3d = ax3dCreate()
+    visualise_all(ax3d, sv_vertices, n3, 'r')  # corners
+    visualise_all(ax3d, sphereIntersect, normals_, 'b') # centers
+    general_direction = np.mean(sphereIntersect, 0)
+    visualise_all(ax3d, general_direction[None,:], general_direction[None,:], 'k') # centers
+
 
     ommatidia_polygons1, regions_side_count = \
         ommatidia_polygons2(sv_vertices, sv_regions)
@@ -403,6 +413,8 @@ def xxx5():
 
     print(u)
     print('====')
+
+    visualise_plane(ax3d, plane)
 
     axes2 = plt.figure()
     plt.imshow(texture, extent=(0.0,1.0,0.0,1.0), alpha=0.6)
