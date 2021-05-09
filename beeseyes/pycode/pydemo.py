@@ -378,11 +378,36 @@ def xxx5():
     #   ommatidia_polygons()
     # (3250, MAX_SIDES, 3)
 
+    texture = load_image(BLUE_FLOWER)
+    #  (192, 256, 3)
+
+
     sv_vertices, sv_regions,normals_, n3 = ommatidia_polygons()
 
     ommatidia_polygons1, regions_side_count = \
         ommatidia_polygons2(sv_vertices, sv_regions)
     # (3250, MAX_SIDES, 3)
+
+
+    # (6496, 3) (6496, 3)
+    print(sv_vertices.shape, n3.shape)
+
+    # replace above with following two;
+    corners = sv_vertices
+    corner_normals = n3
+
+    plane = Plane()
+    beeHead = BeeHead()
+
+    O,D,(u,v) = raycastOmmatidium(corners, corner_normals, beeHead.R, beeHead.pos, plane )
+
+    print(u)
+    print('====')
+
+    axes2 = plt.figure()
+    plt.imshow(texture, extent=(0.0,1.0,0.0,1.0), alpha=0.6)
+    plt.plot(u,v, '.')
+    #plt.plot(u6,v6, 'r.')
 
     '''
     #O,D,(u,v) = raycastOmmatidium(eye_points, normals_xyz, beeHead.R, beeHead.pos, plane)
@@ -402,5 +427,5 @@ def xxx5():
 
 xxx5()
 
-main()
+#main()
 plt.show()

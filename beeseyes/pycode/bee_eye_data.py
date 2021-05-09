@@ -379,13 +379,14 @@ def polygon_points(sphereIntersect, normals):
 
    ax3d = ax3dCreate()
    print('111')
-   #visualise_all(ax3d, sv.vertices, normals)
+   ##visualise_all(ax3d, sv.vertices, normals)
    #print('2222')
-   #visualise_all(ax3d, sphereIntersect, n3)
-   visualise_all(ax3d, sv.vertices, n3, 'r')  # corners
+   ##visualise_all(ax3d, sphereIntersect, n3)
+
+   #visualise_all(ax3d, sv.vertices, n3, 'r')  # corners
    print('2222')
-   visualise_all(ax3d, sphereIntersect, normals, 'b') # centers
-   plt.show()
+   #visualise_all(ax3d, sphereIntersect, normals, 'b') # centers
+   #plt.show()
    return sv.vertices, sv.regions, n3
 
 '''
@@ -450,10 +451,10 @@ def visualise_all(ax3d, X, N, color='b'):
    #plt.show()
 
 '''
+calculting norms at corners of hexagonals by interpolation (n3)
 returns (3250, MAX_SIDES, 3)
 '''
 def ommatidia_polygons():
-
 
    (sphereIntersect, normals, HeadCenter, BeeID) = \
       load_eyes()
