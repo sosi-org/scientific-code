@@ -477,10 +477,10 @@ def ommatidia_polygons():
       polygon_points(sphereIntersect, normals)
    return sv_vertices, sv_regions, normals, n3, sphereIntersect
 
-def ommatidia_polygons2(sv_vertices, sv_regions):
-   MAX_SIDES = 6 #14 # 6
+def ommatidia_polygons_fast_representation(sv_vertices, sv_regions):
+   MAX_SIDES = 14 # 6 #14 # 6
    (regions_fast, regions_side_count, polyg) = \
-      polygon_points2(sv_vertices, sv_regions, maxsides=MAX_SIDES)
+      polygon_points2(sv_vertices, sv_regions, maxsides=MAX_SIDES, default=np.NaN)
 
    # (3250, MAX_SIDES, 3)
    return polyg, regions_side_count
@@ -495,7 +495,7 @@ def main():
    #exit()
    #eyes_demo()
 
-   ommatidia_polygons2(*ommatidia_polygons()[:2])
+   ommatidia_polygons_fast_representation(*ommatidia_polygons()[:2])
 
 if __name__ == "__main__":
     main()

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 from scipy.spatial.transform import Rotation
 
-from bee_eye_data import ommatidia_polygons, ommatidia_polygons2
+from bee_eye_data import ommatidia_polygons, ommatidia_polygons_fast_representation
 from bee_eye_data import ax3dCreate, visualise_all
 
 HEX6 = 6
@@ -402,8 +402,15 @@ def xxx5():
     sv_vertices, sv_regions,normals_, n3, sphereIntersect = ommatidia_polygons()
 
     ommatidia_polygons1, regions_side_count = \
-        ommatidia_polygons2(sv_vertices, sv_regions)
+        ommatidia_polygons_fast_representation(sv_vertices, [sv_regions[0], sv_regions[1]])
     # (3250, MAX_SIDES, 3)
+    print('ommatidia_polygons1')
+    # print(ommatidia_polygons1)
+    # print(ommatidia_polygons1.reshape(-1,3))
+    ommatidia_few_corners = ommatidia_polygons1.reshape(-1,3)
+    ommatidia_few_corners = ommatidia_few_corners[np.logical_not(np.isnan(ommatidia_few_corners[:,0])), :]
+    print('------')
+    print(ommatidia_few_corners.shape, '<<<<')
 
 
     # (6496, 3) (6496, 3)
@@ -431,6 +438,10 @@ def xxx5():
     general_direction = np.mean(sphereIntersect, 0)[None,:]
     visualise_all(ax3d, rot(general_direction) + p0, rot(general_direction), 'k') # centers
     visualise_plane(ax3d, plane)
+    print((normals_*0).shape, '<<<<<<<=====')
+
+    #visualise_all(ax3d, rot(ommatidia_few_corners) + p0, ommatidia_few_corners * 0.01, 'm')
+    #O,D,(u,v) = raycastOmmatidium(ommatidia_few_corners, ommatidia_few_corners_normals, beeHead.R, beeHead.pos, plane )
 
     axes2 = plt.figure()
     plt.imshow(texture, extent=(0.0,1.0,0.0,1.0), alpha=0.6)
