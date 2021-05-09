@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 
-from bee_eye_data import ommatidia_polygons
+from bee_eye_data import ommatidia_polygons, ommatidia_polygons2
 
 HEX6 = 6
 
@@ -177,6 +177,7 @@ def ray_cast(U,V,C0, D,O):
    #print(a)
    #print(b)
    return (a,b)
+
 
 def tuple3_to_np(pxyz):
    x,y,z = pxyz
@@ -370,15 +371,34 @@ def main():
 
     sample_hex(u6,v6, texture)
 
-    plt.show()
+    # plt.show()
 
 def xxx5():
-    ommatidia_polygons1, regions_side_count = \
-       ommatidia_polygons()
+    #ommatidia_polygons1, regions_side_count = \
+    #   ommatidia_polygons()
     # (3250, MAX_SIDES, 3)
+
+    ommatidia_polygons1, regions_side_count = \
+        ommatidia_polygons2(*ommatidia_polygons())
+    # (3250, MAX_SIDES, 3)
+
+    '''
+    #O,D,(u,v) = raycastOmmatidium(eye_points, normals_xyz, beeHead.R, beeHead.pos, plane)
+    #def raycastOmmatidium(eye_points, rays_dirs, bee_R, bee_pos, plane):
+    # sum(a[i,j,:] * b[k,:,m])
+    # (3250, MAX_SIDES, 3), (3,3) -> (3250, MAX_SIDES, 3)
+    O =np.dot(ommatidia_polygons1, bee_R.T) + bee_pos[None,None,:]
+    # (3250, 3), (3,3) -> (3250, 3)
+    D =np.dot(ommatidia_normals, bee_R.T) + bee_pos[None,None,:]
+    #O = np.dot(bee_R, eye_points.T).T + bee_pos
+    #D = np.dot(bee_R, rays_dirs.T).T
+    (u,v) = ray_cast(plane.U,plane.V,plane.C0, D,O)
+    return O, D, (u,v)
+    '''
 
     print('.')
 
 xxx5()
 
 main()
+plt.show()

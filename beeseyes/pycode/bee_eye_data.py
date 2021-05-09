@@ -357,7 +357,7 @@ def load_eyes():
    print('HeadCenter', HeadCenter) # [[1627.86042584 1256.85655492  782.86597872]]
    return (sphereIntersect, normals, HeadCenter, BeeID)
 
-def polygon_points(sphereIntersect, normals, maxsides, default=0.0):
+def polygon_points(sphereIntersect, normals):
    # sphereIntersect[:,0],sphereIntersect[:,1],sphereIntersect[:,2]
    # normals[:,0],normals[:,1],normals[:,2]
 
@@ -365,11 +365,13 @@ def polygon_points(sphereIntersect, normals, maxsides, default=0.0):
    center = np.array([0, 0, 0])
    sv = SphericalVoronoi(sphereIntersect, radius, center)
    sv.sort_vertices_of_regions()
+   return sv.vertices, sv.regions
 
-   regions_fast, regions_side_count = make_fast_regions(sv.regions, maxsides=maxsides)
+def polygon_points2(sv_vertices, sv_regions, maxsides, default=0.0):
+   regions_fast, regions_side_count = make_fast_regions(sv_regions, maxsides=maxsides)
 
    # Delanuey polygons:
-   polyg = spread1(sv.vertices, regions_fast, default=default)
+   polyg = spread1(sv_vertices, regions_fast, default=default)
    # polyg  # (3250, MAX_SIDES, 3)
 
    # print(regions_fast.shape, regions_side_count.shape, polyg.shape)
@@ -383,13 +385,18 @@ returns (3250, MAX_SIDES, 3)
 '''
 def ommatidia_polygons():
 
-   MAX_SIDES = 6 #14 # 6
 
    (sphereIntersect, normals, HeadCenter, BeeID) = \
       load_eyes()
 
+   (sv_vertices, sv_regions) = \
+      polygon_points(sphereIntersect, normals)
+   return sv_vertices, sv_regions
+
+def ommatidia_polygons2(sv_vertices, sv_regions):
+   MAX_SIDES = 6 #14 # 6
    (regions_fast, regions_side_count, polyg) = \
-      polygon_points(sphereIntersect, normals, maxsides=MAX_SIDES)
+      polygon_points2(sv_vertices, sv_regions, maxsides=MAX_SIDES)
 
    # (3250, MAX_SIDES, 3)
    return polyg, regions_side_count
@@ -404,6 +411,6 @@ def main():
    #exit()
    #eyes_demo()
 
-   ommatidia_polygons()
+   ommatidia_polygons2(*ommatidia_polygons())
 
 #main()
