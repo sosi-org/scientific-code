@@ -387,13 +387,6 @@ def xxx5():
 
     sv_vertices, sv_regions,normals_, n3, sphereIntersect = ommatidia_polygons()
 
-    ax3d = ax3dCreate()
-    visualise_all(ax3d, sv_vertices, n3, 'r')  # corners
-    visualise_all(ax3d, sphereIntersect, normals_, 'b') # centers
-    general_direction = np.mean(sphereIntersect, 0)
-    visualise_all(ax3d, general_direction[None,:], general_direction[None,:], 'k') # centers
-
-
     ommatidia_polygons1, regions_side_count = \
         ommatidia_polygons2(sv_vertices, sv_regions)
     # (3250, MAX_SIDES, 3)
@@ -414,6 +407,13 @@ def xxx5():
     print(u)
     print('====')
 
+    ax3d = ax3dCreate()
+    p0 = beeHead.pos
+    print('p0.shape',p0.shape)
+    visualise_all(ax3d, sv_vertices + p0, n3, 'r')  # corners
+    visualise_all(ax3d, sphereIntersect + p0, normals_, 'b') # centers
+    general_direction = np.mean(sphereIntersect, 0)[None,:]
+    visualise_all(ax3d, general_direction + p0, general_direction, 'k') # centers
     visualise_plane(ax3d, plane)
 
     axes2 = plt.figure()
