@@ -2,6 +2,7 @@ from scipy.spatial import Voronoi, voronoi_plot_2d
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
+from scipy.spatial.transform import Rotation
 
 from bee_eye_data import ommatidia_polygons, ommatidia_polygons2
 from bee_eye_data import ax3dCreate, visualise_all
@@ -174,9 +175,13 @@ def ray_cast(U,V,C0, D,O):
    b = (-dx*oy*uz + dx*oz*uy - dx*uy*z0 + dx*uz*y0 + dy*ox*uz - dy*oz*ux + dy*ux*z0 - dy*uz*x0 - dz*ox*uy + dz*oy*ux - dz*ux*y0 + dz*uy*x0) / denom
    t = (-ox*uy*vz + ox*uz*vy + oy*ux*vz - oy*uz*vx - oz*ux*vy + oz*uy*vx + ux*vy*z0 - ux*vz*y0 - uy*vx*z0 + uy*vz*x0 + uz*vx*y0 - uz*vy*x0) / denom
 
-   a = a[t > 0]
-   b = b[t > 0]
-   t = t[t > 0]
+   w = np.logical_and(t > 0,   a > -1.9)
+   w = np.logical_and(w,   b > -1.9)
+   w = np.logical_and(w,   a < 2.9)
+   w = np.logical_and(w,   b < 2.9)
+   a = a[w]
+   b = b[w]
+   t = t[w]
 
    # todo: remove negative `t`
    #print(a)
@@ -343,7 +348,12 @@ class BeeHead:
           'u': (1, 0.1,-0.2), # Bee's right hand  (1,0,-0.2)
           'v': (0,1,0),  # Bee's top
         }
-        bee_R = rotation_matrix(bee)
+        # bee_R = rotation_matrix(bee)
+        #bee_R = np.eye(3)
+
+        bee_R = Rotation.from_euler('x', 180, degrees=True).as_matrix()
+        print('bee_R.shape', bee_R.shape)
+
         bee_pos = tuple3_to_np(bee['pos'])
         # self.np = {}
 
@@ -414,10 +424,12 @@ def xxx5():
     ax3d = ax3dCreate()
     p0 = beeHead.pos
     print('p0.shape',p0.shape)
-    visualise_all(ax3d, sv_vertices + p0, n3, 'r')  # corners
-    visualise_all(ax3d, sphereIntersect + p0, normals_, 'b') # centers
+    def rot(vectos):
+        return np.dot(beeHead.R, vectos.T).T
+    visualise_all(ax3d, rot(sv_vertices) + p0, rot(n3), 'r')  # corners
+    visualise_all(ax3d, rot(sphereIntersect) + p0, rot(normals_), 'b') # centers
     general_direction = np.mean(sphereIntersect, 0)[None,:]
-    visualise_all(ax3d, general_direction + p0, general_direction, 'k') # centers
+    visualise_all(ax3d, rot(general_direction) + p0, rot(general_direction), 'k') # centers
     visualise_plane(ax3d, plane)
 
     axes2 = plt.figure()
