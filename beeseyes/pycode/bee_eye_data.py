@@ -357,6 +357,7 @@ def load_eyes():
    print('HeadCenter', HeadCenter) # [[1627.86042584 1256.85655492  782.86597872]]
    return (sphereIntersect, normals, HeadCenter, BeeID)
 
+# voronoiPoints
 def polygon_points(sphereIntersect, normals):
    # sphereIntersect[:,0],sphereIntersect[:,1],sphereIntersect[:,2]
    # normals[:,0],normals[:,1],normals[:,2]
@@ -364,8 +365,56 @@ def polygon_points(sphereIntersect, normals):
    radius = 1.0
    center = np.array([0, 0, 0])
    sv = SphericalVoronoi(sphereIntersect, radius, center)
+   print(dir(sv))
    sv.sort_vertices_of_regions()
-   return sv.vertices, sv.regions
+   print(dir(sv))
+   num_vertices = sv.vertices.shape[0]
+   three_corners = three_neighbnours(sv.points, sv.regions, num_vertices)
+   a3 = three_corners_claculat(sv.points, three_corners, num_vertices)
+   print(sv.vertices)
+   print(a3-sv.vertices)  # not precise though
+
+   assert sv.points.shape == normals.shape
+   n3 = three_corners_claculat(normals, three_corners, num_vertices)
+
+   ax3d = ax3dCreate()
+   print('111')
+   #visualise_all(ax3d, sv.vertices, normals)
+   #print('2222')
+   #visualise_all(ax3d, sphereIntersect, n3)
+   visualise_all(ax3d, sv.vertices, n3, 'r')  # corners
+   print('2222')
+   visualise_all(ax3d, sphereIntersect, normals, 'b') # centers
+   plt.show()
+   return sv.vertices, sv.regions, n3
+
+'''
+Three neighbours of each
+  points = centers (one for each region/simplex)   (centers)
+  vertices = corners (of each vertex of region/simplex)  (corners)
+  # regions[region index] = [ point index, ]
+'''
+def three_neighbnours(points, regions, num_vertices):
+   MAX_EDGES = 3 # three regions/centers for each corner
+   three = np.full((num_vertices, MAX_EDGES), -1, dtype=np.intp)
+   regions_side_count = np.full((num_vertices, ), 0, dtype=int)
+   for ri,reg_verts in enumerate(regions):
+       nl = len(reg_verts)
+       for vi in reg_verts:
+           ci = ri
+           three[vi, regions_side_count[vi]] = ci
+           regions_side_count[vi] += 1
+   print(three)
+   assert np.sum(regions_side_count-3) == 0, 'exctly three pints for ech vertex'
+   # return three[:,;3]
+   # three_corners
+   return three
+
+''' creates corners again '''
+def three_corners_claculat(points, three, num_vertices):
+   cnx3x3 = np.reshape(points[three.ravel(),:], (num_vertices,3,-1))
+   a = np.sum(cnx3x3, axis=1) / 3.0
+   return a
 
 def polygon_points2(sv_vertices, sv_regions, maxsides, default=0.0):
    regions_fast, regions_side_count = make_fast_regions(sv_regions, maxsides=maxsides)
@@ -380,6 +429,26 @@ def polygon_points2(sv_vertices, sv_regions, maxsides, default=0.0):
    # polyg: (3250, 6, 3)
    return regions_fast, regions_side_count, polyg
 
+def ax3dCreate():
+   SZ=8.0*1.2 * 3
+   ax3d = plt.figure() \
+      .add_subplot(
+         projection='3d', autoscale_on=True,
+         #xlim=(0, +SZ), ylim=(0, +SZ), zlim=(-SZ/2.0, +SZ/2.0)
+      )
+   return ax3d
+
+def visualise_all(ax3d, X, N, color='b'):
+
+   print('X.shape', X.shape)
+   print('N.shape', N.shape)
+   qv = ax3d.quiver( \
+     X[:,0], X[:,1], X[:,2], \
+     N[:,0],N[:,1],N[:,2], \
+     pivot='tail', length=0.1, normalize=True, color=color
+    )
+   #plt.show()
+
 '''
 returns (3250, MAX_SIDES, 3)
 '''
@@ -389,9 +458,13 @@ def ommatidia_polygons():
    (sphereIntersect, normals, HeadCenter, BeeID) = \
       load_eyes()
 
-   (sv_vertices, sv_regions) = \
+   #sphereIntersect = np.random.randn(150,3)
+   #sphereIntersect = sphereIntersect / np.linalg.norm(sphereIntersect, axis=1, ord=2)[:,None]
+   #normals = sphereIntersect / np.linalg.norm(sphereIntersect, axis=1, ord=2)[:,None]
+
+   (sv_vertices, sv_regions, n3) = \
       polygon_points(sphereIntersect, normals)
-   return sv_vertices, sv_regions
+   return sv_vertices, sv_regions, normals, n3
 
 def ommatidia_polygons2(sv_vertices, sv_regions):
    MAX_SIDES = 6 #14 # 6
@@ -411,6 +484,7 @@ def main():
    #exit()
    #eyes_demo()
 
-   ommatidia_polygons2(*ommatidia_polygons())
+   ommatidia_polygons2(*ommatidia_polygons()[:2])
 
-#main()
+if __name__ == "__main__":
+    main()

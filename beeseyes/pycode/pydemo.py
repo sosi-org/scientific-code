@@ -378,8 +378,10 @@ def xxx5():
     #   ommatidia_polygons()
     # (3250, MAX_SIDES, 3)
 
+    sv_vertices, sv_regions,normals_, n3 = ommatidia_polygons()
+
     ommatidia_polygons1, regions_side_count = \
-        ommatidia_polygons2(*ommatidia_polygons())
+        ommatidia_polygons2(sv_vertices, sv_regions)
     # (3250, MAX_SIDES, 3)
 
     '''
