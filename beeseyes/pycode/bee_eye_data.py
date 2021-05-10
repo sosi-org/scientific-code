@@ -316,6 +316,9 @@ def test1():
    polyg = vertices[regions_fast]
    print('polyg', polyg)
 
+'''
+    Replaces empty ones with `default` using `-1` trick.
+'''
 def spread1(vertices, regions_fast, default=NULL_VALUE):
    # assert len(vertices.shape) == 2
    last_row = np.zeros((1, *vertices.shape[1:]), dtype=vertices.dtype)
@@ -421,6 +424,7 @@ def three_corners_claculat(points, three, num_vertices):
    return a
 
 def polygon_points2(sv_vertices, sv_regions, maxsides, default=0.0):
+   # Each row is (the points on) a full polygon, padding empty elements with default value
    regions_fast, regions_side_count = make_fast_regions(sv_regions, maxsides=maxsides)
 
    # Delanuey polygons:
@@ -431,7 +435,8 @@ def polygon_points2(sv_vertices, sv_regions, maxsides, default=0.0):
    # regions_fast: (3250, 6)
    # regions_side_count: (3250,)
    # polyg: (3250, 6, 3)
-   return regions_fast, regions_side_count, polyg
+   #return regions_fast, regions_side_count, polyg
+   return regions_side_count, polyg
 
 def ax3dCreate():
    SZ=8.0*1.2 * 3
@@ -477,10 +482,11 @@ def ommatidia_polygons():
       polygon_points(sphereIntersect, normals)
    return sv_vertices, sv_regions, normals, n3, sphereIntersect
 
-def ommatidia_polygons_fast_representation(sv_vertices, sv_regions):
-   MAX_SIDES = 14 # 6 #14 # 6
-   (regions_fast, regions_side_count, polyg) = \
-      polygon_points2(sv_vertices, sv_regions, maxsides=MAX_SIDES, default=np.NaN)
+def ommatidia_polygons_fast_representation(sv_vertices, sv_regions, maxsides):
+   (regions_side_count, polyg) = \
+      polygon_points2(sv_vertices, sv_regions, maxsides=maxsides, default=np.NaN)
+   #(regions_side_count, polyg) = \
+   #   polygon_points2(sv_vertices, sv_regions, maxsides=maxsides, default=np.NaN)
 
    # (3250, MAX_SIDES, 3)
    return polyg, regions_side_count

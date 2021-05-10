@@ -401,8 +401,9 @@ def xxx5():
 
     sv_vertices, sv_regions,normals_, n3, sphereIntersect = ommatidia_polygons()
 
+    MAX_SIDES = 14 # 6 #14 # 6
     ommatidia_polygons1, regions_side_count = \
-        ommatidia_polygons_fast_representation(sv_vertices, [sv_regions[0], sv_regions[1]])
+        ommatidia_polygons_fast_representation(sv_vertices, [sv_regions[0], sv_regions[1]], maxsides=MAX_SIDES)
     # (3250, MAX_SIDES, 3)
     print('ommatidia_polygons1')
     # print(ommatidia_polygons1)
