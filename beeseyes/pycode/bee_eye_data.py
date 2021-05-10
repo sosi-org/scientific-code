@@ -423,7 +423,10 @@ def three_corners_claculat(points, three, num_vertices):
    a = np.sum(cnx3x3, axis=1) / 3.0
    return a
 
-def polygon_points2(sv_vertices, sv_regions, maxsides, default=0.0):
+'''
+   (3250, MAX_SIDES, 3)
+'''
+def ommatidia_polygons_fast_representation(sv_vertices, sv_regions, maxsides, default=np.NaN):
    # Each row is (the points on) a full polygon, padding empty elements with default value
    regions_fast, regions_side_count = make_fast_regions(sv_regions, maxsides=maxsides)
 
@@ -436,7 +439,7 @@ def polygon_points2(sv_vertices, sv_regions, maxsides, default=0.0):
    # regions_side_count: (3250,)
    # polyg: (3250, 6, 3)
    #return regions_fast, regions_side_count, polyg
-   return regions_side_count, polyg
+   return polyg, regions_side_count
 
 def ax3dCreate():
    SZ=8.0*1.2 * 3
@@ -481,15 +484,6 @@ def ommatidia_polygons():
    (sv_vertices, sv_regions, n3) = \
       polygon_points(sphereIntersect, normals)
    return sv_vertices, sv_regions, normals, n3, sphereIntersect
-
-def ommatidia_polygons_fast_representation(sv_vertices, sv_regions, maxsides, default=np.NaN):
-   (regions_side_count, polyg) = \
-      polygon_points2(sv_vertices, sv_regions, maxsides=maxsides, default=default)
-   #(regions_side_count, polyg) = \
-   #   polygon_points2(sv_vertices, sv_regions, maxsides=maxsides, default=default)
-
-   # (3250, MAX_SIDES, 3)
-   return polyg, regions_side_count
 
 
 def main():
