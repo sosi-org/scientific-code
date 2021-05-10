@@ -482,11 +482,11 @@ def ommatidia_polygons():
       polygon_points(sphereIntersect, normals)
    return sv_vertices, sv_regions, normals, n3, sphereIntersect
 
-def ommatidia_polygons_fast_representation(sv_vertices, sv_regions, maxsides):
+def ommatidia_polygons_fast_representation(sv_vertices, sv_regions, maxsides, default=np.NaN):
    (regions_side_count, polyg) = \
-      polygon_points2(sv_vertices, sv_regions, maxsides=maxsides, default=np.NaN)
+      polygon_points2(sv_vertices, sv_regions, maxsides=maxsides, default=default)
    #(regions_side_count, polyg) = \
-   #   polygon_points2(sv_vertices, sv_regions, maxsides=maxsides, default=np.NaN)
+   #   polygon_points2(sv_vertices, sv_regions, maxsides=maxsides, default=default)
 
    # (3250, MAX_SIDES, 3)
    return polyg, regions_side_count

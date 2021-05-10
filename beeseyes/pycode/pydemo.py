@@ -405,6 +405,7 @@ def xxx5():
     ommatidia_polygons1, regions_side_count = \
         ommatidia_polygons_fast_representation(sv_vertices, [sv_regions[0], sv_regions[1]], maxsides=MAX_SIDES)
     # (3250, MAX_SIDES, 3)
+
     print('ommatidia_polygons1')
     # print(ommatidia_polygons1)
     # print(ommatidia_polygons1.reshape(-1,3))
