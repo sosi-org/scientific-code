@@ -494,7 +494,7 @@ def concat_lists(sv_regions_sel):
     return c
 
 def aaaaa():
-    #ommatidia_polygons1, regions_side_count = \
+    #ommatidia_selected_polygons1, regions_side_count = \
     #   ommatidia_polygons()
     # (3250, MAX_SIDES, 3)
 
@@ -509,7 +509,7 @@ def aaaaa():
     few_regions = [sv_regions[face] for face in few_face_indices]
 
     MAX_SIDES = 14 # 6 #14 # 6
-    ommatidia_polygons1, regions_side_count = \
+    ommatidia_selected_polygons1, regions_side_count = \
         ommatidia_polygons_fast_representation(sv_vertices, few_regions, maxsides=MAX_SIDES)
 
     print('\n'*24 , '-----'*10)
@@ -518,7 +518,7 @@ def aaaaa():
 
     which_corners_in_few_faces = np.array([*sv_regions[0], *sv_regions[1]])
 
-    ommatidia_few_corners = ommatidia_polygons1.reshape(-1,3)
+    ommatidia_few_corners = ommatidia_selected_polygons1.reshape(-1,3)
     ommatidia_few_corners = ommatidia_few_corners[np.logical_not(np.isnan(ommatidia_few_corners[:,0])), :]
     assert which_corners_in_few_faces.shape[0] == ommatidia_few_corners.shape[0]
     ommatidia_few_corners_normals = normals_at_corners[which_corners_in_few_faces, :]
@@ -532,9 +532,8 @@ def aaaaa():
     print(sv_vertices.shape, normals_at_corners.shape)
 
     # replace above with following two;
-    corners = sv_vertices
-    #corner_normals = normals_at_corners
-    #ommatidia_few_corners_normals
+    #sv_vertices <-> corner_points
+    #corner_normals <-> normals_at_corners
 
     return sv_vertices, normals_at_corners, sphereIntersect, normals_, ommatidia_few_corners_normals, ommatidia_few_corners
 
