@@ -361,6 +361,13 @@ def load_eyes():
    return (sphereIntersect, normals, HeadCenter, BeeID)
 
 # voronoiPoints
+'''
+   returns (
+      corner points,  # haxagonals corner points
+      regions, # (list of list [][] of)  indices corners off points
+      normals at corner points
+   )
+'''
 def polygon_points(sphereIntersect, normals):
    # sphereIntersect[:,0],sphereIntersect[:,1],sphereIntersect[:,2]
    # normals[:,0],normals[:,1],normals[:,2]
@@ -467,7 +474,7 @@ def visualise_all(ax3d, X, N, color='b'):
    #plt.show()
 
 '''
-calculting norms at corners of hexagonals by interpolation (n3)
+calculting norms at corners of hexagonals by interpolation (normals_at_corners)
 returns (3250, MAX_SIDES, 3)
 '''
 def ommatidia_polygons():
@@ -481,9 +488,10 @@ def ommatidia_polygons():
    #sphereIntersect = sphereIntersect / np.linalg.norm(sphereIntersect, axis=1, ord=2)[:,None]
    #normals = sphereIntersect / np.linalg.norm(sphereIntersect, axis=1, ord=2)[:,None]
 
-   (sv_vertices, sv_regions, n3) = \
+   (sv_vertices, sv_regions, normals_at_corners) = \
       polygon_points(sphereIntersect, normals)
-   return sv_vertices, sv_regions, normals, n3, sphereIntersect
+
+   return sv_vertices, sv_regions, normals, normals_at_corners, sphereIntersect
 
 
 def main():

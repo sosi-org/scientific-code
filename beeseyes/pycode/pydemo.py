@@ -1,13 +1,17 @@
+from typing import Tuple
+from typing import Tuple
 from scipy.spatial import Voronoi, voronoi_plot_2d
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 from scipy.spatial.transform import Rotation
 
+
 from bee_eye_data import ommatidia_polygons, ommatidia_polygons_fast_representation
 from bee_eye_data import ax3dCreate, visualise_all
 
 HEX6 = 6
+DIM3 = 3
 
 
 # https://en.wikipedia.org/wiki/Blue_flower#/media/File:Bachelor's_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpg
@@ -159,7 +163,14 @@ def one_hexagonal_rays(pindex, hexa_verts_table, points_xyz, normals_xyz):
 '''
      Based on `derive_formulas.py`
 '''
-def ray_cast(U,V,C0, D,O):
+def ray_cast(U : tuple[float, float, float], V : tuple[float, float, float], C0 :tuple[float, float, float], D,O):
+   n = D.shape[0]
+   assert D.shape == (n,3)
+   assert O.shape == (n,3)
+   assert len(C0) == 3
+   assert len(U) == 3
+   assert len(V) == 3
+
    # vectorised
    dx,dy,dz = D[:,0], D[:,1], D[:,2]
    ox,oy,oz = O[:,0], O[:,1], O[:,2]
@@ -304,7 +315,15 @@ def demo_lattice_eyes(EYE_SIZE):
 
     return eye_points, normals_xyz, rays_origins_e, rays_dirs
 
+
+
 def raycastOmmatidium(eye_points, rays_dirs, bee_R, bee_pos, plane):
+   n = rays_dirs.shape[0]
+   assert eye_points.shape == (n, DIM3)
+   assert rays_dirs.shape == (n, DIM3)
+   assert bee_pos.shape == (1,DIM3)
+   assert bee_R.shape == (DIM3, DIM3)
+
    O = np.dot(bee_R, eye_points.T).T + bee_pos
    D = np.dot(bee_R, rays_dirs.T).T
    (u,v) = ray_cast(plane.U,plane.V,plane.C0, D,O)
@@ -399,12 +418,16 @@ def xxx5():
     #  (192, 256, 3)
 
 
-    sv_vertices, sv_regions,normals_, n3, sphereIntersect = ommatidia_polygons()
+    # rename: sv_vertices -> corner_vertices -> corner_points
+    sv_vertices, sv_regions, normals_, normals_at_corners, sphereIntersect = ommatidia_polygons()
+    assert sv_vertices.shape == normals_at_corners.shape
 
     MAX_SIDES = 14 # 6 #14 # 6
     ommatidia_polygons1, regions_side_count = \
         ommatidia_polygons_fast_representation(sv_vertices, [sv_regions[0], sv_regions[1]], maxsides=MAX_SIDES)
     # (3250, MAX_SIDES, 3)
+    #which_few_faces =
+    which_corners_in_few_faces = np.array([*sv_regions[0], *sv_regions[1]])
 
     print('ommatidia_polygons1')
     # print(ommatidia_polygons1)
@@ -413,19 +436,27 @@ def xxx5():
     ommatidia_few_corners = ommatidia_few_corners[np.logical_not(np.isnan(ommatidia_few_corners[:,0])), :]
     print('------')
     print(ommatidia_few_corners.shape, '<<<<')
+    assert which_corners_in_few_faces.shape[0] == ommatidia_few_corners.shape[0]
+    ommatidia_few_corners_normals = normals_at_corners[which_corners_in_few_faces, :]
 
+    # pair: which_corners_in_few_faces, ommatidia_few_corners_normals
+    #  where:
+    assert which_corners_in_few_faces.shape[0] == ommatidia_few_corners.shape[0]
+    assert which_corners_in_few_faces.shape[0] == ommatidia_few_corners_normals.shape[0]
 
     # (6496, 3) (6496, 3)
-    print(sv_vertices.shape, n3.shape)
+    print(sv_vertices.shape, normals_at_corners.shape)
 
     # replace above with following two;
     corners = sv_vertices
-    corner_normals = n3
+    #corner_normals = normals_at_corners
+    #ommatidia_few_corners_normals
 
     plane = Plane()
     beeHead = BeeHead()
 
-    O,D,(u,v) = raycastOmmatidium(corners, corner_normals, beeHead.R, beeHead.pos, plane )
+    print('corners, normals_at_corners', corners.shape, normals_at_corners.shape)
+    O,D,(u,v) = raycastOmmatidium(corners, normals_at_corners, beeHead.R, beeHead.pos, plane )
 
     print(u)
     print('====')
@@ -435,19 +466,27 @@ def xxx5():
     print('p0.shape',p0.shape)
     def rot(vectos):
         return np.dot(beeHead.R, vectos.T).T
-    visualise_all(ax3d, rot(sv_vertices) + p0, rot(n3), 'r')  # corners
+    # rename `sv_vertices` to `*corners`
+    visualise_all(ax3d, rot(sv_vertices) + p0, rot(normals_at_corners), 'r')  # corners
     visualise_all(ax3d, rot(sphereIntersect) + p0, rot(normals_), 'b') # centers
     general_direction = np.mean(sphereIntersect, 0)[None,:]
     visualise_all(ax3d, rot(general_direction) + p0, rot(general_direction), 'k') # centers
     visualise_plane(ax3d, plane)
     print((normals_*0).shape, '<<<<<<<=====')
 
-    #visualise_all(ax3d, rot(ommatidia_few_corners) + p0, ommatidia_few_corners * 0.01, 'm')
-    #O,D,(u,v) = raycastOmmatidium(ommatidia_few_corners, ommatidia_few_corners_normals, beeHead.R, beeHead.pos, plane )
+    if True:
+       print('====', ommatidia_few_corners_normals.shape, ommatidia_few_corners.shape)
+       assert ommatidia_few_corners_normals.shape == ommatidia_few_corners.shape
+       visualise_all(ax3d, rot(ommatidia_few_corners) + p0, ommatidia_few_corners_normals * 0.01, 'm')
+       #O_few,D_few,(u_few,v_few) = raycastOmmatidium(ommatidia_few_corners, normals_at_corners, beeHead.R, beeHead.pos, plane )
+       O_few,D_few,(u_few,v_few) = raycastOmmatidium(ommatidia_few_corners, ommatidia_few_corners_normals, beeHead.R, beeHead.pos, plane )
+
+       #visualise_all(ax3d, rot(general_direction) + p0, rot(general_direction), 'k') # centers
 
     axes2 = plt.figure()
     plt.imshow(texture, extent=(0.0,1.0,0.0,1.0), alpha=0.6)
-    plt.plot(u,v, '.')
+    plt.plot(u,v, 'b.')
+    plt.plot(u_few,v_few, 'r.')
     #plt.plot(u6,v6, 'r.')
 
     '''
