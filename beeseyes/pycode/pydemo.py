@@ -538,7 +538,7 @@ def aaaaa_old():
 
     return sv_vertices, normals_at_corners, sphereIntersect, normals_, ommatidia_few_corners_normals, ommatidia_few_corners
 
-def visualise_3d(corner_points, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, sphereIntersect, normals_, beeHead, plane):
+def visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, center_points, normals_at_center_points, beeHead, plane):
     p0 = beeHead.pos
     print('p0.shape',p0.shape)
 
@@ -548,12 +548,12 @@ def visualise_3d(corner_points, normals_at_corners, ommatidia_few_corners, ommat
     ax3d = ax3dCreate()
     # rename `corner_points` to `*corners`
     visualise_all(ax3d, rot(corner_points) + p0, rot(normals_at_corners), 'r')  # corners
-    visualise_all(ax3d, rot(sphereIntersect) + p0, rot(normals_), 'b') # centers
+    visualise_all(ax3d, rot(center_points) + p0, rot(normals_at_center_points), 'b') # centers
 
-    general_direction = np.mean(sphereIntersect, 0)[None,:]
+    general_direction = np.mean(center_points, 0)[None,:]
     visualise_all(ax3d, rot(general_direction) + p0, rot(general_direction), color='k') # centers
     visualise_plane(ax3d, plane)
-    print((normals_*0).shape, '<<<<<<<=====')
+    print((normals_at_center_points*0).shape, '<<<<<<<=====')
 
     # adding Visualisation of few points in 3D
     print('====', ommatidia_few_corners_normals.shape, ommatidia_few_corners.shape)
@@ -570,17 +570,17 @@ def visualise_uv(u,v, u_few, v_few, texture):
     plt.xlabel('u')
     plt.ylabel('v')
 
-def bbbbbb(sv_vertices, normals_at_corners, sphereIntersect, normals_, ommatidia_few_corners_normals, ommatidia_few_corners):
+def bbbbbb(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners):
     plane = Plane()
     beeHead = BeeHead()
 
-    print('corners, normals_at_corners', sv_vertices.shape, normals_at_corners.shape)
-    O,D,(u,v) = raycastOmmatidium(sv_vertices, normals_at_corners, beeHead.R, beeHead.pos, plane )
+    print('corners, normals_at_corners', corner_points.shape, normals_at_corners.shape)
+    O,D,(u,v) = raycastOmmatidium(corner_points, normals_at_corners, beeHead.R, beeHead.pos, plane )
 
     # Visualisations
 
     # 3D Visualisation of environment
-    visualise_3d(sv_vertices, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, sphereIntersect, normals_, beeHead, plane)
+    visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, center_points, normals_at_center_points, beeHead, plane)
 
     O_few,D_few,(u_few,v_few) = raycastOmmatidium(
        ommatidia_few_corners, ommatidia_few_corners_normals,
@@ -612,8 +612,8 @@ def bbbbbb(sv_vertices, normals_at_corners, sphereIntersect, normals_, ommatidia
 
 
 def xxx5():
-   sv_vertices, normals_at_corners, sphereIntersect, normals_, ommatidia_few_corners_normals, ommatidia_few_corners = aaaaa_old()
-   bbbbbb(sv_vertices, normals_at_corners, sphereIntersect, normals_, ommatidia_few_corners_normals, ommatidia_few_corners)
+   corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners = aaaaa_old()
+   bbbbbb(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners)
 
 xxx5()
 
