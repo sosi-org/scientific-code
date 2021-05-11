@@ -531,10 +531,6 @@ def aaaaa():
     # (6496, 3) (6496, 3)
     print(corner_points.shape, normals_at_corners.shape)
 
-    # replace above with following two;
-    #corner_points <-> corner_points
-    #corner_normals <-> normals_at_corners
-
     return corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners
 
 
