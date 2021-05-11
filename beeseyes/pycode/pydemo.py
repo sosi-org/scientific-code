@@ -536,9 +536,9 @@ def aaaaa_old():
     #corner_normals = normals_at_corners
     #ommatidia_few_corners_normals
 
-    return corners, normals_at_corners, sv_vertices, sphereIntersect, normals_, ommatidia_few_corners_normals, ommatidia_few_corners
+    return sv_vertices, normals_at_corners, sphereIntersect, normals_, ommatidia_few_corners_normals, ommatidia_few_corners
 
-def visualise_3d(sv_vertices, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, sphereIntersect, normals_, beeHead, plane):
+def visualise_3d(corner_points, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, sphereIntersect, normals_, beeHead, plane):
     p0 = beeHead.pos
     print('p0.shape',p0.shape)
 
@@ -546,8 +546,8 @@ def visualise_3d(sv_vertices, normals_at_corners, ommatidia_few_corners, ommatid
         return np.dot(beeHead.R, vectos.T).T
 
     ax3d = ax3dCreate()
-    # rename `sv_vertices` to `*corners`
-    visualise_all(ax3d, rot(sv_vertices) + p0, rot(normals_at_corners), 'r')  # corners
+    # rename `corner_points` to `*corners`
+    visualise_all(ax3d, rot(corner_points) + p0, rot(normals_at_corners), 'r')  # corners
     visualise_all(ax3d, rot(sphereIntersect) + p0, rot(normals_), 'b') # centers
 
     general_direction = np.mean(sphereIntersect, 0)[None,:]
@@ -570,12 +570,12 @@ def visualise_uv(u,v, u_few, v_few, texture):
     plt.xlabel('u')
     plt.ylabel('v')
 
-def bbbbbb(corners, normals_at_corners,  sv_vertices, sphereIntersect, normals_, ommatidia_few_corners_normals, ommatidia_few_corners):
+def bbbbbb(sv_vertices, normals_at_corners, sphereIntersect, normals_, ommatidia_few_corners_normals, ommatidia_few_corners):
     plane = Plane()
     beeHead = BeeHead()
 
-    print('corners, normals_at_corners', corners.shape, normals_at_corners.shape)
-    O,D,(u,v) = raycastOmmatidium(corners, normals_at_corners, beeHead.R, beeHead.pos, plane )
+    print('corners, normals_at_corners', sv_vertices.shape, normals_at_corners.shape)
+    O,D,(u,v) = raycastOmmatidium(sv_vertices, normals_at_corners, beeHead.R, beeHead.pos, plane )
 
     # Visualisations
 
@@ -612,8 +612,8 @@ def bbbbbb(corners, normals_at_corners,  sv_vertices, sphereIntersect, normals_,
 
 
 def xxx5():
-   corners, normals_at_corners, sv_vertices, sphereIntersect, normals_, ommatidia_few_corners_normals, ommatidia_few_corners = aaaaa_old()
-   bbbbbb(corners, normals_at_corners, sv_vertices, sphereIntersect, normals_, ommatidia_few_corners_normals, ommatidia_few_corners)
+   sv_vertices, normals_at_corners, sphereIntersect, normals_, ommatidia_few_corners_normals, ommatidia_few_corners = aaaaa_old()
+   bbbbbb(sv_vertices, normals_at_corners, sphereIntersect, normals_, ommatidia_few_corners_normals, ommatidia_few_corners)
 
 xxx5()
 
