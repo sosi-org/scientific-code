@@ -493,7 +493,7 @@ def concat_lists(sv_regions_sel):
         c.extend(sv_regions_sel[i])
     return c
 
-def aaaaa_old():
+def aaaaa():
     #ommatidia_polygons1, regions_side_count = \
     #   ommatidia_polygons()
     # (3250, MAX_SIDES, 3)
@@ -538,6 +538,8 @@ def aaaaa_old():
 
     return sv_vertices, normals_at_corners, sphereIntersect, normals_, ommatidia_few_corners_normals, ommatidia_few_corners
 
+
+
 def visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, center_points, normals_at_center_points, beeHead, plane):
     p0 = beeHead.pos
     print('p0.shape',p0.shape)
@@ -570,7 +572,7 @@ def visualise_uv(u,v, u_few, v_few, texture):
     plt.xlabel('u')
     plt.ylabel('v')
 
-def bbbbbb(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners):
+def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners):
     plane = Plane()
     beeHead = BeeHead()
 
@@ -611,11 +613,11 @@ def bbbbbb(corner_points, normals_at_corners, center_points, normals_at_center_p
     print('.')
 
 
-def xxx5():
-   corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners = aaaaa_old()
-   bbbbbb(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners)
+def main2():
+   corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners = aaaaa()
+   cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners)
 
-xxx5()
+main2()
 
 #main()
 plt.show()
