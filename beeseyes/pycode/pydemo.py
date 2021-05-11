@@ -439,16 +439,11 @@ def xxx5():
     ommatidia_polygons1, regions_side_count = \
         ommatidia_polygons_fast_representation(sv_vertices, few_regions, maxsides=MAX_SIDES)
     # (3250, MAX_SIDES, 3)
-    #which_few_faces =
+
     which_corners_in_few_faces = np.array([*sv_regions[0], *sv_regions[1]])
 
-    print('ommatidia_polygons1')
-    # print(ommatidia_polygons1)
-    # print(ommatidia_polygons1.reshape(-1,3))
     ommatidia_few_corners = ommatidia_polygons1.reshape(-1,3)
     ommatidia_few_corners = ommatidia_few_corners[np.logical_not(np.isnan(ommatidia_few_corners[:,0])), :]
-    print('------')
-    print(ommatidia_few_corners.shape, '<<<<')
     assert which_corners_in_few_faces.shape[0] == ommatidia_few_corners.shape[0]
     ommatidia_few_corners_normals = normals_at_corners[which_corners_in_few_faces, :]
 
@@ -471,9 +466,7 @@ def xxx5():
     print('corners, normals_at_corners', corners.shape, normals_at_corners.shape)
     O,D,(u,v) = raycastOmmatidium(corners, normals_at_corners, beeHead.R, beeHead.pos, plane )
 
-    print(u)
-    print('====')
-
+    # Visualisation
     ax3d = ax3dCreate()
     p0 = beeHead.pos
     print('p0.shape',p0.shape)
@@ -483,21 +476,20 @@ def xxx5():
     visualise_all(ax3d, rot(sv_vertices) + p0, rot(normals_at_corners), 'r')  # corners
     visualise_all(ax3d, rot(sphereIntersect) + p0, rot(normals_), 'b') # centers
     general_direction = np.mean(sphereIntersect, 0)[None,:]
-    visualise_all(ax3d, rot(general_direction) + p0, rot(general_direction), 'k') # centers
+    visualise_all(ax3d, rot(general_direction) + p0, rot(general_direction), color='k') # centers
     visualise_plane(ax3d, plane)
     print((normals_*0).shape, '<<<<<<<=====')
 
-    if True:
-       print('====', ommatidia_few_corners_normals.shape, ommatidia_few_corners.shape)
-       assert ommatidia_few_corners_normals.shape == ommatidia_few_corners.shape
-       visualise_all(ax3d, rot(ommatidia_few_corners) + p0, ommatidia_few_corners_normals * 0.01, 'm')
-       O_few,D_few,(u_few,v_few) = raycastOmmatidium(
-          ommatidia_few_corners, ommatidia_few_corners_normals,
-          beeHead.R, beeHead.pos, plane,
-          clip=False)
+    # Visualisation of few points
+    print('====', ommatidia_few_corners_normals.shape, ommatidia_few_corners.shape)
+    assert ommatidia_few_corners_normals.shape == ommatidia_few_corners.shape
+    visualise_all(ax3d, rot(ommatidia_few_corners) + p0, ommatidia_few_corners_normals * 0.01, 'm')
+    O_few,D_few,(u_few,v_few) = raycastOmmatidium(
+       ommatidia_few_corners, ommatidia_few_corners_normals,
+       beeHead.R, beeHead.pos, plane,
+       clip=False)
 
-       #visualise_all(ax3d, rot(general_direction) + p0, rot(general_direction), 'k') # centers
-
+    # (u,v) visualisation on plane (pixels)
     axes2 = plt.figure()
     plt.imshow(texture, extent=(0.0,1.0,0.0,1.0), alpha=0.6)
     plt.plot(u,v, '.')
