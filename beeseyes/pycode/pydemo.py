@@ -470,7 +470,7 @@ def make_whichfacets(sv_vertices, sv_regions, areas, SD_THRESHOLD, MAX_SIDES):
     #AREA_THRESHOLD = 0.050
     AREA_THRESHOLD = 0.01/2/4
     w_areas = areas < AREA_THRESHOLD
-    sv_regions_sel = my_index(sv_regions, w_areas)
+    sv_regions_sel = my_index(sv_regions, w_areas)   # sv_regions[w_areas]
     '''
     unionvi = np.array(list(set().union(*sv_regions_sel)))
     sv.vertices = sv.vertices[unionvi, :]
@@ -481,19 +481,22 @@ def make_whichfacets(sv_vertices, sv_regions, areas, SD_THRESHOLD, MAX_SIDES):
     which_facets_sd = sd_s < SD_THRESHOLD
     which_facets = np.logical_and(which_facets_sd, w_areas)
 
-    print('which=', np.arange(0,which_facets.shape[0])[which_facets])
+    which_indices = np.arange(0,which_facets.shape[0])[which_facets]
+    print('which_indices=', which_indices)
 
 
     return which_facets
 
-def xxx5():
+def concat_lists(sv_regions_sel):
+    c = []
+    for i in range(len(sv_regions_sel)):
+        c.extend(sv_regions_sel[i])
+    return c
+
+def aaaaa_old():
     #ommatidia_polygons1, regions_side_count = \
     #   ommatidia_polygons()
     # (3250, MAX_SIDES, 3)
-
-    texture = load_image(BLUE_FLOWER)
-    #  (192, 256, 3)
-
 
     # rename: sv_vertices -> corner_vertices -> corner_points
     sv_vertices, sv_regions, normals_, normals_at_corners, sphereIntersect, areas = ommatidia_polygons()
@@ -533,6 +536,9 @@ def xxx5():
     #corner_normals = normals_at_corners
     #ommatidia_few_corners_normals
 
+    return corners, normals_at_corners, sv_vertices, sphereIntersect, normals_, ommatidia_few_corners_normals, ommatidia_few_corners
+
+def bbbbbb(corners, normals_at_corners,  sv_vertices, sphereIntersect, normals_, ommatidia_few_corners_normals, ommatidia_few_corners):
     plane = Plane()
     beeHead = BeeHead()
 
@@ -562,6 +568,10 @@ def xxx5():
        beeHead.R, beeHead.pos, plane,
        clip=False)
 
+
+    texture = load_image(BLUE_FLOWER)
+    #  (192, 256, 3)
+
     # (u,v) visualisation on plane (pixels)
     axes2 = plt.figure()
     plt.imshow(texture, extent=(0.0,1.0,0.0,1.0), alpha=0.6)
@@ -584,6 +594,11 @@ def xxx5():
     '''
 
     print('.')
+
+
+def xxx5():
+   corners, normals_at_corners, sv_vertices, sphereIntersect, normals_, ommatidia_few_corners_normals, ommatidia_few_corners = aaaaa_old()
+   bbbbbb(corners, normals_at_corners, sv_vertices, sphereIntersect, normals_, ommatidia_few_corners_normals, ommatidia_few_corners)
 
 xxx5()
 
