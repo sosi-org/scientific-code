@@ -498,9 +498,9 @@ def aaaaa():
     #   ommatidia_polygons()
     # (3250, MAX_SIDES, 3)
 
-    # rename: sv_vertices -> corner_vertices -> corner_points
-    sv_vertices, sv_regions, normals_, normals_at_corners, sphereIntersect, areas = ommatidia_polygons()
-    assert sv_vertices.shape == normals_at_corners.shape
+    # rename: corner_points -> corner_vertices -> corner_points
+    corner_points, sv_regions, normals_at_center_points, normals_at_corners, center_points, areas = ommatidia_polygons()
+    assert corner_points.shape == normals_at_corners.shape
 
     # **** select ****
     few_face_indices = [0,1]
@@ -510,11 +510,11 @@ def aaaaa():
 
     MAX_SIDES = 14 # 6 #14 # 6
     ommatidia_selected_polygons1, regions_side_count = \
-        ommatidia_polygons_fast_representation(sv_vertices, few_regions, maxsides=MAX_SIDES)
+        ommatidia_polygons_fast_representation(corner_points, few_regions, maxsides=MAX_SIDES)
 
     print('\n'*24 , '-----'*10)
     # sv_regions < -> few_regions
-    which_facets = make_whichfacets(sv_vertices, sv_regions, areas, SD_THRESHOLD=0.2, MAX_SIDES=MAX_SIDES)
+    which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=0.2, MAX_SIDES=MAX_SIDES)
 
     which_corners_in_few_faces = np.array([*sv_regions[0], *sv_regions[1]])
 
@@ -529,13 +529,13 @@ def aaaaa():
     assert which_corners_in_few_faces.shape[0] == ommatidia_few_corners_normals.shape[0]
 
     # (6496, 3) (6496, 3)
-    print(sv_vertices.shape, normals_at_corners.shape)
+    print(corner_points.shape, normals_at_corners.shape)
 
     # replace above with following two;
-    #sv_vertices <-> corner_points
+    #corner_points <-> corner_points
     #corner_normals <-> normals_at_corners
 
-    return sv_vertices, normals_at_corners, sphereIntersect, normals_, ommatidia_few_corners_normals, ommatidia_few_corners
+    return corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners
 
 
 
