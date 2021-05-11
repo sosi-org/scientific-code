@@ -9,6 +9,7 @@ from scipy.spatial.transform import Rotation
 
 from bee_eye_data import ommatidia_polygons, ommatidia_polygons_fast_representation
 from bee_eye_data import ax3dCreate, visualise_all
+from bee_eye_data import make_midpoints, make_deviations, my_index
 
 HEX6 = 6
 DIM3 = 3
@@ -417,6 +418,74 @@ def main():
 
     # plt.show()
 
+def make_whichfacets(sv_vertices, sv_regions, areas, SD_THRESHOLD, MAX_SIDES):
+    ommatidia_polygons1, regions_side_count = \
+       ommatidia_polygons_fast_representation(sv_vertices, sv_regions, maxsides=MAX_SIDES, default=np.NaN)
+
+    #print('ommatidia_polygons1\n', ommatidia_polygons1)
+    midpoints = make_midpoints(ommatidia_polygons1, regions_side_count)
+    #print('midpoints', midpoints.shape)
+    #print('midpoints\n', midpoints)
+    polyg_d = make_deviations(ommatidia_polygons1, midpoints, regions_side_count)
+    #print('polyg_d', polyg_d.shape) # (2, 14, 3)
+    #print('polyg_d', polyg_d)
+    #print('polyg_d^2', polyg_d * polyg_d)
+    counts = regions_side_count.astype(polyg_d.dtype)[:,None]
+    #print('counts.shape', counts.shape)
+    #print('counts', counts)
+    # nanxx = np.nansum
+    sum_rows = np.nansum(polyg_d * polyg_d, axis=1) / counts  # (n,)
+    var_s = np.nansum(sum_rows, axis=1)
+    #print('>>> var_s', var_s.shape)
+    #print('=========')
+    sd_s = np.power(var_s, 0.5)
+    #print('sd_s', var_s.shape)
+    print(sd_s)
+
+    '''
+    plt.figure()
+    plt.title('STD of ommatidia corners')
+    plt.hist(sd_s, bins=np.arange(0, 1.1, 0.01))
+    plt.yscale('log')
+    plt.show()
+    '''
+    plt.figure()
+    plt.title('STD of ommatidia corners')
+    hist1, bin_edges = np.histogram(sd_s, bins=np.arange(0, 1.1, 0.01))
+    hist1cumsum = np.cumsum(hist1)
+    plt.plot(bin_edges[:-1], hist1cumsum)
+    plt.plot(bin_edges[:-1], hist1)
+    plt.yscale('log')
+    #plt.show()
+
+    # areas
+    '''
+    plt.figure()
+    plt.title('Areas of ommatidia_polygons (from SphericalVoronoi)')
+    plt.hist(areas, bins=np.arange(0,0.2,0.01 / 10.0))
+    plt.yscale('log')
+    plt.show()
+    '''
+
+    #AREA_THRESHOLD = 0.050
+    AREA_THRESHOLD = 0.01/2/4
+    w_areas = areas < AREA_THRESHOLD
+    sv_regions_sel = my_index(sv_regions, w_areas)
+    '''
+    unionvi = np.array(list(set().union(*sv_regions_sel)))
+    sv.vertices = sv.vertices[unionvi, :]
+    normals_at_corners = normals_at_corners[unionvi, :]
+    '''
+
+    # SD_THRESHOLD = 0.2
+    which_facets_sd = sd_s < SD_THRESHOLD
+    which_facets = np.logical_and(which_facets_sd, w_areas)
+
+    print('which=', np.arange(0,which_facets.shape[0])[which_facets])
+
+
+    return which_facets
+
 def xxx5():
     #ommatidia_polygons1, regions_side_count = \
     #   ommatidia_polygons()
@@ -427,9 +496,10 @@ def xxx5():
 
 
     # rename: sv_vertices -> corner_vertices -> corner_points
-    sv_vertices, sv_regions, normals_, normals_at_corners, sphereIntersect = ommatidia_polygons()
+    sv_vertices, sv_regions, normals_, normals_at_corners, sphereIntersect, areas = ommatidia_polygons()
     assert sv_vertices.shape == normals_at_corners.shape
 
+    # **** select ****
     few_face_indices = [0,1]
     #print('**', len(sv_regions))
     #few_face_indices = [300, 301] #[500, 501]
@@ -438,7 +508,10 @@ def xxx5():
     MAX_SIDES = 14 # 6 #14 # 6
     ommatidia_polygons1, regions_side_count = \
         ommatidia_polygons_fast_representation(sv_vertices, few_regions, maxsides=MAX_SIDES)
-    # (3250, MAX_SIDES, 3)
+
+    print('\n'*24 , '-----'*10)
+    # sv_regions < -> few_regions
+    which_facets = make_whichfacets(sv_vertices, sv_regions, areas, SD_THRESHOLD=0.2, MAX_SIDES=MAX_SIDES)
 
     which_corners_in_few_faces = np.array([*sv_regions[0], *sv_regions[1]])
 

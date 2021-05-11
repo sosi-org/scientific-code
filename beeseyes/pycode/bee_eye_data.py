@@ -152,6 +152,28 @@ def load_relevant(idx):
 
 from scipy.spatial import SphericalVoronoi
 
+def make_midpoints(polyg, regions_side_count):
+    n, maxsides = polyg.shape[:2]
+    assert polyg.shape == (n, maxsides, 3)
+    assert regions_side_count.shape == (n,)
+
+    return np.nansum(polyg, axis=1) / regions_side_count.astype(polyg.dtype)[:,None]
+
+'''
+Usage:
+   polyg_d = make_deviations(polyg, midpoints, regions_side_count)
+   var_s = np.sum(np.sum(polyg_d * polyg_d ,axis=1),axis=1) / regions_side_count.astype(polyg.dtype)
+   sd_s = np.power(var_s, 0.5)
+'''
+def make_deviations(polyg, midpoints, regions_side_count):
+     nv, maxsides = polyg.shape[:2]
+     assert polyg.shape == (nv, maxsides, 3)
+     assert midpoints.shape == (nv, 3)
+     assert regions_side_count.shape == (nv,)
+
+     polyg_d = polyg - midpoints[:,None,:]
+     return polyg_d
+
 def eyes_demo():
    '''
      0: 3187
@@ -242,13 +264,14 @@ def eyes_demo():
    print('polyg.shape') # (3250, MAX_SIDES, 3)
    print(polyg.shape)
    print(polyg)
-   midpoints = np.sum(polyg, axis=1) / regions_side_count.astype(polyg.dtype)[:,None]
+
+   midpoints = make_midpoints(polyg, regions_side_count)
    print(midpoints)
    print(midpoints.shape) # (3250, 3)
 
    # standard deviations
-   polyg_d = polyg - midpoints[:,None,:]
-   var_s = np.sum(np.sum(polyg_d * polyg_d ,axis=1),axis=1) / regions_side_count.astype(polyg.dtype)
+   polyg_d = make_deviations(polyg, midpoints, regions_side_count)
+   var_s = np.nansum(np.nansum(polyg_d * polyg_d ,axis=1),axis=1) / regions_side_count.astype(polyg.dtype)
    print('var_s', var_s.shape)
    sd_s = np.power(var_s, 0.5)
 
@@ -407,26 +430,23 @@ def polygon_points(sphereIntersect, normals):
 
    areas = sv.calculate_areas()
 
-   '''
-   plt.figure()
-   plt.title('Areas of ommatidia_polygons (from SphericalVoronoi)')
-   plt.hist(areas, bins=np.arange(0,0.2,0.01 / 10.0))
-   plt.yscale('log')
-   plt.show()
-   '''
+
    # select
+   if False:
    #AREA_THRESHOLD = 0.050
-   AREA_THRESHOLD = 0.01/2/4
+       AREA_THRESHOLD = 0.01/2/4
 
-   w = areas < AREA_THRESHOLD
-   sv_regions_sel = my_index(sv.regions, w)
-   '''
-   unionvi = np.array(list(set().union(*sv_regions_sel)))
-   sv.vertices = sv.vertices[unionvi, :]
-   normals_at_corners = normals_at_corners[unionvi, :]
-   '''
+       w = areas < AREA_THRESHOLD
+       sv_regions_sel = my_index(sv.regions, w)
+       '''
+       unionvi = np.array(list(set().union(*sv_regions_sel)))
+       sv.vertices = sv.vertices[unionvi, :]
+       normals_at_corners = normals_at_corners[unionvi, :]
+       '''
+   else:
+       sv_regions_sel = sv.regions
 
-   return sv.vertices, sv_regions_sel, normals_at_corners
+   return sv.vertices, sv_regions_sel, normals_at_corners, areas
 
 '''
 Three neighbours of each
@@ -514,10 +534,10 @@ def ommatidia_polygons():
    #sphereIntersect = sphereIntersect / np.linalg.norm(sphereIntersect, axis=1, ord=2)[:,None]
    #normals = sphereIntersect / np.linalg.norm(sphereIntersect, axis=1, ord=2)[:,None]
 
-   (sv_vertices, sv_regions, normals_at_corners) = \
+   (sv_vertices, sv_regions, normals_at_corners, areas) = \
       polygon_points(sphereIntersect, normals)
 
-   return sv_vertices, sv_regions, normals, normals_at_corners, sphereIntersect
+   return sv_vertices, sv_regions, normals, normals_at_corners, sphereIntersect, areas
 
 
 def main():
