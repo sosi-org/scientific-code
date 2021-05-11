@@ -545,12 +545,15 @@ def bbbbbb(corners, normals_at_corners,  sv_vertices, sphereIntersect, normals_,
     print('corners, normals_at_corners', corners.shape, normals_at_corners.shape)
     O,D,(u,v) = raycastOmmatidium(corners, normals_at_corners, beeHead.R, beeHead.pos, plane )
 
-    # Visualisation
-    ax3d = ax3dCreate()
+    # Visualisations
+
     p0 = beeHead.pos
     print('p0.shape',p0.shape)
     def rot(vectos):
         return np.dot(beeHead.R, vectos.T).T
+
+    # 3D Visualisation of environment
+    ax3d = ax3dCreate()
     # rename `sv_vertices` to `*corners`
     visualise_all(ax3d, rot(sv_vertices) + p0, rot(normals_at_corners), 'r')  # corners
     visualise_all(ax3d, rot(sphereIntersect) + p0, rot(normals_), 'b') # centers
@@ -559,7 +562,7 @@ def bbbbbb(corners, normals_at_corners,  sv_vertices, sphereIntersect, normals_,
     visualise_plane(ax3d, plane)
     print((normals_*0).shape, '<<<<<<<=====')
 
-    # Visualisation of few points
+    # adding Visualisation of few points in 3D
     print('====', ommatidia_few_corners_normals.shape, ommatidia_few_corners.shape)
     assert ommatidia_few_corners_normals.shape == ommatidia_few_corners.shape
     visualise_all(ax3d, rot(ommatidia_few_corners) + p0, ommatidia_few_corners_normals * 0.01, 'm')
@@ -569,15 +572,18 @@ def bbbbbb(corners, normals_at_corners,  sv_vertices, sphereIntersect, normals_,
        clip=False)
 
 
+   # 2D Visualisation of (u,v) on textures
     texture = load_image(BLUE_FLOWER)
     #  (192, 256, 3)
 
     # (u,v) visualisation on plane (pixels)
     axes2 = plt.figure()
     plt.imshow(texture, extent=(0.0,1.0,0.0,1.0), alpha=0.6)
-    plt.plot(u,v, '.')
-    plt.plot(u_few,v_few, 'o', color='r')
+    plt.plot(u, v, '.')
+    plt.plot(u_few, v_few, 'o', color='r')
     #plt.plot(u6,v6, 'r.')
+    plt.xlabel('u')
+    plt.ylabel('v')
 
     '''
     #O,D,(u,v) = raycastOmmatidium(eye_points, normals_xyz, beeHead.R, beeHead.pos, plane)
