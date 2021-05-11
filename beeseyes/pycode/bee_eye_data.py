@@ -360,6 +360,10 @@ def load_eyes():
    print('HeadCenter', HeadCenter) # [[1627.86042584 1256.85655492  782.86597872]]
    return (sphereIntersect, normals, HeadCenter, BeeID)
 
+''' Takes, from a given list, elements based on a boolean numpy array'''
+def my_index(l1, np_bool):
+    return [l1[i] for i in np_bool.tolist()]
+
 # voronoiPoints
 '''
    returns (
@@ -388,19 +392,41 @@ def polygon_points(sphereIntersect, normals):
    print(a3-sv.vertices)  # not precise though
 
    assert sv.points.shape == normals.shape
-   n3 = three_corners_claculat(normals, three_corners, num_vertices)
+   normals_at_corners = three_corners_claculat(normals, three_corners, num_vertices)
 
    #ax3d = ax3dCreate()
    #print('111')
    ##visualise_all(ax3d, sv.vertices, normals)
    #print('2222')
-   ##visualise_all(ax3d, sphereIntersect, n3)
+   ##visualise_all(ax3d, sphereIntersect, normals_at_corners)
 
-   #visualise_all(ax3d, sv.vertices, n3, 'r')  # corners
+   #visualise_all(ax3d, sv.vertices, normals_at_corners, 'r')  # corners
    #print('2222')
    #visualise_all(ax3d, sphereIntersect, normals, 'b') # centers
    #plt.show()
-   return sv.vertices, sv.regions, n3
+
+   areas = sv.calculate_areas()
+
+   '''
+   plt.figure()
+   plt.title('Areas of ommatidia_polygons (from SphericalVoronoi)')
+   plt.hist(areas, bins=np.arange(0,0.2,0.01 / 10.0))
+   plt.yscale('log')
+   plt.show()
+   '''
+   # select
+   #AREA_THRESHOLD = 0.050
+   AREA_THRESHOLD = 0.01/2/4
+
+   w = areas < AREA_THRESHOLD
+   sv_regions_sel = my_index(sv.regions, w)
+   '''
+   unionvi = np.array(list(set().union(*sv_regions_sel)))
+   sv.vertices = sv.vertices[unionvi, :]
+   normals_at_corners = normals_at_corners[unionvi, :]
+   '''
+
+   return sv.vertices, sv_regions_sel, normals_at_corners
 
 '''
 Three neighbours of each
