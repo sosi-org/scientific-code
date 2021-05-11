@@ -163,7 +163,14 @@ def one_hexagonal_rays(pindex, hexa_verts_table, points_xyz, normals_xyz):
 '''
      Based on `derive_formulas.py`
 '''
-def ray_cast(U : tuple[float, float, float], V : tuple[float, float, float], C0 :tuple[float, float, float], D,O):
+def ray_cast(
+              U : tuple[float, float, float],
+              V : tuple[float, float, float],
+              C0 :tuple[float, float, float],
+              D,
+              O,
+              clip:bool=True
+            ):
    n = D.shape[0]
    assert D.shape == (n,3)
    assert O.shape == (n,3)
@@ -186,13 +193,14 @@ def ray_cast(U : tuple[float, float, float], V : tuple[float, float, float], C0 
    b = (-dx*oy*uz + dx*oz*uy - dx*uy*z0 + dx*uz*y0 + dy*ox*uz - dy*oz*ux + dy*ux*z0 - dy*uz*x0 - dz*ox*uy + dz*oy*ux - dz*ux*y0 + dz*uy*x0) / denom
    t = (-ox*uy*vz + ox*uz*vy + oy*ux*vz - oy*uz*vx - oz*ux*vy + oz*uy*vx + ux*vy*z0 - ux*vz*y0 - uy*vx*z0 + uy*vz*x0 + uz*vx*y0 - uz*vy*x0) / denom
 
-   w = np.logical_and(t > 0,   a > -1.9)
-   w = np.logical_and(w,   b > -1.9)
-   w = np.logical_and(w,   a < 2.9)
-   w = np.logical_and(w,   b < 2.9)
-   a = a[w]
-   b = b[w]
-   t = t[w]
+   if (clip):
+       w = np.logical_and(t > 0,   a > -1.9)
+       w = np.logical_and(w,   b > -1.9)
+       w = np.logical_and(w,   a < 2.9)
+       w = np.logical_and(w,   b < 2.9)
+       a = a[w]
+       b = b[w]
+       t = t[w]
 
    # todo: remove negative `t`
    #print(a)
@@ -317,7 +325,7 @@ def demo_lattice_eyes(EYE_SIZE):
 
 
 
-def raycastOmmatidium(eye_points, rays_dirs, bee_R, bee_pos, plane):
+def raycastOmmatidium(eye_points, rays_dirs, bee_R, bee_pos, plane, clip:bool=True):
    n = rays_dirs.shape[0]
    assert eye_points.shape == (n, DIM3)
    assert rays_dirs.shape == (n, DIM3)
@@ -326,7 +334,7 @@ def raycastOmmatidium(eye_points, rays_dirs, bee_R, bee_pos, plane):
 
    O = np.dot(bee_R, eye_points.T).T + bee_pos
    D = np.dot(bee_R, rays_dirs.T).T
-   (u,v) = ray_cast(plane.U,plane.V,plane.C0, D,O)
+   (u,v) = ray_cast(plane.U,plane.V,plane.C0, D,O, clip=clip)
    return O, D, (u,v)
 
 class Plane:
@@ -422,9 +430,14 @@ def xxx5():
     sv_vertices, sv_regions, normals_, normals_at_corners, sphereIntersect = ommatidia_polygons()
     assert sv_vertices.shape == normals_at_corners.shape
 
+    few_face_indices = [0,1]
+    #print('**', len(sv_regions))
+    #few_face_indices = [300, 301] #[500, 501]
+    few_regions = [sv_regions[face] for face in few_face_indices]
+
     MAX_SIDES = 14 # 6 #14 # 6
     ommatidia_polygons1, regions_side_count = \
-        ommatidia_polygons_fast_representation(sv_vertices, [sv_regions[0], sv_regions[1]], maxsides=MAX_SIDES)
+        ommatidia_polygons_fast_representation(sv_vertices, few_regions, maxsides=MAX_SIDES)
     # (3250, MAX_SIDES, 3)
     #which_few_faces =
     which_corners_in_few_faces = np.array([*sv_regions[0], *sv_regions[1]])
@@ -478,15 +491,17 @@ def xxx5():
        print('====', ommatidia_few_corners_normals.shape, ommatidia_few_corners.shape)
        assert ommatidia_few_corners_normals.shape == ommatidia_few_corners.shape
        visualise_all(ax3d, rot(ommatidia_few_corners) + p0, ommatidia_few_corners_normals * 0.01, 'm')
-       #O_few,D_few,(u_few,v_few) = raycastOmmatidium(ommatidia_few_corners, normals_at_corners, beeHead.R, beeHead.pos, plane )
-       O_few,D_few,(u_few,v_few) = raycastOmmatidium(ommatidia_few_corners, ommatidia_few_corners_normals, beeHead.R, beeHead.pos, plane )
+       O_few,D_few,(u_few,v_few) = raycastOmmatidium(
+          ommatidia_few_corners, ommatidia_few_corners_normals,
+          beeHead.R, beeHead.pos, plane,
+          clip=False)
 
        #visualise_all(ax3d, rot(general_direction) + p0, rot(general_direction), 'k') # centers
 
     axes2 = plt.figure()
     plt.imshow(texture, extent=(0.0,1.0,0.0,1.0), alpha=0.6)
-    plt.plot(u,v, 'b.')
-    plt.plot(u_few,v_few, 'r.')
+    plt.plot(u,v, '.')
+    plt.plot(u_few,v_few, 'o', color='r')
     #plt.plot(u6,v6, 'r.')
 
     '''
