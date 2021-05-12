@@ -493,15 +493,7 @@ def concat_lists(sv_regions_sel):
         c.extend(sv_regions_sel[i])
     return c
 
-def aaaaa():
-    #ommatidia_selected_polygons1, regions_side_count = \
-    #   ommatidia_polygons()
-    # (3250, MAX_SIDES, 3)
-
-    # rename: corner_points -> corner_vertices -> corner_points
-    corner_points, sv_regions, normals_at_center_points, normals_at_corners, center_points, areas = ommatidia_polygons()
-    assert corner_points.shape == normals_at_corners.shape
-
+def pick_subset_of_vectors(sv_regions, areas, corner_points, normals_at_corners):
     # **** select ****
     few_face_indices = [0,1]
     #print('**', len(sv_regions))
@@ -527,6 +519,19 @@ def aaaaa():
     #  where:
     assert which_corners_in_few_faces.shape[0] == ommatidia_few_corners.shape[0]
     assert which_corners_in_few_faces.shape[0] == ommatidia_few_corners_normals.shape[0]
+
+    return ommatidia_few_corners, ommatidia_few_corners_normals
+
+def aaaaa():
+    #ommatidia_selected_polygons1, regions_side_count = \
+    #   ommatidia_polygons()
+    # (3250, MAX_SIDES, 3)
+
+    # rename: corner_points -> corner_vertices -> corner_points
+    corner_points, sv_regions, normals_at_center_points, normals_at_corners, center_points, areas = ommatidia_polygons()
+    assert corner_points.shape == normals_at_corners.shape
+
+    ommatidia_few_corners, ommatidia_few_corners_normals = pick_subset_of_vectors(sv_regions, areas, corner_points, normals_at_corners)
 
     # (6496, 3) (6496, 3)
     print(corner_points.shape, normals_at_corners.shape)
