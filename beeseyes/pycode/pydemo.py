@@ -501,9 +501,8 @@ def select_regions(sv_regions, areas, corner_points, MAX_SIDES):
     selected_regions = []
     for i in range(len(sv_regions)):
         if which_facets[i]:
-            selected_regions.push(sv_regions[i])
+            selected_regions.append(sv_regions[i])
 
-    in_progress
     return selected_regions
 
 
@@ -544,7 +543,7 @@ def pick_subset_of_vectors(sv_regions, areas, corner_points, normals_at_corners)
 
     print('\n'*24 , '-----'*10)
     # sv_regions < -> few_regions
-    which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=0.2, MAX_SIDES=MAX_SIDES)
+    # which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=0.2, MAX_SIDES=MAX_SIDES)
 
     which_corners_in_few_faces = np.array([*sv_regions[0], *sv_regions[1]])
 
@@ -577,7 +576,9 @@ def aaaaa():
     # (6496, 3) (6496, 3)
     print(corner_points.shape, normals_at_corners.shape)
 
-    return corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners
+    selected_regions = select_regions(sv_regions, areas, corner_points, MAX_SIDES=14)
+
+    return (corner_points, normals_at_corners), (center_points, normals_at_center_points), (ommatidia_few_corners_normals, ommatidia_few_corners)
 
 
 
@@ -655,7 +656,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
 
 def main2():
-   corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners = aaaaa()
+   (corner_points, normals_at_corners), (center_points, normals_at_center_points), (ommatidia_few_corners_normals, ommatidia_few_corners) = aaaaa()
    cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners)
 
 main2()
