@@ -604,7 +604,7 @@ def aaaaa():
     print(corner_points.shape, normals_at_corners.shape)
 
 
-    which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=0.2, MAX_SIDES=14)
+    which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=0.2*3, MAX_SIDES=14)
     #selected_regions = select_regions(sv_regions, areas, corner_points, MAX_SIDES=14)
     selected_regions =  select_regions(sv_regions, which_facets)
     selected_center_points = select_centers(which_facets, center_points)
@@ -663,21 +663,33 @@ def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, tit
     ax3d.set_zlabel('Z')
     ax3d.set_title(title)
 
-def visualise_uv(u,v, u_few, v_few, texture):
+def visualise_uv(u,v, u_few, v_few, texture, uv_rgba=None, title=None):
     # (u,v) visualisation on plane (pixels)
     axes2 = plt.figure()
+    ax = axes2.add_subplot(111)
     plt.imshow(texture, extent=(0.0,1.0,0.0,1.0), alpha=0.6)
-    plt.plot(u, v, '.')
+    #plt.plot(u, v, '.', facecolors=uv_rgba)
+    plt.scatter(u, v, marker='.', facecolors=uv_rgba)
     plt.plot(u_few, v_few, 'o', color='r')
     #plt.plot(u6,v6, 'r.')
     plt.xlabel('u')
     plt.ylabel('v')
+    '''
+    ax.set_xlim(0,1.0)
+    ax.set_ylim(0,1.0)
+    if title is not None:
+        ax.set_title(title)
+    '''
+
+    # https://stackoverflow.com/questions/12444716/how-do-i-set-the-figure-title-and-axes-labels-font-size-in-matplotlib
+    return ax
 
 def calculate_colors(uv, regions, texture):
     print('uv.shape', uv.shape)
     nan_rgb = np.zeros((3,)) + np.NaN
     EPS = 0.00000001
     (W,H) = texture.shape[0:2]
+    print('W,H', W,H)
     W_ = (W + 1 - EPS)
     H_ = (H + 1 - EPS)
     nf = len(regions)
@@ -693,12 +705,12 @@ def calculate_colors(uv, regions, texture):
             rgb = nan_rgb
         else:
             # sample
-            px = math.floor(um * W_)
-            py = math.floor(vm * H_)
-            if px < 0 or py < 0 or px >= W or py >= H:
+            px = math.floor(um * H_)
+            py = math.floor(vm * W_)
+            if px < 0 or py < 0 or py >= W or px >= H:
                 rgb = nan_rgb
             else:
-               rgb = texture[px,py]
+               rgb = texture[py,px]
         regions_rgb[i] = rgb
     return regions_rgb, uvm_for_debug
 
@@ -760,7 +772,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     regions_rgba = np.concatenate( (regions_rgb / 255.0, one), axis=1)
     _ALPHA = 3
     regions_rgba[nans, 0:2] = 0.0
-    #regions_rgba[:, _ALPHA] = 1.0
+    regions_rgba[:, _ALPHA] = 1.0
     regions_rgba[nans, _ALPHA] = 0.0
     #regions_rgba[:, :] = 0.0
     #regions_rgba[nans, _ALPHA] = 1.0
@@ -775,7 +787,13 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     #print('uv2.shape', uv2.shape)
     #uv2 = uv2[n1,:]
     #visualise_uv(uv2[:,0], uv2[:,1], uv2[0:0,0], uv2[0:0,1], texture)
-    visualise_uv(uvm_debug[:,0], uvm_debug[:,1], uvm_debug[0:0,0], uvm_debug[0:0,1], texture)
+    ax2 = \
+      visualise_uv(uvm_debug[:,0], uvm_debug[:,1], uvm_debug[0:0,0], uvm_debug[0:0,1], texture, uv_rgba=regions_rgba)
+
+    ax2.set_xlim(0,1.0)
+    ax2.set_ylim(0,1.0)
+    ax2.set_title('sampled pixels')
+
 
 
     '''
