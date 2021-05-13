@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 from scipy.spatial.transform import Rotation
-
+import math
 
 from bee_eye_data import ommatidia_polygons, ommatidia_polygons_fast_representation
 from bee_eye_data import ax3dCreate, visualise_all
@@ -199,9 +199,13 @@ def ray_cast(
        w = np.logical_and(w,   b > -1.9)
        w = np.logical_and(w,   a < 2.9)
        w = np.logical_and(w,   b < 2.9)
-       a = a[w]
-       b = b[w]
-       t = t[w]
+       #a = a[w]
+       #b = b[w]
+       #t = t[w]
+       not_w = np.logical_not(w)
+       a[not_w] = np.NaN
+       b[not_w] = np.NaN
+       t[not_w] = np.NaN
 
    # todo: remove negative `t`
    #print(a)
@@ -494,17 +498,40 @@ def concat_lists(sv_regions_sel):
     return c
 
 
-def select_regions(sv_regions, areas, corner_points, MAX_SIDES):
+#def select_regions(sv_regions, areas, corner_points, MAX_SIDES):
+def select_regions(sv_regions, which_facets):
 
-    which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=0.2, MAX_SIDES=MAX_SIDES)
+    #which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=0.2, MAX_SIDES=MAX_SIDES)
 
+    n = which_facets.shape[0]
+    assert which_facets.shape[0] == len(sv_regions)
     selected_regions = []
-    for i in range(len(sv_regions)):
+    for i in range(n):
         if which_facets[i]:
             selected_regions.append(sv_regions[i])
 
+    #selected_center_points = select_centers(which_facets, center_points)
     return selected_regions
 
+# dont use this
+def select_centers(which_facets, center_points):
+
+    # which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=0.2, MAX_SIDES=MAX_SIDES)
+
+    n = which_facets.shape[0]
+    selected_center_points_list = []
+    for i in range(n):
+        if which_facets[i]:
+            selected_center_points_list.append(center_points[i])
+
+    # todo: faster
+    m = len(selected_center_points_list)
+    ndims = center_points.shape[1]
+    selected_center_points = np.zeros((m, ndims), dtype=center_points.dtype)
+    for i in range(m):
+        selected_center_points[i,:] = center_points[i]
+
+    return selected_center_points
 
 
 # pick a few only-for debugging purpose
@@ -576,11 +603,14 @@ def aaaaa():
     # (6496, 3) (6496, 3)
     print(corner_points.shape, normals_at_corners.shape)
 
-    selected_regions = select_regions(sv_regions, areas, corner_points, MAX_SIDES=14)
 
-    return (corner_points, normals_at_corners), (center_points, normals_at_center_points), (ommatidia_few_corners_normals, ommatidia_few_corners)
+    which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=0.2, MAX_SIDES=14)
+    #selected_regions = select_regions(sv_regions, areas, corner_points, MAX_SIDES=14)
+    selected_regions =  select_regions(sv_regions, which_facets)
+    selected_center_points = select_centers(which_facets, center_points)
+    # `selected_regions` is linked to [indices of] `(corner_points, normals_at_corners)`
 
-
+    return (corner_points, normals_at_corners), (center_points, normals_at_center_points), (ommatidia_few_corners_normals, ommatidia_few_corners), selected_regions, selected_center_points, which_facets
 
 def visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, center_points, normals_at_center_points, beeHead, plane):
     p0 = beeHead.pos
@@ -604,6 +634,35 @@ def visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corn
     assert ommatidia_few_corners_normals.shape == ommatidia_few_corners.shape
     visualise_all(ax3d, rot(ommatidia_few_corners) + p0, ommatidia_few_corners_normals * 0.01, 'm')
 
+
+def array_minmax(x):
+    mn = np.min(x)
+    mx = np.max(x)
+    return (mn, mx)
+
+def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, title):
+    assert selected_center_points.shape[0] == regions_rgb.shape[0]
+
+    p0 = beeHead.pos
+
+    def rot(vectors):
+        return np.dot(beeHead.R, vectors.T).T
+
+    X = rot(selected_center_points) + p0
+
+    ax3d = ax3dCreate()
+    ax3d.scatter(X[:,0], X[:,1], X[:,2], facecolors=regions_rgb, marker='.')
+    print('XXX ', X)
+    print('regions_rgb ', regions_rgb)
+
+    ax3d.set_xlim(*array_minmax(X[:,0]))
+    ax3d.set_ylim(*array_minmax(X[:,1]))
+    ax3d.set_zlim(*array_minmax(X[:,2]))
+    ax3d.set_xlabel('X')
+    ax3d.set_ylabel('Y')
+    ax3d.set_zlabel('Z')
+    ax3d.set_title(title)
+
 def visualise_uv(u,v, u_few, v_few, texture):
     # (u,v) visualisation on plane (pixels)
     axes2 = plt.figure()
@@ -614,12 +673,43 @@ def visualise_uv(u,v, u_few, v_few, texture):
     plt.xlabel('u')
     plt.ylabel('v')
 
-def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners):
+def calculate_colors(uv, regions, texture):
+    print('uv.shape', uv.shape)
+    nan_rgb = np.zeros((3,)) + np.NaN
+    EPS = 0.00000001
+    (W,H) = texture.shape[0:2]
+    W_ = (W + 1 - EPS)
+    H_ = (H + 1 - EPS)
+    nf = len(regions)
+    uvm_for_debug = np.zeros((nf,2),dtype=float)
+    regions_rgb = np.zeros((nf,3),dtype=float)
+    for i in range(nf):
+        # temporary solution: sample at center only
+        #if np.isnan(uv[regions[i], 0]):
+        um = np.mean(uv[regions[i], 0])
+        vm = np.mean(uv[regions[i], 1])
+        uvm_for_debug[i, :] = [um, vm]
+        if np.isnan(um) or np.isnan(vm):
+            rgb = nan_rgb
+        else:
+            # sample
+            px = math.floor(um * W_)
+            py = math.floor(vm * H_)
+            if px < 0 or py < 0 or px >= W or py >= H:
+                rgb = nan_rgb
+            else:
+               rgb = texture[px,py]
+        regions_rgb[i] = rgb
+    return regions_rgb, uvm_for_debug
+
+def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets):
     plane = Plane()
     beeHead = BeeHead()
 
+    # corners, normals_at_corners (6496, 3) (6496, 3)
     print('corners, normals_at_corners', corner_points.shape, normals_at_corners.shape)
     O,D,(u,v) = raycastOmmatidium(corner_points, normals_at_corners, beeHead.R, beeHead.pos, plane )
+    print('>>>u,v', u.shape)
 
     # Visualisations
 
@@ -632,11 +722,61 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
        clip=False)
 
 
-   # 2D Visualisation of (u,v) on textures
+    # 2D Visualisation of (u,v) on textures
     texture = load_image(BLUE_FLOWER)
     #  (192, 256, 3)
 
     visualise_uv(u,v, u_few, v_few, texture)
+
+    # selected_center_points = select_centers(which_facets, center_points)
+
+    uv = np.concatenate((u[:,None], v[:,None]), axis=1)
+    #selected_uv = select_centers(which_facets, uv)
+
+    print('u,v', u.shape)
+    print('uv', uv.shape)
+    print('selected_regions', len(selected_regions))
+    nfs = np.sum(which_facets)
+    #assert selected_uv.shape[0] == nfs
+    assert len(selected_regions) == nfs
+    #regions_rgb = calculate_colors(selected_uv, selected_regions, texture)
+    regions_rgb, uvm_debug = calculate_colors(uv, selected_regions, texture)
+
+    nf =len(selected_regions)
+    #assert u.shape[0] == nf
+    assert regions_rgb.shape[0] == nf
+    assert len(selected_regions) == nf
+
+    assert selected_center_points.shape[0] == nf
+    assert regions_rgb.shape[0] == nf
+
+    print(regions_rgb)
+    print('non-nan', np.sum(np.logical_not(np.isnan(regions_rgb)), axis=0)) # [14,14,14]
+    #print('non-nan', np.sum(np.logical_not(np.isnan(regions_rgb)), axis=1))
+
+    nans = np.isnan(regions_rgb[:,0])
+    one = np.ones((regions_rgb.shape[0],1), dtype=np.float)
+    #print('max', np.nanmax(regions_rgb))
+    regions_rgba = np.concatenate( (regions_rgb / 255.0, one), axis=1)
+    _ALPHA = 3
+    regions_rgba[nans, 0:2] = 0.0
+    #regions_rgba[:, _ALPHA] = 1.0
+    regions_rgba[nans, _ALPHA] = 0.0
+    #regions_rgba[:, :] = 0.0
+    #regions_rgba[nans, _ALPHA] = 1.0
+
+
+    # one center_point for each region. todo: re-index center_point-s based on selected regions
+    visualise_3d_situation_eye(selected_center_points, regions_rgba, beeHead, 'good ones')
+
+    #uv2 = uv.copy()
+    #n1 = np.logical_not(nans[:])
+    #print('n1.shape', n1.shape)
+    #print('uv2.shape', uv2.shape)
+    #uv2 = uv2[n1,:]
+    #visualise_uv(uv2[:,0], uv2[:,1], uv2[0:0,0], uv2[0:0,1], texture)
+    visualise_uv(uvm_debug[:,0], uvm_debug[:,1], uvm_debug[0:0,0], uvm_debug[0:0,1], texture)
+
 
     '''
     #O,D,(u,v) = raycastOmmatidium(eye_points, normals_xyz, beeHead.R, beeHead.pos, plane)
@@ -656,8 +796,8 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
 
 def main2():
-   (corner_points, normals_at_corners), (center_points, normals_at_center_points), (ommatidia_few_corners_normals, ommatidia_few_corners) = aaaaa()
-   cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners)
+   (corner_points, normals_at_corners), (center_points, normals_at_center_points), (ommatidia_few_corners_normals, ommatidia_few_corners), selected_regions, selected_center_points, which_facets = aaaaa()
+   cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets)
 
 main2()
 

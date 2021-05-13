@@ -494,8 +494,8 @@ def ommatidia_polygons_fast_representation(sv_vertices, sv_regions, maxsides, de
    #return regions_fast, regions_side_count, polyg
    return polyg, regions_side_count
 
-def ax3dCreate():
-   SZ=8.0*1.2 * 3
+# SZ=8.0*1.2 * 3 == 28,8
+def ax3dCreate(SZ=28.8):
    ax3d = plt.figure() \
       .add_subplot(
          projection='3d', autoscale_on=True,
