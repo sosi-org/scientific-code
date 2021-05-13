@@ -493,16 +493,54 @@ def concat_lists(sv_regions_sel):
         c.extend(sv_regions_sel[i])
     return c
 
+
+def select_regions(sv_regions, areas, corner_points, MAX_SIDES):
+
+    which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=0.2, MAX_SIDES=MAX_SIDES)
+
+    selected_regions = []
+    for i in range(len(sv_regions)):
+        if which_facets[i]:
+            selected_regions.push(sv_regions[i])
+
+    in_progress
+    return selected_regions
+
+
+
+# pick a few only-for debugging purpose
+DEBUG_FEW = True
+
 def pick_subset_of_vectors(sv_regions, areas, corner_points, normals_at_corners):
-    # **** select ****
-    few_face_indices = [0,1]
-    #print('**', len(sv_regions))
-    #few_face_indices = [300, 301] #[500, 501]
-    few_regions = [sv_regions[face] for face in few_face_indices]
+    # Future plan:
+    # 1. based on `which_facets`, choose a subset of `sv_regions`.
+    # 2. Then do the `ommatidia_polygons_fast_representation()` for those regions. (pads with NaN)
+    # 3. (optional: not now) Avoid re-computing corners that are not used there? How? no. Just remove them corners not used? Then it will need re-indexing of the "corner" vertices.
+    # 4. Flatten (those padded with NaN).
+    # 5. Remove NaNs => re-index again?! (ALl can be done here)
+    # Ok foret about this faast thing. It is in-fact incomplete.
+
+    # see temp6.py
+    #  selects some faces and returns them as an array of (point,normal)s
+    # Two types of selection:
+    # 1. select a few for debug (not in production)
+    # 2. select aa subset because of invalid regions
 
     MAX_SIDES = 14 # 6 #14 # 6
-    ommatidia_selected_polygons1, regions_side_count = \
-        ommatidia_polygons_fast_representation(corner_points, few_regions, maxsides=MAX_SIDES)
+    if DEBUG_FEW:
+        few_face_indices = [0,1]
+        #print('**', len(sv_regions))
+        #few_face_indices = [300, 301] #[500, 501]
+        few_regions = [sv_regions[face] for face in few_face_indices]
+
+        # original points. Limit only for rdebugging purposes
+        ommatidia_selected_polygons1, regions_side_count = \
+            ommatidia_polygons_fast_representation(corner_points, few_regions, maxsides=MAX_SIDES)
+        ommatidia_polygons = ommatidia_selected_polygons1
+    else:
+        ommatidia_originl_polygons1, regions_side_count = \
+            ommatidia_polygons_fast_representation(corner_points, sv_regions, maxsides=MAX_SIDES)
+        ommatidia_polygons = ommatidia_originl_polygons1
 
     print('\n'*24 , '-----'*10)
     # sv_regions < -> few_regions
@@ -520,6 +558,7 @@ def pick_subset_of_vectors(sv_regions, areas, corner_points, normals_at_corners)
     assert which_corners_in_few_faces.shape[0] == ommatidia_few_corners.shape[0]
     assert which_corners_in_few_faces.shape[0] == ommatidia_few_corners_normals.shape[0]
 
+    #return ommatidia_unique_corners, ommatidia_few_corners_normals
     return ommatidia_few_corners, ommatidia_few_corners_normals
 
 def aaaaa():
@@ -530,6 +569,8 @@ def aaaaa():
     # rename: corner_points -> corner_vertices -> corner_points
     corner_points, sv_regions, normals_at_center_points, normals_at_corners, center_points, areas = ommatidia_polygons()
     assert corner_points.shape == normals_at_corners.shape
+
+    print('\n'*24 , '-----'*10)
 
     ommatidia_few_corners, ommatidia_few_corners_normals = pick_subset_of_vectors(sv_regions, areas, corner_points, normals_at_corners)
 
