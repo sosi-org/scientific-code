@@ -19,7 +19,9 @@ DIM3 = 3
 # https://en.wikipedia.org/wiki/Blue_flower
 BLUE_FLOWER = "../art/256px-Bachelor's_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpeg"
 
-BLUE_FLOWER = '/Users/a9858770/Documents/xx/3bebe3b139b7e0e01573faabb4c92934.jpeg'
+#BLUE_FLOWER = '/Users/a9858770/Documents/xx/3bebe3b139b7e0e01573faabb4c92934.jpeg'
+
+
 def eye_centers(n):
   nx = int(np.sqrt(n)+1) +2
   ny = int(np.sqrt(n)) + 2
@@ -416,8 +418,8 @@ def main():
 
     axes2 = plt.figure()
     plt.imshow(texture, extent=(0.0,1.0,0.0,1.0), alpha=0.6)
-    plt.plot(u,v, '.')
-    plt.plot(u6,v6, 'r.')
+    plt.plot(v, 1-u, '.')
+    plt.plot(v6, 1-u6, 'r.')
 
     sample_hex(u6,v6, texture)
 
@@ -605,7 +607,7 @@ def aaaaa():
     print(corner_points.shape, normals_at_corners.shape)
 
 
-    which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=0.2*3, MAX_SIDES=14)
+    which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=0.2*30, MAX_SIDES=14)
     #selected_regions = select_regions(sv_regions, areas, corner_points, MAX_SIDES=14)
     selected_regions =  select_regions(sv_regions, which_facets)
     selected_center_points = select_centers(which_facets, center_points)
@@ -670,11 +672,11 @@ def visualise_uv(u,v, u_few, v_few, texture, uv_rgba=None, title=None):
     ax = axes2.add_subplot(111)
     tt = texture
     # tt = np.transpose(texture, axes=(1,0,2))
-    plt.imshow(tt, extent=(0.0,1.0,1.0,0.0), alpha=0.6, origin='lower')
+    plt.imshow(tt, extent=(0.0,1.0,0.0,1.0), alpha=0.6) #, origin='lower')
     #plt.plot(u, v, '.', facecolors=uv_rgba)
     plt.scatter(v, 1-u, marker='.', facecolors=uv_rgba)
     if (u_few is not None) and (v_few is not None):
-       plt.plot(u_few, v_few, 'o', color='r')
+       plt.plot(v_few, 1-u_few, 'o', color='r')
     #plt.plot(u6,v6, 'r.')
     plt.xlabel('u')
     plt.ylabel('v')
@@ -799,6 +801,8 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     ax2.set_title('sampled pixels')
 
 
+
+    # visualise_3d_situation_eye(center_points, regions_rgba, beeHead, 'sferikal ')
 
     '''
     #O,D,(u,v) = raycastOmmatidium(eye_points, normals_xyz, beeHead.R, beeHead.pos, plane)
