@@ -19,6 +19,7 @@ DIM3 = 3
 # https://en.wikipedia.org/wiki/Blue_flower
 BLUE_FLOWER = "../art/256px-Bachelor's_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpeg"
 
+BLUE_FLOWER = '/Users/a9858770/Documents/xx/3bebe3b139b7e0e01573faabb4c92934.jpeg'
 def eye_centers(n):
   nx = int(np.sqrt(n)+1) +2
   ny = int(np.sqrt(n)) + 2
@@ -667,10 +668,13 @@ def visualise_uv(u,v, u_few, v_few, texture, uv_rgba=None, title=None):
     # (u,v) visualisation on plane (pixels)
     axes2 = plt.figure()
     ax = axes2.add_subplot(111)
-    plt.imshow(texture, extent=(0.0,1.0,0.0,1.0), alpha=0.6)
+    tt = texture
+    # tt = np.transpose(texture, axes=(1,0,2))
+    plt.imshow(tt, extent=(0.0,1.0,1.0,0.0), alpha=0.6, origin='lower')
     #plt.plot(u, v, '.', facecolors=uv_rgba)
-    plt.scatter(u, v, marker='.', facecolors=uv_rgba)
-    plt.plot(u_few, v_few, 'o', color='r')
+    plt.scatter(v, 1-u, marker='.', facecolors=uv_rgba)
+    if (u_few is not None) and (v_few is not None):
+       plt.plot(u_few, v_few, 'o', color='r')
     #plt.plot(u6,v6, 'r.')
     plt.xlabel('u')
     plt.ylabel('v')
@@ -684,11 +688,11 @@ def visualise_uv(u,v, u_few, v_few, texture, uv_rgba=None, title=None):
     # https://stackoverflow.com/questions/12444716/how-do-i-set-the-figure-title-and-axes-labels-font-size-in-matplotlib
     return ax
 
-def calculate_colors(uv, regions, texture):
+def sample_colors(uv, regions, texture):
     print('uv.shape', uv.shape)
     nan_rgb = np.zeros((3,)) + np.NaN
     EPS = 0.00000001
-    (W,H) = texture.shape[0:2]
+    (H,W) = texture.shape[0:2]
     print('W,H', W,H)
     W_ = (W + 1 - EPS)
     H_ = (H + 1 - EPS)
@@ -705,9 +709,9 @@ def calculate_colors(uv, regions, texture):
             rgb = nan_rgb
         else:
             # sample
-            px = math.floor(um * H_)
-            py = math.floor(vm * W_)
-            if px < 0 or py < 0 or py >= W or px >= H:
+            py = math.floor(um * H_)
+            px = math.floor(vm * W_)
+            if px < 0 or py < 0 or px >= W or py >= H:
                 rgb = nan_rgb
             else:
                rgb = texture[py,px]
@@ -751,8 +755,8 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     nfs = np.sum(which_facets)
     #assert selected_uv.shape[0] == nfs
     assert len(selected_regions) == nfs
-    #regions_rgb = calculate_colors(selected_uv, selected_regions, texture)
-    regions_rgb, uvm_debug = calculate_colors(uv, selected_regions, texture)
+    #regions_rgb = sample_colors(selected_uv, selected_regions, texture)
+    regions_rgb, uvm_debug = sample_colors(uv, selected_regions, texture)
 
     nf =len(selected_regions)
     #assert u.shape[0] == nf
@@ -788,7 +792,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     #uv2 = uv2[n1,:]
     #visualise_uv(uv2[:,0], uv2[:,1], uv2[0:0,0], uv2[0:0,1], texture)
     ax2 = \
-      visualise_uv(uvm_debug[:,0], uvm_debug[:,1], uvm_debug[0:0,0], uvm_debug[0:0,1], texture, uv_rgba=regions_rgba)
+      visualise_uv(uvm_debug[:,0], uvm_debug[:,1], None, None, texture, uv_rgba=regions_rgba)
 
     ax2.set_xlim(0,1.0)
     ax2.set_ylim(0,1.0)
