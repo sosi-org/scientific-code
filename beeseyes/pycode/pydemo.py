@@ -14,13 +14,23 @@ from bee_eye_data import make_midpoints, make_deviations, my_index
 HEX6 = 6
 DIM3 = 3
 
+#0.00125 , 0.01/2/4
+AREA_THRESHOLD = 0.02*10
+
+#0.2
+SD_THRESHOLD=0.03
+
+AREA_THRESHOLD = 0.02*10 *100000+1000
+SD_THRESHOLD=0.03 * 10000+1000
+
+
 
 # https://en.wikipedia.org/wiki/Blue_flower#/media/File:Bachelor's_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpg
 # https://en.wikipedia.org/wiki/Blue_flower
 BLUE_FLOWER = "../art/256px-Bachelor's_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpeg"
 
 #BLUE_FLOWER = '/Users/a9858770/Documents/xx/3bebe3b139b7e0e01573faabb4c92934.jpeg'
-
+BLUE_FLOWER = '/Users/a9858770/Documents/bee-walt-Spike_art.PNG.png'
 
 def eye_centers(n):
   nx = int(np.sqrt(n)+1) +2
@@ -425,7 +435,7 @@ def main():
 
     # plt.show()
 
-def make_whichfacets(sv_vertices, sv_regions, areas, SD_THRESHOLD, MAX_SIDES):
+def make_whichfacets(sv_vertices, sv_regions, areas, SD_THRESHOLD, AREA_THRESHOLD, MAX_SIDES):
     ommatidia_polygons1, regions_side_count = \
        ommatidia_polygons_fast_representation(sv_vertices, sv_regions, maxsides=MAX_SIDES, default=np.NaN)
 
@@ -475,7 +485,7 @@ def make_whichfacets(sv_vertices, sv_regions, areas, SD_THRESHOLD, MAX_SIDES):
     '''
 
     #AREA_THRESHOLD = 0.050
-    AREA_THRESHOLD = 0.01/2/4
+    #AREA_THRESHOLD = 0.01/2/4
     w_areas = areas < AREA_THRESHOLD
     sv_regions_sel = my_index(sv_regions, w_areas)   # sv_regions[w_areas]
     '''
@@ -504,7 +514,7 @@ def concat_lists(sv_regions_sel):
 #def select_regions(sv_regions, areas, corner_points, MAX_SIDES):
 def select_regions(sv_regions, which_facets):
 
-    #which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=0.2, MAX_SIDES=MAX_SIDES)
+    #which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=SD_THRESHOLD, AREA_THRESHOLD=AREA_THRESHOLD, MAX_SIDES=MAX_SIDES)
 
     n = which_facets.shape[0]
     assert which_facets.shape[0] == len(sv_regions)
@@ -519,7 +529,7 @@ def select_regions(sv_regions, which_facets):
 # dont use this
 def select_centers(which_facets, center_points):
 
-    # which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=0.2, MAX_SIDES=MAX_SIDES)
+    # which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=SD_THRESHOLD, AREA_THRESHOLD=AREA_THRESHOLD, MAX_SIDES=MAX_SIDES)
 
     n = which_facets.shape[0]
     selected_center_points_list = []
@@ -573,7 +583,7 @@ def pick_subset_of_vectors(sv_regions, areas, corner_points, normals_at_corners)
 
     print('\n'*24 , '-----'*10)
     # sv_regions < -> few_regions
-    # which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=0.2, MAX_SIDES=MAX_SIDES)
+    # which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=SD_THRESHOLD, AREA_THRESHOLD=AREA_THRESHOLD, MAX_SIDES=MAX_SIDES)
 
     which_corners_in_few_faces = np.array([*sv_regions[0], *sv_regions[1]])
 
@@ -607,7 +617,8 @@ def aaaaa():
     print(corner_points.shape, normals_at_corners.shape)
 
 
-    which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=0.2*30, MAX_SIDES=14)
+    which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=SD_THRESHOLD, AREA_THRESHOLD=AREA_THRESHOLD, MAX_SIDES=14)
+
     #selected_regions = select_regions(sv_regions, areas, corner_points, MAX_SIDES=14)
     selected_regions =  select_regions(sv_regions, which_facets)
     selected_center_points = select_centers(which_facets, center_points)
@@ -641,6 +652,8 @@ def visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corn
 def array_minmax(x):
     mn = np.min(x)
     mx = np.max(x)
+    md = (mn + mx)/2.0
+    (mn,mx) = ((mn-md)*1.2+md, (mx-md)*1.2+md)
     return (mn, mx)
 
 def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, title):
@@ -665,6 +678,8 @@ def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, tit
     ax3d.set_ylabel('Y')
     ax3d.set_zlabel('Z')
     ax3d.set_title(title)
+
+    return ax3d
 
 def visualise_uv(u,v, u_few, v_few, texture, uv_rgba=None, title=None):
     # (u,v) visualisation on plane (pixels)
@@ -692,6 +707,8 @@ def visualise_uv(u,v, u_few, v_few, texture, uv_rgba=None, title=None):
 
 def sample_colors(uv, regions, texture):
     print('uv.shape', uv.shape)
+    if texture.shape[2] == 4:
+        texture = texture[:,:, 0:3]
     nan_rgb = np.zeros((3,)) + np.NaN
     EPS = 0.00000001
     (H,W) = texture.shape[0:2]
