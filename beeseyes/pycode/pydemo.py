@@ -761,6 +761,8 @@ def visualise_map_spherical_to_planar(center_points, uv_rgba=None, transform2pla
         horiz = np.concatenate(((c*0+ x0)[:,None], c[:,None]), axis=1)
         ax2d.plot(*transf2d(horiz),'--', linewidth=0.2, color='k')
 
+    ax2d.axhline(y=0, color='k')
+    ax2d.axvline(x=0, color='k')
     #ax2d.set_xlim(*array_minmax(points[0]))
     #ax2d.set_ylim(*array_minmax(points[1]))
     ax2d.set_xlim(-180, +180)
@@ -800,6 +802,17 @@ def sample_colors(uv, regions, texture):
                rgb = texture[py,px]
         regions_rgb[i] = rgb
     return regions_rgb, uvm_for_debug
+
+def histogram_of_sides(regions):
+   sides_l = []
+   for region in regions:
+      n = len(region)
+      sides_l.append(n)
+
+   plt.figure()
+   plt.title('Number of sides: Delanuey')
+   plt.hist(np.array(sides_l), bins=np.arange(2-1,11+1, 0.2))
+   plt.yscale('log')
 
 def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets):
     plane = Plane()
@@ -908,7 +921,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     visualise_map_spherical_to_planar(selected_center_points - 0, regions_rgba)
     ax2d.set_title('carto-')
 
-
+    histogram_of_sides(selected_regions)
 
     '''
     #O,D,(u,v) = raycastOmmatidium(eye_points, normals_xyz, beeHead.R, beeHead.pos, plane)
