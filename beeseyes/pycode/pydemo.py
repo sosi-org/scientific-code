@@ -30,7 +30,7 @@ SD_THRESHOLD=0.03 * 10000+1000
 BLUE_FLOWER = "../art/256px-Bachelor's_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpeg"
 
 #BLUE_FLOWER = '/Users/a9858770/Documents/xx/3bebe3b139b7e0e01573faabb4c92934.jpeg'
-BLUE_FLOWER = '/Users/a9858770/Documents/bee-walt-Spike_art.PNG.png'
+#BLUE_FLOWER = '/Users/a9858770/Documents/bee-walt-Spike_art.PNG.png'
 
 def eye_centers(n):
   nx = int(np.sqrt(n)+1) +2
