@@ -723,7 +723,7 @@ def transform_thetapi(xyz):
     [_, theta, phi] = asSpherical(xyz)
     # (phi,theta) = (theta,phi) # swap (theta, phi)
     thetaphi = np.concatenate(((theta)[:,None], phi[:,None]), axis=1)
-    return thetaphi, ('\\theta', '$\\phi$')
+    return thetaphi, (r'$\theta$', r'$\phi$')
 
 # visualise_uv_map
 
@@ -761,14 +761,26 @@ def visualise_map_spherical_to_planar(center_points, uv_rgba=None, transform2pla
         horiz = np.concatenate(((c*0+ x0)[:,None], c[:,None]), axis=1)
         ax2d.plot(*transf2d(horiz),'--', linewidth=0.2, color='k')
 
+    '''
     ax2d.axhline(y=0, color='k')
     ax2d.axvline(x=0, color='k')
+    '''
+
+    ax2d.spines['left'].set_position('zero')
+    #ax2d.spines['right'].set_color('none')
+    ax2d.yaxis.tick_left()
+    ax2d.spines['bottom'].set_position('zero')
+    #ax2d.spines['top'].set_color('none')
+    ax2d.xaxis.tick_bottom()
+
+    #ax2d.axis([0,6,0,6])
+
     #ax2d.set_xlim(*array_minmax(points[0]))
     #ax2d.set_ylim(*array_minmax(points[1]))
     ax2d.set_xlim(-180, +180)
     ax2d.set_ylim(-180, +180)
-    ax2d.set_xlabel(axeslabels[0])
-    ax2d.set_ylabel(axeslabels[1])
+    ax2d.set_xlabel(axeslabels[0], fontsize=15)
+    ax2d.set_ylabel(axeslabels[1], fontsize=15)
     return ax2d
 
 def sample_colors(uv, regions, texture):
