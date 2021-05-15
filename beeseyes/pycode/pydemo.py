@@ -705,6 +705,70 @@ def visualise_uv(u,v, u_few, v_few, texture, uv_rgba=None, title=None):
     # https://stackoverflow.com/questions/12444716/how-do-i-set-the-figure-title-and-axes-labels-font-size-in-matplotlib
     return ax
 
+def asSpherical(xyz):
+    #takes list xyz (single coord)
+    x       = xyz[:,0]
+    y       = xyz[:,1]
+    z       = xyz[:,2]
+    r       =  np.sqrt(x*x + y*y + z*z)
+    #theta   =  acos(z/r)*180/ pi #to degrees
+    #phi     =  atan2(y,x)*180/ pi
+    theta   =  np.arccos(z/r)  # radians
+    phi     =  np.arctan2(y,x)
+    print('theta' , theta.shape)
+    print('phi' ,phi.shape)
+    return [r, theta ,phi]
+
+def transform_thetapi(xyz):
+    [_, theta, phi] = asSpherical(xyz)
+    # (phi,theta) = (theta,phi) # swap (theta, phi)
+    thetaphi = np.concatenate(((theta)[:,None], phi[:,None]), axis=1)
+    return thetaphi, ('\\theta', '$\\phi$')
+
+# visualise_uv_map
+
+# I think: It is visualising on a (2d) sphere using polar coords
+def visualise_map_spherical_to_planar(center_points, uv_rgba=None, transform2planar=transform_thetapi):
+    #traansform_planar, map3to2
+    #traansform_planar = center_points
+    planar2d, axeslabels = transform2planar(center_points)
+    print('planar2d', planar2d)
+
+    fig = plt.figure()
+    ax2d = fig.add_axes([0,0,1,1])
+    def transf2d(p2d) -> tuple[float,float]:
+        return p2d[:,0] * 180/np.pi * np.cos(p2d[:,1]), p2d[:,1] * 180/np.pi
+
+    points = transf2d(planar2d)
+    ax2d.scatter(*points, facecolors=uv_rgba, marker='.')
+    #ax2d.scatter(*transf2d(planar2d), marker='.')
+
+    xr = [-np.pi, np.pi]
+    yr = [-np.pi, np.pi]
+    xa = np.arange(xr[0], xr[1], np.pi/5 - 0.0001)
+    ya = np.arange(xr[0], xr[1], np.pi/5 - 0.0001)
+
+    for i in range(len(ya)):
+        y0 = ya[i]
+        c = np.arange(xr[0], xr[1], 0.01)
+        horiz = np.concatenate((c[:,None], (c*0 + y0)[:,None]), axis=1)
+        ax2d.plot(*transf2d(horiz),'--', linewidth=0.2, color='k')
+        # grid_row =
+
+    for i in range(len(xa)):
+        x0 = xa[i]
+        c = np.arange(yr[0], yr[1], 0.01)
+        horiz = np.concatenate(((c*0+ x0)[:,None], c[:,None]), axis=1)
+        ax2d.plot(*transf2d(horiz),'--', linewidth=0.2, color='k')
+
+    #ax2d.set_xlim(*array_minmax(points[0]))
+    #ax2d.set_ylim(*array_minmax(points[1]))
+    ax2d.set_xlim(-180, +180)
+    ax2d.set_ylim(-180, +180)
+    ax2d.set_xlabel(axeslabels[0])
+    ax2d.set_ylabel(axeslabels[1])
+    return ax2d
+
 def sample_colors(uv, regions, texture):
     print('uv.shape', uv.shape)
     if texture.shape[2] == 4:
@@ -820,6 +884,31 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
 
     # visualise_3d_situation_eye(center_points, regions_rgba, beeHead, 'sferikal ')
+
+    ## corner_points linked to uv
+    #assert corner_points.shape[0] == uv.shape[0]
+    #visualise_uv_map(corner_points, regions_rgba)
+    # visualise_map_spherical_to_planar(corner_points, regions_rgba)
+
+    # center_points linked to regions_rgba
+    #assert corner_points.shape[0] == uv.shape[0]
+    #print('assert corner_points.shape[0] == regions_rgba.shape[0]', corner_points.shape, regions_rgba.shape)
+    #assert corner_points.shape[0] == regions_rgba.shape[0]
+    #visualise_map_spherical_to_planar(center_points, regions_rgba)
+    # No, we don't have the projection of the center points (in `uv` and  `regions_rgba`). They aare made from coorner points.
+    #
+
+    #print('corner_points.shape ?== regions_rgba.shape', corner_points.shape, regions_rgba.shape)
+    #assert corner_points.shape[0] == regions_rgba.shape[0]
+    #visualise_map_spherical_to_planar(corner_points, regions_rgba)
+
+    print('selected_center_points.shape ?== regions_rgba.shape', corner_points.shape, regions_rgba.shape)
+    assert selected_center_points.shape[0] == regions_rgba.shape[0]
+    ax2d = \
+    visualise_map_spherical_to_planar(selected_center_points - 0, regions_rgba)
+    ax2d.set_title('carto-')
+
+
 
     '''
     #O,D,(u,v) = raycastOmmatidium(eye_points, normals_xyz, beeHead.R, beeHead.pos, plane)
