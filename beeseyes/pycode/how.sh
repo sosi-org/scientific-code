@@ -8,6 +8,7 @@ pip install scipy
 pip install matplotlib
 pip install imageio
 
+pip install Shapely
 
 # level 2
 source ./p3/bin/activate

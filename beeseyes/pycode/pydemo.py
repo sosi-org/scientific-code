@@ -781,20 +781,39 @@ def visualise_map_spherical_to_planar(center_points, uv_rgba=None, transform2pla
     ax2d.set_ylim(-180, +180)
     ax2d.set_xlabel(axeslabels[0], fontsize=15)
     ax2d.set_ylabel(axeslabels[1], fontsize=15)
+    # ax2d.tight_layout() # Doesn't work
     return ax2d
 
+nan_rgb = np.zeros((3,)) + np.NaN
+
+def sample1(um,vm, texture, W_,H_,W,H):
+   if np.isnan(um) or np.isnan(vm):
+       rgb = nan_rgb
+   else:
+       # sample
+       py = math.floor(um * H_)
+       px = math.floor(vm * W_)
+       if px < 0 or py < 0 or px >= W or py >= H:
+           rgb = nan_rgb
+       else:
+          rgb = texture[py,px]
+   return rgb
+
+# slow
 def sample_colors(uv, regions, texture):
     print('uv.shape', uv.shape)
     if texture.shape[2] == 4:
         texture = texture[:,:, 0:3]
-    nan_rgb = np.zeros((3,)) + np.NaN
+
     EPS = 0.00000001
+    # (H,W) mmove to slow part.
     (H,W) = texture.shape[0:2]
     print('W,H', W,H)
     W_ = (W + 1 - EPS)
     H_ = (H + 1 - EPS)
     nf = len(regions)
     uvm_for_debug = np.zeros((nf,2),dtype=float)
+
     regions_rgb = np.zeros((nf,3),dtype=float)
     for i in range(nf):
         # temporary solution: sample at center only
@@ -802,17 +821,9 @@ def sample_colors(uv, regions, texture):
         um = np.mean(uv[regions[i], 0])
         vm = np.mean(uv[regions[i], 1])
         uvm_for_debug[i, :] = [um, vm]
-        if np.isnan(um) or np.isnan(vm):
-            rgb = nan_rgb
-        else:
-            # sample
-            py = math.floor(um * H_)
-            px = math.floor(vm * W_)
-            if px < 0 or py < 0 or px >= W or py >= H:
-                rgb = nan_rgb
-            else:
-               rgb = texture[py,px]
+        rgb = sample1(um,vm, texture, W_,H_,W,H)
         regions_rgb[i] = rgb
+
     return regions_rgb, uvm_for_debug
 
 def histogram_of_sides(regions):
