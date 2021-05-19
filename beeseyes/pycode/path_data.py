@@ -56,6 +56,13 @@ def load_trajectory_data(filename_xls):
     print('allv:', allv)
     print(allv)
     return allv
+    '''
+    bee_traj['RWSmoothed'] bounds:
+
+    (7.079130000000021, 573.19317)
+    (42.99566999999999, 371.98803)
+    (-21.25277299999999, 272.127343)
+    '''
 
 def load_trajectory_cached(filename):
     CACHE_FILE = './traj-cache'  # traj.cache.npz

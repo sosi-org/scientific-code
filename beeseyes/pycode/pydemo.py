@@ -891,6 +891,34 @@ def histogram_of_sides(regions):
    plt.hist(np.array(sides_l), bins=np.arange(2-1,11+1, 0.2))
    plt.yscale('log')
 
+'''histogram etc'''
+def trajectory_stats(bee_path):
+
+    print(array_minmax(bee_path[:,0]))
+    print(array_minmax(bee_path[:,1]))
+    print(array_minmax(bee_path[:,2]))
+
+    plt.figure()
+    ax2d = plt.figure().add_subplot(111)
+    plt.title('Bee locations')
+    for dim in [0,1,2]:
+       vals = bee_path[:, dim]
+       hist1, bin_edges = np.histogram(vals, bins=np.arange(-100, 600, 5.0))
+       ph, = ax2d.plot((bin_edges[:-1] + bin_edges[1:])/2.0, hist1)
+       ph.set_label(['x axis','y axis','z axis'][dim])
+    ax2d.legend()
+    plt.yscale('log')
+    ax2d.set_ylabel('Freq.')
+
+    #plt.show()
+
+    '''
+    (0.3539564999999989, 28.659658500000006)
+    (2.1497835, 18.5994015)
+    (-1.0626386500000002, 13.60636715)
+    '''
+    #exit()
+
 def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets):
 
 
@@ -898,11 +926,11 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
     print('bee_traj', bee_traj)
     frameTimes = bee_traj['fTime']
-    bee_path = bee_traj['RWSmoothed'] / 100.0 * 5.0
+    bee_path = bee_traj['RWSmoothed']
     bee_directions = bee_traj['direction']
 
     frame_index = 100
-    bee_head_pos = bee_path[frame_index][None,:]
+    bee_head_pos = bee_path[frame_index][None,:]  / 20.0
     bee_direction = bee_directions[frame_index]
     frame_time = frameTimes[frame_index]
 
@@ -939,11 +967,12 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     # 3D Visualisation of environment
     ax3d = \
     visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, center_points, normals_at_center_points, beeHead, planes)
-    ax3d.scatter3D(bee_path[:,0], bee_path[:,1], bee_path[:,2], '.') # , c=zdata, cmap='Greens')
+    ax3d.plot3D(bee_path[:,0], bee_path[:,1], bee_path[:,2], alpha=0.4, linewidth=0.3)
     ax3d.set_xlim(*array_minmax(bee_path[:,0]))
     ax3d.set_ylim(*array_minmax(bee_path[:,1]))
     ax3d.set_zlim(*array_minmax(bee_path[:,2]))
 
+    trajectory_stats(bee_path)
 
     O_few,D_few,(u_few,v_few) = raycastOmmatidium(
        ommatidia_few_corners, ommatidia_few_corners_normals,
