@@ -7,6 +7,8 @@ from scipy.spatial import Delaunay
 from scipy.spatial.transform import Rotation
 import math
 
+from path_data import load_path_data
+
 from bee_eye_data import ommatidia_polygons, ommatidia_polygons_fast_representation
 from bee_eye_data import ax3dCreate, visualise_all
 from bee_eye_data import make_midpoints, make_deviations, my_index
@@ -32,8 +34,11 @@ BLUE_FLOWER = "../art/256px-Bachelor's_button,_Basket_flower,_Boutonniere_flower
 #BLUE_FLOWER = '/Users/a9858770/Documents/xx/3bebe3b139b7e0e01573faabb4c92934.jpeg'
 #BLUE_FLOWER = '/Users/a9858770/Documents/bee-walt-Spike_art.PNG.png'
 
-EIGHT_PANEL = '/Users/a9858770/cs/scientific-code/beeseyes/Setup/IMG_2872.MOV.BkCorrectedPerspCroppedColourContrast.png'
-PINK_WALLPAPER = '/Users/a9858770/cs/scientific-code/beeseyes/Setup/pinkRandomDots.png'
+CURRENT_PATH = '/Users/a9858770/cs/scientific-code/beeseyes'
+EIGHT_PANEL = CURRENT_PATH + '/Setup/IMG_2872.MOV.BkCorrectedPerspCroppedColourContrast.png'
+PINK_WALLPAPER = CURRENT_PATH + '/Setup/pinkRandomDots.png'
+POSITIONS_XLS = CURRENT_PATH + '/Setup/beepath.xlsx'
+
 
 def eye_centers(n):
   nx = int(np.sqrt(n)+1) +2
@@ -70,7 +75,7 @@ def find_neighbors(pindex, triang):
     return list(set(neighbors))
 
 '''
-  ret[vert_index] = array of len 6 of vert_index.
+  res[vert_index] = array of len 6 of vert_index.
   Padded with NO_VERT=-1
 
   Not very fast
@@ -874,6 +879,8 @@ def histogram_of_sides(regions):
    plt.yscale('log')
 
 def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets):
+
+    xx = load_path_data(POSITIONS_XLS)
 
     # 2D Visualisation of (u,v) on textures
     texture1, physical_size1, dpi1 = load_image_withsize(EIGHT_PANEL, sample_px=200, sample_cm=10.0)
