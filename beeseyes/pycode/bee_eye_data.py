@@ -419,13 +419,13 @@ def polygon_points(sphereIntersect, normals):
 
    #ax3d = ax3dCreate()
    #print('111')
-   ##visualise_all(ax3d, sv.vertices, normals)
+   ##visualise_quiver(ax3d, sv.vertices, normals)
    #print('2222')
-   ##visualise_all(ax3d, sphereIntersect, normals_at_corners)
+   ##visualise_quiver(ax3d, sphereIntersect, normals_at_corners)
 
-   #visualise_all(ax3d, sv.vertices, normals_at_corners, 'r')  # corners
+   #visualise_quiver(ax3d, sv.vertices, normals_at_corners, 'r')  # corners
    #print('2222')
-   #visualise_all(ax3d, sphereIntersect, normals, 'b') # centers
+   #visualise_quiver(ax3d, sphereIntersect, normals, 'b') # centers
    #plt.show()
 
    areas = sv.calculate_areas()
@@ -508,16 +508,16 @@ def ax3dCreate(SZ=28.8):
    ax3d.set_zlabel('z')
    return ax3d
 
-def visualise_all(ax3d, X, N, color='b'):
+def visualise_quiver(ax3d, X, N, color='b'):
 
-   print('X.shape', X.shape)
-   print('N.shape', N.shape)
+   assert X.shape == N.shape
+   assert X.shape[0] == N.shape[0]
+
    qv = ax3d.quiver( \
      X[:,0], X[:,1], X[:,2], \
      N[:,0],N[:,1],N[:,2], \
      pivot='tail', length=0.1/10, normalize=True, color=color
     )
-   #plt.show()
 
 '''
 calculting norms at corners of hexagonals by interpolation (normals_at_corners)

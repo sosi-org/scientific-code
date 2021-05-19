@@ -10,7 +10,7 @@ import math
 from path_data import load_trajectory_cached
 
 from bee_eye_data import ommatidia_polygons, ommatidia_polygons_fast_representation
-from bee_eye_data import ax3dCreate, visualise_all
+from bee_eye_data import ax3dCreate, visualise_quiver
 from bee_eye_data import make_midpoints, make_deviations, my_index
 
 HEX6 = 6
@@ -689,19 +689,17 @@ def visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corn
 
     ax3d = ax3dCreate()
     # rename `corner_points` to `*corners`
-    visualise_all(ax3d, rot(corner_points) + p0, rot(normals_at_corners), 'r')  # corners
-    visualise_all(ax3d, rot(center_points) + p0, rot(normals_at_center_points), 'b') # centers
+    visualise_quiver(ax3d, rot(corner_points) + p0, rot(normals_at_corners), 'r')  # corners
+    visualise_quiver(ax3d, rot(center_points) + p0, rot(normals_at_center_points), 'b') # centers
 
     general_direction = np.mean(center_points, 0)[None,:]
-    visualise_all(ax3d, rot(general_direction) + p0, rot(general_direction), color='k') # centers
+    visualise_quiver(ax3d, rot(general_direction) + p0, rot(general_direction), color='k') # centers
     for i in range(len(planes)):
         visualise_plane(ax3d, planes[i], color='tab:pink')
-    print((normals_at_center_points*0).shape, '<<<<<<<=====')
 
     # adding Visualisation of few points in 3D
-    print('====', ommatidia_few_corners_normals.shape, ommatidia_few_corners.shape)
     assert ommatidia_few_corners_normals.shape == ommatidia_few_corners.shape
-    visualise_all(ax3d, rot(ommatidia_few_corners) + p0, ommatidia_few_corners_normals * 0.01, 'm')
+    visualise_quiver(ax3d, rot(ommatidia_few_corners) + p0, ommatidia_few_corners_normals * 0.01, 'm')
     return ax3d
 
 
@@ -900,7 +898,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
     print('bee_traj', bee_traj)
     frameTimes = bee_traj['fTime']
-    bee_path = bee_traj['RWSmoothed'] / 100.0
+    bee_path = bee_traj['RWSmoothed'] / 100.0 * 5.0
     bee_directions = bee_traj['direction']
 
     frame_index = 100
@@ -932,15 +930,19 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     print('corners, normals_at_corners', corner_points.shape, normals_at_corners.shape)
     #for i in range(len(planes)):
     O,D,(u,v) = raycastOmmatidium(corner_points, normals_at_corners, beeHead.R, beeHead.pos, planes[0] )
-    print('>>>u,v', u.shape)
+    assert u.shape ==(corner_points.shape[0],)
 
 
+    print('bee_path>>', bee_path)
     # Visualisations
 
     # 3D Visualisation of environment
     ax3d = \
     visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, center_points, normals_at_center_points, beeHead, planes)
-    ax3d.scatter3D(bee_path[:,0]*100, bee_path[:,1]*100, bee_path[:,2]*100) # , c=zdata, cmap='Greens')
+    ax3d.scatter3D(bee_path[:,0], bee_path[:,1], bee_path[:,2], '.') # , c=zdata, cmap='Greens')
+    ax3d.set_xlim(*array_minmax(bee_path[:,0]))
+    ax3d.set_ylim(*array_minmax(bee_path[:,1]))
+    ax3d.set_zlim(*array_minmax(bee_path[:,2]))
 
 
     O_few,D_few,(u_few,v_few) = raycastOmmatidium(
