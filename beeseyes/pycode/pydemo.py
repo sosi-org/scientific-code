@@ -955,7 +955,8 @@ def anim_frame(
       corner_points, normals_at_corners,
       ommatidia_few_corners, ommatidia_few_corners_normals,
       selected_regions, which_facets,
-      selected_center_points
+      selected_center_points,
+      whether_visualise_eye_3d, whether_visualise_uv_samples, whether_visualise_uv_scatter
 ):
 
     head_transformation = -M*10 # -M*10 is adhoc
@@ -980,8 +981,8 @@ def anim_frame(
        clip=False)
 
 
-
-    visualise_uv(u,v, u_few, v_few, textures[0])
+    if whether_visualise_uv_scatter:
+        visualise_uv(u,v, u_few, v_few, textures[0])
 
 
     # selected_center_points = select_centers(which_facets, center_points)
@@ -989,9 +990,6 @@ def anim_frame(
     uv = np.concatenate((u[:,None], v[:,None]), axis=1)
     #selected_uv = select_centers(which_facets, uv)
 
-    print('u,v', u.shape)
-    print('uv', uv.shape)
-    print('selected_regions', len(selected_regions))
     nfs = np.sum(which_facets)
     #assert selected_uv.shape[0] == nfs
     assert len(selected_regions) == nfs
@@ -1006,38 +1004,29 @@ def anim_frame(
     assert selected_center_points.shape[0] == nf
     assert regions_rgb.shape[0] == nf
 
-    print(regions_rgb)
     print('non-nan', np.sum(np.logical_not(np.isnan(regions_rgb)), axis=0)) # [14,14,14]
-    #print('non-nan', np.sum(np.logical_not(np.isnan(regions_rgb)), axis=1))
 
     nans = np.isnan(regions_rgb[:,0])
     one = np.ones((regions_rgb.shape[0],1), dtype=np.float)
-    #print('max', np.nanmax(regions_rgb))
     regions_rgba = np.concatenate( (regions_rgb / 255.0, one), axis=1)
     _ALPHA = 3
     regions_rgba[nans, 0:2] = 0.0
     regions_rgba[:, _ALPHA] = 1.0
     regions_rgba[nans, _ALPHA] = 0.0
-    #regions_rgba[:, :] = 0.0
-    #regions_rgba[nans, _ALPHA] = 1.0
+
+    if whether_visualise_eye_3d:
+        # one center_point for each region. todo: re-index center_point-s based on selected regions
+        visualise_3d_situation_eye(selected_center_points, regions_rgba, beeHead, 'good ones')
 
 
-    # one center_point for each region. todo: re-index center_point-s based on selected regions
-    visualise_3d_situation_eye(selected_center_points, regions_rgba, beeHead, 'good ones')
+    if whether_visualise_uv_samples:
+        ax2 = \
+          visualise_uv(uvm_debug[:,0], uvm_debug[:,1], None, None, textures[0], uv_rgba=regions_rgba)
 
-    #uv2 = uv.copy()
-    #n1 = np.logical_not(nans[:])
-    #print('n1.shape', n1.shape)
-    #print('uv2.shape', uv2.shape)
-    #uv2 = uv2[n1,:]
-    #visualise_uv(uv2[:,0], uv2[:,1], uv2[0:0,0], uv2[0:0,1], textures[0])
-    ax2 = \
-      visualise_uv(uvm_debug[:,0], uvm_debug[:,1], None, None, textures[0], uv_rgba=regions_rgba)
-
-    ax2.set_xlim(0,1.0)
-    ax2.set_ylim(0,1.0)
-    ax2.set_aspect('auto')
-    ax2.set_title('sampled pixels')
+        ax2.set_xlim(0,1.0)
+        ax2.set_ylim(0,1.0)
+        ax2.set_aspect('auto')
+        ax2.set_title('sampled pixels')
 
     return (beeHead, regions_rgba)
 
@@ -1084,7 +1073,9 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
         corner_points, normals_at_corners,
         ommatidia_few_corners, ommatidia_few_corners_normals,
         selected_regions, which_facets,
-        selected_center_points
+        selected_center_points,
+        whether_visualise_eye_3d=True, whether_visualise_uv_samples=True,
+        whether_visualise_uv_scatter=True
     )
 
     print('bee_path>>', bee_path)
