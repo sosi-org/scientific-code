@@ -903,19 +903,19 @@ def trajectory_stats(bee_path):
     plt.title('Bee locations')
     for dim in [0,1,2]:
        vals = bee_path[:, dim]
-       hist1, bin_edges = np.histogram(vals, bins=np.arange(-100, 600, 5.0))
+       hist1, bin_edges = np.histogram(vals, bins=np.arange(-500, 1500, 5.0))
        ph, = ax2d.plot((bin_edges[:-1] + bin_edges[1:])/2.0, hist1)
-       ph.set_label(['x axis','y axis','z axis'][dim])
+       ph.set_label(['X (RWxSmoothed)','Y (RWySmoothed)','Z (RWzSmoothed)'][dim])
     ax2d.legend()
     plt.yscale('log')
     ax2d.set_ylabel('Freq.')
 
-    #plt.show()
+    # plt.show()
 
     '''
-    (0.3539564999999989, 28.659658500000006)
-    (2.1497835, 18.5994015)
-    (-1.0626386500000002, 13.60636715)
+    (7.079130000000021, 573.19317)
+    (42.99566999999999, 371.98803)
+    (-21.25277299999999, 272.127343)
     '''
     #exit()
 
@@ -930,7 +930,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     bee_directions = bee_traj['direction']
 
     frame_index = 100
-    bee_head_pos = bee_path[frame_index][None,:]  / 20.0
+    bee_head_pos = bee_path[frame_index][None,:]  / 10.0
     bee_direction = bee_directions[frame_index]
     frame_time = frameTimes[frame_index]
 
@@ -943,11 +943,14 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     texture2, physical_size2, dpi2 = load_image_withsize(PINK_WALLPAPER, dpi=dpi1)
     assert dpi1 == dpi2
 
+    print('physical_size1', physical_size1) # (35.050000000000004, 58.1)
+
     textures = [texture1, texture2]
 
     plane1 = Plane(*physical_size1)
-    plane2 = Plane(*physical_size2)
-    planes = [plane1, plane2]
+    #plane2 = Plane(*physical_size2)
+    #planes = [plane1, plane2]
+    planes = [plane1,]
 
     beeHead = BeeHead()
     beeHead.set_eye_position(bee_head_pos)
@@ -967,7 +970,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     # 3D Visualisation of environment
     ax3d = \
     visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, center_points, normals_at_center_points, beeHead, planes)
-    ax3d.plot3D(bee_path[:,0], bee_path[:,1], bee_path[:,2], alpha=0.4, linewidth=0.3)
+    ax3d.plot3D(bee_path[:,0], bee_path[:,1], bee_path[:,2], alpha=0.1, linewidth=0.3, marker='.')
     ax3d.set_xlim(*array_minmax(bee_path[:,0]))
     ax3d.set_ylim(*array_minmax(bee_path[:,1]))
     ax3d.set_zlim(*array_minmax(bee_path[:,2]))
