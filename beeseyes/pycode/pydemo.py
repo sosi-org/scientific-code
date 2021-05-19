@@ -428,7 +428,7 @@ class Plane:
 in fact, Bee Eye
 '''
 class BeeHead:
-    def __init__(self):
+    def __init__(self, matrix1=None):
         bee = {
           'pos': (15.0, 15.0, -10.0/3),
           #'u': (15.0, 15.0, -10.0),
@@ -440,6 +440,8 @@ class BeeHead:
 
         bee_R = Rotation.from_euler('x', 180, degrees=True).as_matrix()
         print('bee_R.shape', bee_R.shape)
+        if matrix1 is not None:
+            bee_R = np.dot( bee_R, matrix1.T)
 
         bee_pos = tuple3_to_np(bee['pos'])
         # self.np = {}
@@ -919,18 +921,48 @@ def trajectory_stats(bee_path):
     '''
     #exit()
 
+'''
+Affine transormation for correcting the mismtch between the units in Excel file and assumed orientation of the plane.
+Do do, apply the reverse of this to the plane only.
+The plane's dimentions are correct. But its orientation.
+Todo:
+   Just rescale (nd not rotate) the trajectory data.
+   But apply the reverse of this transform to the plane.
+'''
+def trajectory_transformation():
+    maxy = np.array([7,+372,272])[None,:]
+    M = np.eye(3)
+    # '''
+    M = M * 0
+    # M[to,from]
+    _X = 0
+    _Y = 1
+    _Z = 2
+    M[_X ,_X] = 1.0
+    M[_Y ,_Z] = -1.0
+    M[_Z ,_Y] = -1.0 # should be negative
+
+    # z,x -> (y,x)
+    # z,x,y -> (y,x,z)
+    # x,y,z -> (x,z,y)
+    M = M / 10.0
+
+    return M, maxy
+
 def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets):
 
 
     bee_traj = load_trajectory_cached(POSITIONS_XLS)
 
+    M, maxy = trajectory_transformation()
+
     print('bee_traj', bee_traj)
     frameTimes = bee_traj['fTime']
-    bee_path = bee_traj['RWSmoothed']
+    bee_path = np.dot( bee_traj['RWSmoothed'] - maxy, M.T) + np.array([0,0,0])[None,:]
     bee_directions = bee_traj['direction']
 
     frame_index = 100
-    bee_head_pos = bee_path[frame_index][None,:]  / 10.0
+    bee_head_pos = bee_path[frame_index][None,:]
     bee_direction = bee_directions[frame_index]
     frame_time = frameTimes[frame_index]
 
@@ -952,7 +984,9 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     #planes = [plane1, plane2]
     planes = [plane1,]
 
-    beeHead = BeeHead()
+    head_transformation = -M*10 # -M*10 is adhoc
+
+    beeHead = BeeHead(head_transformation)
     beeHead.set_eye_position(bee_head_pos)
     # todo: set_direction() not implemented
     beeHead.set_direction(bee_direction)
