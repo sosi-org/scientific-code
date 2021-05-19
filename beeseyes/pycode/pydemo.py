@@ -7,7 +7,7 @@ from scipy.spatial import Delaunay
 from scipy.spatial.transform import Rotation
 import math
 
-from path_data import load_trajectory_data
+from path_data import load_trajectory_cached
 
 from bee_eye_data import ommatidia_polygons, ommatidia_polygons_fast_representation
 from bee_eye_data import ax3dCreate, visualise_all
@@ -424,6 +424,9 @@ class Plane:
 
 
 
+'''
+in fact, Bee Eye
+'''
 class BeeHead:
     def __init__(self):
         bee = {
@@ -443,6 +446,17 @@ class BeeHead:
 
         self.R = bee_R
         self.pos = bee_pos
+
+    def set_eye_position(self, eye_pos):
+        self.pos = eye_pos
+        assert self.pos.dtype == np.dtype(float)
+        assert self.pos.shape == (1,3)
+
+    def set_direction(self, dirc):
+        #bee_R = Rotation.from_rotvec(dirc, 180, degrees=True).as_matrix()
+        #self.R = bee_R
+        assert self.R.dtype == np.dtype(float)
+        assert self.R.shape == (3,3)
 
 
 def main():
@@ -688,6 +702,7 @@ def visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corn
     print('====', ommatidia_few_corners_normals.shape, ommatidia_few_corners.shape)
     assert ommatidia_few_corners_normals.shape == ommatidia_few_corners.shape
     visualise_all(ax3d, rot(ommatidia_few_corners) + p0, ommatidia_few_corners_normals * 0.01, 'm')
+    return ax3d
 
 
 def array_minmax(x):
@@ -880,15 +895,16 @@ def histogram_of_sides(regions):
 
 def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets):
 
-    bee_traj = load_trajectory_data(POSITIONS_XLS)
+
+    bee_traj = load_trajectory_cached(POSITIONS_XLS)
 
     print('bee_traj', bee_traj)
     frameTimes = bee_traj['fTime']
-    bee_path = bee_traj['RWSmoothed']
+    bee_path = bee_traj['RWSmoothed'] / 100.0
     bee_directions = bee_traj['direction']
 
     frame_index = 100
-    bee_head_pos = bee_path[frame_index]
+    bee_head_pos = bee_path[frame_index][None,:]
     bee_direction = bee_directions[frame_index]
     frame_time = frameTimes[frame_index]
 
@@ -905,9 +921,12 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
     plane1 = Plane(*physical_size1)
     plane2 = Plane(*physical_size2)
-
     planes = [plane1, plane2]
+
     beeHead = BeeHead()
+    beeHead.set_eye_position(bee_head_pos)
+    # todo: set_direction() not implemented
+    beeHead.set_direction(bee_direction)
 
     # corners, normals_at_corners (6496, 3) (6496, 3)
     print('corners, normals_at_corners', corner_points.shape, normals_at_corners.shape)
@@ -919,7 +938,10 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     # Visualisations
 
     # 3D Visualisation of environment
+    ax3d = \
     visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, center_points, normals_at_center_points, beeHead, planes)
+    ax3d.scatter3D(bee_path[:,0]*100, bee_path[:,1]*100, bee_path[:,2]*100) # , c=zdata, cmap='Greens')
+
 
     O_few,D_few,(u_few,v_few) = raycastOmmatidium(
        ommatidia_few_corners, ommatidia_few_corners_normals,

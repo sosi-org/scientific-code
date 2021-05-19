@@ -1,5 +1,5 @@
 import numpy as np
-
+import os
 from openpyxl import load_workbook
 
 def load_xls(filename_xls, columnset):
@@ -56,6 +56,31 @@ def load_trajectory_data(filename_xls):
     print('allv:', allv)
     print(allv)
     return allv
+
+def load_trajectory_cached(filename):
+    CACHE_FILE = './traj-cache'  # traj.cache.npz
+    if (os.path.exists(CACHE_FILE + '.npz')):
+       print('Cache file found. Ignoring the .xslx file')
+       bee_traj = np.load(CACHE_FILE + '.npz')
+       print('>>bee_traj')
+       print(bee_traj)
+       #print('2',sorted(bee_traj.files))
+       #print('3',bee_traj.files)
+       print("bee_traj['RWSmoothed']")
+       print(bee_traj['RWSmoothed'])
+       print('---')
+       return bee_traj
+
+    else:
+       print('Cache file not found. Creating it.')
+       bee_traj = load_trajectory_data(filename)
+       np.savez(CACHE_FILE, **bee_traj)
+       # savez_compressed versus savez
+       # 275 KB  275540 19 May 16:42 cache-traj.npz
+       # 157 KB   157831 19 May 16:43 cache-traj.npz
+       print('saved trajectpories in a cache file. Not that it is raedy, run again to load the trajectory cache file')
+       exit()
+
 
 if __name__ == "__main__":
     CURRENT_PATH = '/Users/a9858770/cs/scientific-code/beeseyes'
