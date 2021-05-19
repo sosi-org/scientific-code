@@ -32,6 +32,8 @@ BLUE_FLOWER = "../art/256px-Bachelor's_button,_Basket_flower,_Boutonniere_flower
 #BLUE_FLOWER = '/Users/a9858770/Documents/xx/3bebe3b139b7e0e01573faabb4c92934.jpeg'
 #BLUE_FLOWER = '/Users/a9858770/Documents/bee-walt-Spike_art.PNG.png'
 
+EIGHT_PANEL = '/Users/a9858770/cs/scientific-code/beeseyes/Setup/IMG_2872.MOV.BkCorrectedPerspCropped.png'
+
 def eye_centers(n):
   nx = int(np.sqrt(n)+1) +2
   ny = int(np.sqrt(n)) + 2
@@ -298,7 +300,34 @@ def load_image(image_path):
    pict_array2d = np.asarray(img)
    #pict_array2d = numpy.array(Image.fromarray(pict_array2d).resize())
    #pict_array2d = scipy.misc.imresize(pict_array2d, FIXED_SIZE[0:2])
+
    return pict_array2d
+
+'''
+    Loads texture with physical size in cm
+'''
+def load_image_withsize(image_path, sample_px=200, sample_cm=10.0):
+
+   texture = load_image(image_path)
+
+   #  (192, 256, 3)
+   # Ignore image alpha
+   if (texture.shape[2] == 4):
+       texture = texture[:,:,:3]
+   # (701, 1162, 3)
+
+   # dpi:  in fact, "dots per centimeters", D.P.C.
+   # Each circle is 200x200 px^2, 6.0 cm <---> 200 px
+   # sample_cm = 6.0
+   #sample_cm = 10.0
+   #sample_px = 200
+
+   #dpi = texture.shape * sample_cm / sample_px
+   dpi = 1.0 * sample_cm / float(sample_px)
+   print('dpi', dpi, '(dots per cm)')
+   physical_size = (texture.shape[0]* dpi, texture.shape[1]* dpi)
+   print(physical_size, '(cm x cm)')
+   return texture, physical_size
 
 '''
 Samples the area in the image (pixels)
@@ -415,6 +444,7 @@ def main():
 
     texture = load_image(BLUE_FLOWER)
     #  (192, 256, 3)
+
 
     plane = Plane()
 
@@ -858,8 +888,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
 
     # 2D Visualisation of (u,v) on textures
-    texture = load_image(BLUE_FLOWER)
-    #  (192, 256, 3)
+    texture, physical_size = load_image_withsize(EIGHT_PANEL, sample_px=200, sample_cm=10.0)
 
     visualise_uv(u,v, u_few, v_few, texture)
 
@@ -915,6 +944,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
     ax2.set_xlim(0,1.0)
     ax2.set_ylim(0,1.0)
+    ax2.set_aspect('auto')
     ax2.set_title('sampled pixels')
 
 
