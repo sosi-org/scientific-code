@@ -958,7 +958,8 @@ def anim_frame(
       selected_regions, which_facets,
       selected_center_points,
       whether_visualise_eye_3d, whether_visualise_uv_samples, whether_visualise_uv_scatter,
-      animation_fig=None
+      animation_fig=None,
+      text_description=''
 ):
 
     head_transformation = -M*10 # -M*10 is adhoc
@@ -1030,6 +1031,8 @@ def anim_frame(
         ax2.set_aspect('auto')
         ax2.set_title('sampled pixels')
 
+        ax2.text(-0.1, 1.1, text_description, size=10, color='k', backgroundcolor='w')
+
         anim_frame_artist = ax2
 
     return (beeHead, regions_rgba, anim_frame_artist)
@@ -1079,7 +1082,8 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
         selected_regions, which_facets,
         selected_center_points,
         whether_visualise_eye_3d=True, whether_visualise_uv_samples=True,
-        whether_visualise_uv_scatter=True
+        whether_visualise_uv_scatter=True,
+        text_description='text'
     )
 
     print('bee_path>>', bee_path)
@@ -1123,8 +1127,9 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
     histogram_of_sides(selected_regions)
 
-    # return # skip animation creation
+    #return # skip animation creation
     NUM_FRAMES = 20*3
+    # NUM_FRAMES = 5
 
     # Animation
     from matplotlib.animation import FuncAnimation
@@ -1133,12 +1138,14 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     #    pass
     def animate_frame(animation_frame_index):
         #for frame_index in range(2): # range(len(bee_path)):
-        frame_index = animation_frame_index + 100
+        frame_index = animation_frame_index + 100+60
 
         bee_head_pos = bee_path[frame_index][None,:]
         bee_direction = bee_directions[frame_index]
-        frame_time = frameTimes[frame_index]
+        frame_time = frameTimes[frame_index, 0]
 
+        text_description = 'time: '+str(frame_time)+' (s)   frame:'+str(animation_frame_index)
+        anim_fig.clear() # Much faster
         (beeHead, regions_rgba, anim_frame_artist) = \
         anim_frame(
             textures, planes,
@@ -1149,7 +1156,8 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
             selected_center_points,
             whether_visualise_eye_3d=False, whether_visualise_uv_samples=True,
             whether_visualise_uv_scatter=False,
-            animation_fig=anim_fig
+            animation_fig=anim_fig,
+            text_description=text_description
         )
         print('frame done:', animation_frame_index, 'traj frame:', frame_index)
         import gc
