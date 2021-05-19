@@ -32,7 +32,8 @@ BLUE_FLOWER = "../art/256px-Bachelor's_button,_Basket_flower,_Boutonniere_flower
 #BLUE_FLOWER = '/Users/a9858770/Documents/xx/3bebe3b139b7e0e01573faabb4c92934.jpeg'
 #BLUE_FLOWER = '/Users/a9858770/Documents/bee-walt-Spike_art.PNG.png'
 
-EIGHT_PANEL = '/Users/a9858770/cs/scientific-code/beeseyes/Setup/IMG_2872.MOV.BkCorrectedPerspCropped.png'
+EIGHT_PANEL = '/Users/a9858770/cs/scientific-code/beeseyes/Setup/IMG_2872.MOV.BkCorrectedPerspCroppedColourContrast.png'
+PINK_WALLPAPER = '/Users/a9858770/cs/scientific-code/beeseyes/Setup/pinkRandomDots.png'
 
 def eye_centers(n):
   nx = int(np.sqrt(n)+1) +2
@@ -251,7 +252,7 @@ def rotation_matrix(bee):
    # [U,V,W] concat as rows
    return np.concatenate((U,V,W), axis=0)
 
-def visualise_plane(ax3d, plane):
+def visualise_plane(ax3d, plane, color):
     # visulaise the plane in 3d
     NU = 10
     NV = 10
@@ -265,7 +266,7 @@ def visualise_plane(ax3d, plane):
      pu*U[:,0]+pv*V[:,0] + C0[:,0],
      pu*U[:,1]+pv*V[:,1] + C0[:,1],
      pu*U[:,2]+pv*V[:,2] + C0[:,2],
-     marker='.', color='g')
+     marker='.', color=color)
 
 def visuaise_3d(rays_origins, rays_dirs, points_xyz, plane):
     SZ=8.0*1.2 * 3
@@ -290,7 +291,7 @@ def visuaise_3d(rays_origins, rays_dirs, points_xyz, plane):
     # All ommatidia
     ax3d.scatter(points_xyz[:,0],points_xyz[:,1],points_xyz[:,2], marker='.')
 
-    visualise_plane(ax3d, plane)
+    visualise_plane(ax3d, plane, color='g')
 
 
 import scipy.misc
@@ -306,7 +307,7 @@ def load_image(image_path):
 '''
     Loads texture with physical size in cm
 '''
-def load_image_withsize(image_path, sample_px=200, sample_cm=10.0):
+def load_image_withsize(image_path, sample_px=200, sample_cm=10.0, dpi=None):
 
    texture = load_image(image_path)
 
@@ -322,12 +323,16 @@ def load_image_withsize(image_path, sample_px=200, sample_cm=10.0):
    #sample_cm = 10.0
    #sample_px = 200
 
-   #dpi = texture.shape * sample_cm / sample_px
-   dpi = 1.0 * sample_cm / float(sample_px)
+   if dpi is None:
+       #dpi = texture.shape * sample_cm / sample_px
+       dpi = 1.0 * sample_cm / float(sample_px)
+   else:
+       pass
+
    print('dpi', dpi, '(dots per cm)')
    physical_size = (texture.shape[0]* dpi, texture.shape[1]* dpi)
    print(physical_size, '(cm x cm)')
-   return texture, physical_size
+   return texture, physical_size, dpi
 
 '''
 Samples the area in the image (pixels)
@@ -385,13 +390,13 @@ def raycastOmmatidium(eye_points, rays_dirs, bee_R, bee_pos, plane, clip:bool=Tr
    return O, D, (u,v)
 
 class Plane:
-    def __init__(self, physical_size_u=30, physical_size_h=30):
+    def __init__(self, physical_size_u=30, physical_size_h=30, C0_pos=(0,0,0)):
        # centimeters
        # todo: rename U -> A, a->uz
        plane = {
           'U': (float(physical_size_u),0,0),
           'V': (0,float(physical_size_h),0),
-          'C0': (0,0,0),
+          'C0': C0_pos,
        }
        '''
            x = u * U + v * V + C0
@@ -656,7 +661,7 @@ def aaaaa():
 
     return (corner_points, normals_at_corners), (center_points, normals_at_center_points), (ommatidia_few_corners_normals, ommatidia_few_corners), selected_regions, selected_center_points, which_facets
 
-def visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, center_points, normals_at_center_points, beeHead, plane):
+def visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, center_points, normals_at_center_points, beeHead, planes):
     p0 = beeHead.pos
     print('p0.shape',p0.shape)
 
@@ -670,7 +675,8 @@ def visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corn
 
     general_direction = np.mean(center_points, 0)[None,:]
     visualise_all(ax3d, rot(general_direction) + p0, rot(general_direction), color='k') # centers
-    visualise_plane(ax3d, plane)
+    for i in range(len(planes)):
+        visualise_plane(ax3d, planes[i], color='tab:pink')
     print((normals_at_center_points*0).shape, '<<<<<<<=====')
 
     # adding Visualisation of few points in 3D
@@ -870,30 +876,39 @@ def histogram_of_sides(regions):
 def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets):
 
     # 2D Visualisation of (u,v) on textures
-    texture, physical_size = load_image_withsize(EIGHT_PANEL, sample_px=200, sample_cm=10.0)
+    texture1, physical_size1, dpi1 = load_image_withsize(EIGHT_PANEL, sample_px=200, sample_cm=10.0)
+    texture2, physical_size2, dpi2 = load_image_withsize(PINK_WALLPAPER, dpi=dpi1)
+    assert dpi1 == dpi2
 
-    plane = Plane(*physical_size)
+    textures = [texture1, texture2]
+
+    plane1 = Plane(*physical_size1)
+    plane2 = Plane(*physical_size2)
+
+    planes = [plane1, plane2]
     beeHead = BeeHead()
 
     # corners, normals_at_corners (6496, 3) (6496, 3)
     print('corners, normals_at_corners', corner_points.shape, normals_at_corners.shape)
-    O,D,(u,v) = raycastOmmatidium(corner_points, normals_at_corners, beeHead.R, beeHead.pos, plane )
+    #for i in range(len(planes)):
+    O,D,(u,v) = raycastOmmatidium(corner_points, normals_at_corners, beeHead.R, beeHead.pos, planes[0] )
     print('>>>u,v', u.shape)
 
 
     # Visualisations
 
     # 3D Visualisation of environment
-    visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, center_points, normals_at_center_points, beeHead, plane)
+    visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, center_points, normals_at_center_points, beeHead, planes)
 
     O_few,D_few,(u_few,v_few) = raycastOmmatidium(
        ommatidia_few_corners, ommatidia_few_corners_normals,
-       beeHead.R, beeHead.pos, plane,
+       beeHead.R, beeHead.pos, planes[0],
        clip=False)
 
 
 
-    visualise_uv(u,v, u_few, v_few, texture)
+    visualise_uv(u,v, u_few, v_few, textures[0])
+
 
     # selected_center_points = select_centers(which_facets, center_points)
 
@@ -906,8 +921,8 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     nfs = np.sum(which_facets)
     #assert selected_uv.shape[0] == nfs
     assert len(selected_regions) == nfs
-    #regions_rgb = sample_colors(selected_uv, selected_regions, texture)
-    regions_rgb, uvm_debug = sample_colors(uv, selected_regions, texture)
+    #regions_rgb = sample_colors(selected_uv, selected_regions, textures[0])
+    regions_rgb, uvm_debug = sample_colors(uv, selected_regions, textures[0])
 
     nf =len(selected_regions)
     #assert u.shape[0] == nf
@@ -941,9 +956,9 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     #print('n1.shape', n1.shape)
     #print('uv2.shape', uv2.shape)
     #uv2 = uv2[n1,:]
-    #visualise_uv(uv2[:,0], uv2[:,1], uv2[0:0,0], uv2[0:0,1], texture)
+    #visualise_uv(uv2[:,0], uv2[:,1], uv2[0:0,0], uv2[0:0,1], textures[0])
     ax2 = \
-      visualise_uv(uvm_debug[:,0], uvm_debug[:,1], None, None, texture, uv_rgba=regions_rgba)
+      visualise_uv(uvm_debug[:,0], uvm_debug[:,1], None, None, textures[0], uv_rgba=regions_rgba)
 
     ax2.set_xlim(0,1.0)
     ax2.set_ylim(0,1.0)
