@@ -36,14 +36,15 @@ def load_xls(filename_xls, columnset):
             print('header',header,'for column', use_col);
             res.append(x2)
             print('', flush=True)
-        res2d = np.array(res)
+        res2d = np.array(res).T
         assert len(res2d.shape) == 2
-        assert res2d.shape[0] == len(columns)
+        assert res2d.shape[1] == len(columns)
+        print('res2d.shape', res2d.shape)
         ret[key] = res2d
 
     return ret
 
-def load_path_data(filename_xls):
+def load_trajectory_data(filename_xls):
     cols = {
      'fTime': (0,),
      'RWSmoothed': (6,7,8), # RWxSmoothed
@@ -60,4 +61,4 @@ if __name__ == "__main__":
     CURRENT_PATH = '/Users/a9858770/cs/scientific-code/beeseyes'
     POSITIONS_XLS = CURRENT_PATH + '/Setup/beepath.xlsx'
 
-    load_path_data(POSITIONS_XLS)
+    load_trajectory_data(POSITIONS_XLS)

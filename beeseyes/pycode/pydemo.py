@@ -7,7 +7,7 @@ from scipy.spatial import Delaunay
 from scipy.spatial.transform import Rotation
 import math
 
-from path_data import load_path_data
+from path_data import load_trajectory_data
 
 from bee_eye_data import ommatidia_polygons, ommatidia_polygons_fast_representation
 from bee_eye_data import ax3dCreate, visualise_all
@@ -880,7 +880,21 @@ def histogram_of_sides(regions):
 
 def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets):
 
-    xx = load_path_data(POSITIONS_XLS)
+    bee_traj = load_trajectory_data(POSITIONS_XLS)
+
+    print('bee_traj', bee_traj)
+    frameTimes = bee_traj['fTime']
+    bee_path = bee_traj['RWSmoothed']
+    bee_directions = bee_traj['direction']
+
+    frame_index = 100
+    bee_head_pos = bee_path[frame_index]
+    bee_direction = bee_directions[frame_index]
+    frame_time = frameTimes[frame_index]
+
+    print('frame_time', frame_time)
+    print('bee_direction', bee_direction)
+    print('bee_head_pos', bee_head_pos)
 
     # 2D Visualisation of (u,v) on textures
     texture1, physical_size1, dpi1 = load_image_withsize(EIGHT_PANEL, sample_px=200, sample_cm=10.0)
