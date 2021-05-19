@@ -949,40 +949,14 @@ def trajectory_transformation():
 
     return M, maxy
 
-def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets):
-
-
-    bee_traj = load_trajectory_cached(POSITIONS_XLS)
-
-    M, maxy = trajectory_transformation()
-
-    print('bee_traj', bee_traj)
-    frameTimes = bee_traj['fTime']
-    bee_path = np.dot( bee_traj['RWSmoothed'] - maxy, M.T) + np.array([0,0,0])[None,:]
-    bee_directions = bee_traj['direction']
-
-    frame_index = 100
-    bee_head_pos = bee_path[frame_index][None,:]
-    bee_direction = bee_directions[frame_index]
-    frame_time = frameTimes[frame_index]
-
-    print('frame_time', frame_time)
-    print('bee_direction', bee_direction)
-    print('bee_head_pos', bee_head_pos)
-
-    # 2D Visualisation of (u,v) on textures
-    texture1, physical_size1, dpi1 = load_image_withsize(EIGHT_PANEL, sample_px=200, sample_cm=10.0)
-    texture2, physical_size2, dpi2 = load_image_withsize(PINK_WALLPAPER, dpi=dpi1)
-    assert dpi1 == dpi2
-
-    print('physical_size1', physical_size1) # (35.050000000000004, 58.1)
-
-    textures = [texture1, texture2]
-
-    plane1 = Plane(*physical_size1)
-    #plane2 = Plane(*physical_size2)
-    #planes = [plane1, plane2]
-    planes = [plane1,]
+def anim_frame(
+      textures, planes,
+      M, bee_head_pos, bee_direction,
+      corner_points, normals_at_corners,
+      ommatidia_few_corners, ommatidia_few_corners_normals,
+      selected_regions, which_facets,
+      selected_center_points
+):
 
     head_transformation = -M*10 # -M*10 is adhoc
 
@@ -998,18 +972,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     assert u.shape ==(corner_points.shape[0],)
 
 
-    print('bee_path>>', bee_path)
-    # Visualisations
 
-    # 3D Visualisation of environment
-    ax3d = \
-    visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, center_points, normals_at_center_points, beeHead, planes)
-    ax3d.plot3D(bee_path[:,0], bee_path[:,1], bee_path[:,2], alpha=0.1, linewidth=0.3, marker='.')
-    ax3d.set_xlim(*array_minmax(bee_path[:,0]))
-    ax3d.set_ylim(*array_minmax(bee_path[:,1]))
-    ax3d.set_zlim(*array_minmax(bee_path[:,2]))
-
-    trajectory_stats(bee_path)
 
     O_few,D_few,(u_few,v_few) = raycastOmmatidium(
        ommatidia_few_corners, ommatidia_few_corners_normals,
@@ -1076,6 +1039,66 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     ax2.set_aspect('auto')
     ax2.set_title('sampled pixels')
 
+    return (beeHead, regions_rgba)
+
+def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets):
+
+
+    bee_traj = load_trajectory_cached(POSITIONS_XLS)
+
+    M, maxy = trajectory_transformation()
+
+    frame_index = 100
+
+    print('bee_traj', bee_traj)
+    frameTimes = bee_traj['fTime']
+    bee_path = np.dot( bee_traj['RWSmoothed'] - maxy, M.T) + np.array([0,0,0])[None,:]
+    bee_directions = bee_traj['direction']
+
+    bee_head_pos = bee_path[frame_index][None,:]
+    bee_direction = bee_directions[frame_index]
+    frame_time = frameTimes[frame_index]
+
+    print('frame_time', frame_time)
+    print('bee_direction', bee_direction)
+    print('bee_head_pos', bee_head_pos)
+
+    # 2D Visualisation of (u,v) on textures
+    texture1, physical_size1, dpi1 = load_image_withsize(EIGHT_PANEL, sample_px=200, sample_cm=10.0)
+    texture2, physical_size2, dpi2 = load_image_withsize(PINK_WALLPAPER, dpi=dpi1)
+    assert dpi1 == dpi2
+
+    print('physical_size1', physical_size1) # (35.050000000000004, 58.1)
+
+    textures = [texture1, texture2]
+
+    plane1 = Plane(*physical_size1)
+    #plane2 = Plane(*physical_size2)
+    #planes = [plane1, plane2]
+    planes = [plane1,]
+
+    (beeHead, regions_rgba) = \
+    anim_frame(
+        textures, planes,
+        M, bee_head_pos, bee_direction,
+        corner_points, normals_at_corners,
+        ommatidia_few_corners, ommatidia_few_corners_normals,
+        selected_regions, which_facets,
+        selected_center_points
+    )
+
+    print('bee_path>>', bee_path)
+    # Visualisations
+
+    # 3D Visualisation of environment
+    ax3d = \
+    visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, center_points, normals_at_center_points, beeHead, planes)
+    ax3d.plot3D(bee_path[:,0], bee_path[:,1], bee_path[:,2], alpha=0.1, linewidth=0.3, marker='.')
+    ax3d.set_xlim(*array_minmax(bee_path[:,0]))
+    ax3d.set_ylim(*array_minmax(bee_path[:,1]))
+    ax3d.set_zlim(*array_minmax(bee_path[:,2]))
+
+    trajectory_stats(bee_path)
 
 
     # visualise_3d_situation_eye(center_points, regions_rgba, beeHead, 'sferikal ')
@@ -1105,19 +1128,6 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
     histogram_of_sides(selected_regions)
 
-    '''
-    #O,D,(u,v) = raycastOmmatidium(eye_points, normals_xyz, beeHead.R, beeHead.pos, plane)
-    #def raycastOmmatidium(eye_points, rays_dirs, bee_R, bee_pos, plane):
-    # sum(a[i,j,:] * b[k,:,m])
-    # (3250, MAX_SIDES, 3), (3,3) -> (3250, MAX_SIDES, 3)
-    O =np.dot(ommatidia_polygons1, bee_R.T) + bee_pos[None,None,:]
-    # (3250, 3), (3,3) -> (3250, 3)
-    D =np.dot(ommatidia_normals, bee_R.T) + bee_pos[None,None,:]
-    #O = np.dot(bee_R, eye_points.T).T + bee_pos
-    #D = np.dot(bee_R, rays_dirs.T).T
-    (u,v) = ray_cast(plane.U,plane.V,plane.C0, D,O)
-    return O, D, (u,v)
-    '''
 
     print('.')
 
