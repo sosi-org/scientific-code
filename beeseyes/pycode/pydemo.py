@@ -385,12 +385,12 @@ def raycastOmmatidium(eye_points, rays_dirs, bee_R, bee_pos, plane, clip:bool=Tr
    return O, D, (u,v)
 
 class Plane:
-    def __init__(self):
+    def __init__(self, physical_size_u=30, physical_size_h=30):
        # centimeters
        # todo: rename U -> A, a->uz
        plane = {
-          'U': (30,0,0),
-          'V': (0,30,0),
+          'U': (float(physical_size_u),0,0),
+          'V': (0,float(physical_size_h),0),
           'C0': (0,0,0),
        }
        '''
@@ -446,7 +446,7 @@ def main():
     #  (192, 256, 3)
 
 
-    plane = Plane()
+    plane = Plane(30.0, 30.0)
 
     beeHead = BeeHead()
 
@@ -868,13 +868,18 @@ def histogram_of_sides(regions):
    plt.yscale('log')
 
 def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets):
-    plane = Plane()
+
+    # 2D Visualisation of (u,v) on textures
+    texture, physical_size = load_image_withsize(EIGHT_PANEL, sample_px=200, sample_cm=10.0)
+
+    plane = Plane(*physical_size)
     beeHead = BeeHead()
 
     # corners, normals_at_corners (6496, 3) (6496, 3)
     print('corners, normals_at_corners', corner_points.shape, normals_at_corners.shape)
     O,D,(u,v) = raycastOmmatidium(corner_points, normals_at_corners, beeHead.R, beeHead.pos, plane )
     print('>>>u,v', u.shape)
+
 
     # Visualisations
 
@@ -887,8 +892,6 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
        clip=False)
 
 
-    # 2D Visualisation of (u,v) on textures
-    texture, physical_size = load_image_withsize(EIGHT_PANEL, sample_px=200, sample_cm=10.0)
 
     visualise_uv(u,v, u_few, v_few, texture)
 
