@@ -15,6 +15,9 @@ pip install Shapely
 #            our version of xlrd is 2.0.1. In xlrd >= 2.0, only the xls format is supported. Install openpyxl instead.
 # pip install openpyxl
 
+# Mac-specific:
+brew install ffmpeg
+
 # level 2
 source ./p3/bin/activate
 python pydemo.py

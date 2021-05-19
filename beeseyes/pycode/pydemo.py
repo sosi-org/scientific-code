@@ -737,10 +737,11 @@ def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, tit
 
     return ax3d
 
-def visualise_uv(u,v, u_few, v_few, texture, uv_rgba=None, title=None):
+def visualise_uv(u,v, u_few, v_few, texture, uv_rgba=None, title=None, fig=None):
     # (u,v) visualisation on plane (pixels)
-    axes2 = plt.figure()
-    ax = axes2.add_subplot(111)
+    if fig is None:
+        fig = plt.figure()
+    ax = fig.add_subplot(111)
     tt = texture
     # tt = np.transpose(texture, axes=(1,0,2))
     plt.imshow(tt, extent=(0.0,1.0,0.0,1.0), alpha=0.6) #, origin='lower')
@@ -857,14 +858,14 @@ def sample1(um,vm, texture, W_,H_,W,H):
 
 # slow
 def sample_colors(uv, regions, texture):
-    print('uv.shape', uv.shape)
+    # print('uv.shape', uv.shape)
     if texture.shape[2] == 4:
         texture = texture[:,:, 0:3]
 
     EPS = 0.00000001
     # (H,W) mmove to slow part.
     (H,W) = texture.shape[0:2]
-    print('W,H', W,H)
+    # print('W,H', W,H)
     W_ = (W + 1 - EPS)
     H_ = (H + 1 - EPS)
     nf = len(regions)
@@ -956,7 +957,8 @@ def anim_frame(
       ommatidia_few_corners, ommatidia_few_corners_normals,
       selected_regions, which_facets,
       selected_center_points,
-      whether_visualise_eye_3d, whether_visualise_uv_samples, whether_visualise_uv_scatter
+      whether_visualise_eye_3d, whether_visualise_uv_samples, whether_visualise_uv_scatter,
+      animation_fig=None
 ):
 
     head_transformation = -M*10 # -M*10 is adhoc
@@ -982,7 +984,7 @@ def anim_frame(
 
 
     if whether_visualise_uv_scatter:
-        visualise_uv(u,v, u_few, v_few, textures[0])
+        visualise_uv(u,v, u_few, v_few, textures[0], fig=None)
 
 
     # selected_center_points = select_centers(which_facets, center_points)
@@ -1021,14 +1023,16 @@ def anim_frame(
 
     if whether_visualise_uv_samples:
         ax2 = \
-          visualise_uv(uvm_debug[:,0], uvm_debug[:,1], None, None, textures[0], uv_rgba=regions_rgba)
+          visualise_uv(uvm_debug[:,0], uvm_debug[:,1], None, None, textures[0], uv_rgba=regions_rgba, fig=animation_fig)
 
         ax2.set_xlim(0,1.0)
         ax2.set_ylim(0,1.0)
         ax2.set_aspect('auto')
         ax2.set_title('sampled pixels')
 
-    return (beeHead, regions_rgba)
+        anim_frame_artist = ax2
+
+    return (beeHead, regions_rgba, anim_frame_artist)
 
 def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets):
 
@@ -1066,7 +1070,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     #planes = [plane1, plane2]
     planes = [plane1,]
 
-    (beeHead, regions_rgba) = \
+    beeHead, regions_rgba,_ = \
     anim_frame(
         textures, planes,
         M, bee_head_pos, bee_direction,
@@ -1119,12 +1123,23 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
     histogram_of_sides(selected_regions)
 
-    for frame_index in range(2): # range(len(bee_path)):
+    # return # skip animation creation
+    NUM_FRAMES = 20*3
+
+    # Animation
+    from matplotlib.animation import FuncAnimation
+    anim_fig = plt.figure()
+    #def anim_init():
+    #    pass
+    def animate_frame(animation_frame_index):
+        #for frame_index in range(2): # range(len(bee_path)):
+        frame_index = animation_frame_index + 100
+
         bee_head_pos = bee_path[frame_index][None,:]
         bee_direction = bee_directions[frame_index]
         frame_time = frameTimes[frame_index]
 
-        (beeHead, regions_rgba) = \
+        (beeHead, regions_rgba, anim_frame_artist) = \
         anim_frame(
             textures, planes,
             M, bee_head_pos, bee_direction,
@@ -1133,9 +1148,26 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
             selected_regions, which_facets,
             selected_center_points,
             whether_visualise_eye_3d=False, whether_visualise_uv_samples=True,
-            whether_visualise_uv_scatter=False
+            whether_visualise_uv_scatter=False,
+            animation_fig=anim_fig
         )
-        print('frame done:', frame_index)
+        print('frame done:', animation_frame_index, 'traj frame:', frame_index)
+        import gc
+        gc.collect()
+        print('gc:', gc.get_count(), gc.isenabled())
+        return (anim_frame_artist,)
+
+    # plt.rcParams['animation.ffmpeg_path'] = u'/usr/local/bin/ffmpeg'
+    anim = FuncAnimation(anim_fig, animate_frame, #init_func=anim_init,
+                               frames=NUM_FRAMES, interval=100 #, blit=True
+                               , blit=False
+                               #, progress_callback = lambda i, n: print(f'Saving frame {i} of {n}')
+                               )
+    #anim.save('beeAnim.mpeg')
+    anim.save('beeAnim.gif', writer='imagemagick')
+    # ffmpeg, codec=s, writer='imagemagick' for gif
+    # Also see: Animation.to_html5_video
+    print('saved animation', flush=True)
 
 
 def main2():
