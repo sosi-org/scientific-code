@@ -815,8 +815,8 @@ def visualise_map_spherical_to_planar(center_points, uv_rgba=None, transform2pla
     #ax2d.set_ylim(*array_minmax(points[1]))
     ax2d.set_xlim(-180, +180)
     ax2d.set_ylim(-180, +180)
-    ax2d.set_xlabel(axeslabels[0], fontsize=15)
-    ax2d.set_ylabel(axeslabels[1], fontsize=15)
+    ax2d.set_xlabel(axeslabels[0], fontsize=15, verticalalignment='bottom', x=0.1)
+    ax2d.set_ylabel(axeslabels[1], fontsize=15, verticalalignment='bottom', y=0.9)
     # ax2d.tight_layout() # Doesn't work
     return ax2d
 
