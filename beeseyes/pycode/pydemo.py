@@ -1144,7 +1144,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
         bee_direction = bee_directions[frame_index]
         frame_time = frameTimes[frame_index, 0]
 
-        text_description = 'time: '+str(frame_time)+' (s)   frame:'+str(animation_frame_index)
+        text_description = f'time: {round(frame_time,2)} (s)   frame:{animation_frame_index}'
         anim_fig.clear() # Much faster
         (beeHead, regions_rgba, anim_frame_artist) = \
         anim_frame(
@@ -1160,9 +1160,6 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
             text_description=text_description
         )
         print('frame done:', animation_frame_index, 'traj frame:', frame_index)
-        import gc
-        gc.collect()
-        print('gc:', gc.get_count(), gc.isenabled())
         return (anim_frame_artist,)
 
     # plt.rcParams['animation.ffmpeg_path'] = u'/usr/local/bin/ffmpeg'
