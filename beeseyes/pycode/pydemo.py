@@ -1037,13 +1037,13 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
     M, maxy = trajectory_transformation()
 
-    frame_index = 100
 
     print('bee_traj', bee_traj)
     frameTimes = bee_traj['fTime']
     bee_path = np.dot( bee_traj['RWSmoothed'] - maxy, M.T) + np.array([0,0,0])[None,:]
     bee_directions = bee_traj['direction']
 
+    frame_index = 100
     bee_head_pos = bee_path[frame_index][None,:]
     bee_direction = bee_directions[frame_index]
     frame_time = frameTimes[frame_index]
@@ -1119,8 +1119,23 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
     histogram_of_sides(selected_regions)
 
+    for frame_index in range(2): # range(len(bee_path)):
+        bee_head_pos = bee_path[frame_index][None,:]
+        bee_direction = bee_directions[frame_index]
+        frame_time = frameTimes[frame_index]
 
-    print('.')
+        (beeHead, regions_rgba) = \
+        anim_frame(
+            textures, planes,
+            M, bee_head_pos, bee_direction,
+            corner_points, normals_at_corners,
+            ommatidia_few_corners, ommatidia_few_corners_normals,
+            selected_regions, which_facets,
+            selected_center_points,
+            whether_visualise_eye_3d=False, whether_visualise_uv_samples=True,
+            whether_visualise_uv_scatter=False
+        )
+        print('frame done:', frame_index)
 
 
 def main2():
