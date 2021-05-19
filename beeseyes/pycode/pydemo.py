@@ -785,7 +785,7 @@ def visualise_map_spherical_to_planar(center_points, uv_rgba=None, transform2pla
     return ax2d
 
 nan_rgb = np.zeros((3,)) + np.NaN
-
+# sampler session: texture, W_,H_,W,H
 def sample1(um,vm, texture, W_,H_,W,H):
    if np.isnan(um) or np.isnan(vm):
        rgb = nan_rgb
