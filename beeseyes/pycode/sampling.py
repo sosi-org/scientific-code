@@ -5,9 +5,12 @@ nan_rgb = np.zeros((3,)) + np.NaN
 
 # sampler session: texture, W_,H_,W,H
 '''
-Samples a single pixel
+Samples a single pixel.
 Using square pixels.
-[0 ... W] (incl.)
+
+[0, ... ,W-1] (incl.)
+By mapping [0,1) -> [0,W) (int)
+(mapping u,v)
 '''
 def sample1(um,vm, texture, W_,H_,W,H):
    if np.isnan(um) or np.isnan(vm):
