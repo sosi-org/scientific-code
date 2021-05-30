@@ -4,6 +4,11 @@ import math
 nan_rgb = np.zeros((3,)) + np.NaN
 
 # sampler session: texture, W_,H_,W,H
+'''
+Samples a single pixel
+Using square pixels.
+[0 ... W] (incl.)
+'''
 def sample1(um,vm, texture, W_,H_,W,H):
    if np.isnan(um) or np.isnan(vm):
        rgb = nan_rgb
@@ -30,8 +35,8 @@ def sample_colors(uv, regions, texture):
     # (H,W) mmove to slow part.
     (H,W) = texture.shape[0:2]
     # print('W,H', W,H)
-    W_ = (W + 1 - EPS)
-    H_ = (H + 1 - EPS)
+    W_ = (W - EPS)
+    H_ = (H - EPS)
     nf = len(regions)
     uvm_for_debug = np.zeros((nf,2),dtype=float)
 
