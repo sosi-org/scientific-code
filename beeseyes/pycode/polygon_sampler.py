@@ -41,8 +41,35 @@ def create_samples(count, uv_poly):
     which = [polygon.contains(Point(grid_xy[i,0], grid_xy[i,1])) for i in range(grid_xy.shape[0])]
     return grid_xy[which,:]
 
+
+GRID_FR = 0.1*0.1
+meshgridx0, meshgridy0 = np.meshgrid(
+  np.arange(0,1.0, 1.0*GRID_FR),
+  np.arange(0,1.0, 1.0*GRID_FR),
+)
+grid_xy0 = np.array([meshgridx0.ravel(), meshgridy0.ravel()]).T
+
 def create_samples_region(count, uv, region):
-  return create_samples(count, uv[region,:])
+  #return create_samples(count, uv[region,:])
+    # const
+
+    uv_poly = uv[region,:]
+    a = [(uv_poly[i,0], uv_poly[i,1]) for i in range(uv_poly.shape[0])]
+    polygon = Polygon(a)
+
+    x0,x1 = array_minmax(uv_poly[:,0])
+    y0,y1 = array_minmax(uv_poly[:,1])
+
+    grid_xy = grid_xy0.copy()
+    grid_xy[:,0] = grid_xy0[:,0]*(x1-x0)+x0
+    grid_xy[:,1] = grid_xy0[:,1]*(y1-y0)+y0
+    # meshgridy = meshgridx0*(x1-x0)+x0
+
+    which = [polygon.contains(Point(grid_xy[i,0], grid_xy[i,1])) for i in range(grid_xy.shape[0])]
+    return grid_xy[which,:]
+
+# def sample_poly_region(uv, regions, texture):
+
 
 def run_tests():
   #import image_loader
@@ -54,6 +81,8 @@ def run_tests():
   plt.plot(xy[:,0], xy[:, 1], '.')
   plt.show()
   print(xy)
+  print(xy.shape) # 34 points
+  # 3208 / 10000
 
 if __name__ == "__main__":
     run_tests()
