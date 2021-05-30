@@ -42,14 +42,14 @@ def create_samples(count, uv_poly):
     return grid_xy[which,:]
 
 
-GRID_FR = 0.1*0.1
+GRID_FR = 0.1 * 0.5 # *0.1
 meshgridx0, meshgridy0 = np.meshgrid(
   np.arange(0,1.0, 1.0*GRID_FR),
   np.arange(0,1.0, 1.0*GRID_FR),
 )
 grid_xy0 = np.array([meshgridx0.ravel(), meshgridy0.ravel()]).T
 
-def create_samples_region(count, uv, region):
+def create_samples_region(uv, region):
   #return create_samples(count, uv[region,:])
     # const
 
@@ -68,21 +68,47 @@ def create_samples_region(count, uv, region):
     which = [polygon.contains(Point(grid_xy[i,0], grid_xy[i,1])) for i in range(grid_xy.shape[0])]
     return grid_xy[which,:]
 
-# def sample_poly_region(uv, regions, texture):
+def poly_region_points(uv, regions):
+  l = []
+  for i in range(len(regions)):
+    region_xy = create_samples_region(uv, regions[i])
+    l.append(region_xy)
+  gxy =  np.concatenate(l, axis=0)
+  plot_scatter_uv(gxy)
+  return gxy
 
+def sample_poly_region(uv, regions, texture):
+  poly_region_points
+  exit()
+
+def plot_scatter_uv(xy):
+  import matplotlib.pyplot as plt
+  plt.plot(xy[:,0], xy[:, 1], '.')
+  plt.show()
 
 def run_tests():
   #import image_loader
   #image_loader.load_image_withsize
   uv = np.array([[0,1],[0.4,0.8],[0.8, 0.5],[1,0.3],[0,-1],[-1,0],[-0.3,0.3]])
   assert uv.shape[1] == 2
-  xy = create_samples_region(100, uv, [0,1,2,3,4,5,6])
-  import matplotlib.pyplot as plt
-  plt.plot(xy[:,0], xy[:, 1], '.')
-  plt.show()
+  xy = create_samples_region(uv, [0,1,2,3,4,5,6])
+  plot_scatter_uv(xy)
   print(xy)
   print(xy.shape) # 34 points
   # 3208 / 10000
+
+  # test 2
+  import image_loader
+  BLUE_FLOWER = "../art/256px-Bachelor's_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpeg"
+  texture1, physical_size1, dpi1 = image_loader.load_image_withsize(BLUE_FLOWER,
+      sample_px=200, sample_cm=10.0)
+
+  uv = np.random.rand(*(100,2))*100
+
+  regions = [[0,1,2,3], [3,4,6,7], [5,6,7,8,9]]
+  test1_points = poly_region_points(uv, regions)
+  rgba = sample_poly_region(uv, regions, texture1)
+  print(rgba)
 
 if __name__ == "__main__":
     run_tests()
