@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import polygon_sampler
 
 nan_rgb = np.zeros((3,)) + np.NaN
 
@@ -25,8 +26,13 @@ def sample1(um,vm, texture, W_,H_,W,H):
           rgb = texture[py,px]
    return rgb
 
-# slow
-def sample_colors(uv, regions, texture):
+'''
+slow.
+"Pixel at Centroid" sampler
+One pixel is taken for each region
+
+'''
+def sample_colors_squarepixels(uv, regions, texture):
     # print('uv.shape', uv.shape)
     if texture.shape[2] == 4:
         texture = texture[:,:, 0:3]
@@ -54,3 +60,9 @@ def sample_colors(uv, regions, texture):
         regions_rgb[i] = rgb
 
     return regions_rgb, uvm_for_debug
+
+
+
+def sample_colors(uv, regions, texture):
+  # return sample_colors_squarepixels (uv, regions, texture)
+  return polygon_sampler.sample_colors_polygons (uv, regions, texture)

@@ -1,3 +1,4 @@
+import math
 import numpy as np
 
 from shapely.geometry import Point
@@ -42,19 +43,34 @@ def create_samples(count, uv_poly):
     return grid_xy[which,:]
 
 
-GRID_FR = 0.1 * 0.5 # *0.1
-meshgridx0, meshgridy0 = np.meshgrid(
-  np.arange(0,1.0, 1.0*GRID_FR),
-  np.arange(0,1.0, 1.0*GRID_FR),
-)
-grid_xy0 = np.array([meshgridx0.ravel(), meshgridy0.ravel()]).T
+def create_master_grid(xa, ya):
+  #GRID_FR = 0.1 * 0.5 # *0.1
+  meshgridx0, meshgridy0 = np.meshgrid(xa, ya)
+  grid_xy0 = np.array([meshgridx0.ravel(), meshgridy0.ravel()]).T
+  return grid_xy0
 
-def create_samples_region(uv, region):
+master_grids = {}
+
+class G:
+    def __init__(self):
+      #self.__x = x
+      pass
+
+def init_grid(key, GRID_FR):
+  #GRID_FR = 0.1 * 0.5 # *0.1
+  obj = G() #{}
+  xa = np.arange(0,1.0, 1.0*GRID_FR)
+  ya = np.arange(0,1.0, 1.0*GRID_FR)
+  obj.grid_xy0 = create_master_grid(xa,ya)
+  master_grids[key] = obj
+
+def create_samples_region(uv, region, grid_xy0):
   #return create_samples(count, uv[region,:])
     # const
 
     uv_poly = uv[region,:]
     a = [(uv_poly[i,0], uv_poly[i,1]) for i in range(uv_poly.shape[0])]
+
     polygon = Polygon(a)
 
     x0,x1 = array_minmax(uv_poly[:,0])
@@ -69,9 +85,11 @@ def create_samples_region(uv, region):
     return grid_xy[which,:]
 
 def poly_region_points(uv, regions):
+  KEY = '0'
+  grid_xy0 = master_grids[KEY].grid_xy0
   l = []
   for i in range(len(regions)):
-    region_xy = create_samples_region(uv, regions[i])
+    region_xy = create_samples_region(uv, regions[i], grid_xy0)
     l.append(region_xy)
   gxy =  np.concatenate(l, axis=0)
   plot_scatter_uv(gxy)
@@ -81,17 +99,62 @@ def sample_poly_region(uv, regions, texture):
   poly_region_points
   exit()
 
-def plot_scatter_uv(xy):
+def create_samples_region1(uv, region, grid_xy0):
+    uv_poly = uv[region,:]
+    a = [(uv_poly[i,0], uv_poly[i,1]) for i in range(uv_poly.shape[0])]
+    a = filter(lambda t: not math.isnan(t[0]), a)
+    # What to do if it is partially outside?
+
+    polygon = Polygon(a)
+
+    x0,x1 = array_minmax(uv_poly[:,0])
+    y0,y1 = array_minmax(uv_poly[:,1])
+
+    grid_xy = grid_xy0.copy()
+    grid_xy[:,0] = grid_xy0[:,0]*(x1-x0)+x0
+    grid_xy[:,1] = grid_xy0[:,1]*(y1-y0)+y0
+    # meshgridy = meshgridx0*(x1-x0)+x0
+
+    which = [polygon.contains(Point(grid_xy[i,0], grid_xy[i,1])) for i in range(grid_xy.shape[0])]
+    return grid_xy[which,:]
+
+def sample_colors_polygons(uv, regions, texture):
+
+  xa = np.arange(0, texture.shape[0], 1.0)
+  ya = np.arange(0, texture.shape[1], 1.0)
+  grid_xy0 = create_master_grid(xa,ya)
+
+  l = []
+  for i in range(len(regions)):
+    region_xy = create_samples_region1(uv, regions[i], grid_xy0)
+    l.append(region_xy)
+    plot_scatter_uv(l[-1], False)
+  plt.show()
+  dfgdkj
+  exit()
+  # poly_region_points(uv, regions)
+  
+  
+
+
+def plot_scatter_uv(xy, show=True):
   import matplotlib.pyplot as plt
   plt.plot(xy[:,0], xy[:, 1], '.')
-  plt.show()
+  if show:
+    plt.show()
 
 def run_tests():
+  GRID_FR = 0.1 * 0.5 # *0.1
+  init_grid('0', GRID_FR)
+
+  KEY = '0'
+  grid_xy0 = master_grids[KEY].grid_xy0
+
   #import image_loader
   #image_loader.load_image_withsize
   uv = np.array([[0,1],[0.4,0.8],[0.8, 0.5],[1,0.3],[0,-1],[-1,0],[-0.3,0.3]])
   assert uv.shape[1] == 2
-  xy = create_samples_region(uv, [0,1,2,3,4,5,6])
+  xy = create_samples_region(uv, [0,1,2,3,4,5,6], grid_xy0)
   plot_scatter_uv(xy)
   print(xy)
   print(xy.shape) # 34 points
