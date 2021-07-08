@@ -5,7 +5,7 @@ from time import sleep
 
 BEES_DATA_FILE = '../hadi/doi_10.5061_dryad.23rj4pm__v1/DataForPlots.mat'
 
-def test_data():
+def explore_data():
 
    mat = scipy.io.loadmat(BEES_DATA_FILE)
    # print(mat)
@@ -41,6 +41,7 @@ def test_data():
    '''
    print('----------------------------------------------------------------')
    fullBeeData = mat['fullBeeData']
+   print('fullBeeData')
    #print(fullBeeData)
 
    """
@@ -129,6 +130,58 @@ def test_data():
      #print(sphereIntersectBorders)
      #print(HeadCenter)
      print(a['BeeID'][0,idx], a['BeeSpecies'][0,idx]) # 'AM' 'BT'
+
+   beeIndex = 1
+   # print(a.dtype): has all names.
+   # numpy.ndarray
+   print(f.keys())
+   """
+   __header__
+   __version__
+   __globals__
+   CCT_Thresh
+   IDWMinRangeFacet
+   baseHeightStep
+   bordersFromNearest
+   densityLim
+   forceHorizontal
+   forceVertical
+   fullBeeData
+   lensT_Thresh
+   limLargeDensities
+   limRetinaDist_Thresh
+   measurmentIntervals
+   nearestOnWorld
+   powerP
+   powerPonSphere
+   None
+   stepInFromBorders
+   stepInInterval
+   surfaceFitRngTests
+   useDirectHexAxes
+   useReverseNormal
+   __function_workspace__
+   """
+   fullBeeData = a
+   print(fullBeeData['BeeID'][0, beeIndex]) # ['BT_77974']
+   print(fullBeeData['BeeID'][:, beeIndex][:])    # [array(['AM_60186'], dtype='<U8')]
+   print(a.dtype.fields)
+      # A dicitonary with values: (dtype, offset[, title]),
+      # eg.  (dtype('O'), 768)
+      # dtype('O') means an Object (python objects)
+   print(type(fullBeeData['BeeID'])) # numpy.ndarra
+   print(fullBeeData['BeeID'].shape) # (1,8)
+   print(type(fullBeeData['BeeID'][0,beeIndex])) # numpy.ndarray
+   print(fullBeeData['BeeID'][0,beeIndex].shape) # (1,)
+   print(type(fullBeeData['BeeID'][0,beeIndex][0])) # numpy.str_
+
+   #for k,v in a.dtype.fields.items():
+   #  print(k)
+   #print( lambda k,v: k for 
+   #print( k for k in a.dtype.fields) # generator
+   print( [k for k in a.dtype.fields])
+
+   exit()
 
 '''
   0 ['AM_60185'] ['AM']
@@ -541,7 +594,8 @@ def ommatidia_polygons():
 
 
 def main():
-   #test_data()
+   explore_data()
+   print('\n'*10)
    #main_data()
    #exit()
    #test1()
