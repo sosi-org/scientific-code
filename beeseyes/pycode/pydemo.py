@@ -953,6 +953,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
     M, maxy = trajectory_transformation()
 
+    print(bee_traj._RWSmoothed)
 
     print('bee_traj', bee_traj)
     frameTimes = bee_traj['fTime']
@@ -1037,9 +1038,10 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     histogram_of_sides(selected_regions)
 
     #return # skip animation creation
-    NUM_FRAMES = 20*3
+    #NUM_FRAMES = 20*3
     NUM_FRAMES = 1
     # NUM_FRAMES = 5
+    #NUM_FRAMES = 20
 
     # Animation
     from matplotlib.animation import FuncAnimation

@@ -64,13 +64,24 @@ def load_trajectory_data(filename_xls):
     (-21.25277299999999, 272.127343)
     '''
 
+"""
+  returns attributes of of bee trajectory as numpy arrays:
+  *  e.g. 'direction', 'RWSmoothed', 'fTime'
+"""
 def load_trajectory_cached(filename):
     CACHE_FILE = './traj-cache'  # traj.cache.npz
-    if (os.path.exists(CACHE_FILE + '.npz')):
-       print('Cache file found. Ignoring the .xslx file')
-       bee_traj = np.load(CACHE_FILE + '.npz')
-       print('>>bee_traj')
-       print(bee_traj)
+    cachefile_fullname = CACHE_FILE + '.npz'
+    if (os.path.exists(cachefile_fullname)):
+       print('Cache file found. Ignoring the .xslx file. To refresh the cache, delete ' + cachefile_fullname)
+       bee_traj = np.load(cachefile_fullname)
+       #print('>>bee_traj', bee_traj) # numpy.lib.npyio.NpzFile object
+
+       #bee_traj.fields = {}
+       #bee_traj.fields.A = 'A'
+       bee_traj._RWSmoothed = 'RWSmoothed'
+       bee_traj._direction = 'direction'
+       bee_traj._fTime = 'fTime'
+
        #print('2',sorted(bee_traj.files))
        #print('3',bee_traj.files)
        print("bee_traj['RWSmoothed']")
@@ -85,7 +96,7 @@ def load_trajectory_cached(filename):
        # savez_compressed versus savez
        # 275 KB  275540 19 May 16:42 cache-traj.npz
        # 157 KB   157831 19 May 16:43 cache-traj.npz
-       print('saved trajectpories in a cache file. Not that it is raedy, run again to load the trajectory cache file')
+       print('Saved trajectpories in a cache file. Now that it is cached, exiting. Run again to load the trajectory cache file')
        exit()
 
 

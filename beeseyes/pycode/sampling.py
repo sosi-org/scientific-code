@@ -6,7 +6,9 @@ nan_rgb = np.zeros((3,)) + np.NaN
 
 # sampler session: texture, W_,H_,W,H
 '''
-Samples a single pixel.
+Used by `sample_colors_squarepixels()`
+
+Samples a single point.
 Using square pixels.
 
 [0, ... ,W-1] (incl.)
@@ -27,9 +29,11 @@ def sample1(um,vm, texture, W_,H_,W,H):
    return rgb
 
 '''
+Simple sampler.
 slow.
 "Pixel at Centroid" sampler
 One pixel is taken for each region
+Uses `sample1`
 
 '''
 def sample_colors_squarepixels(uv, regions, texture):
@@ -62,7 +66,13 @@ def sample_colors_squarepixels(uv, regions, texture):
     return regions_rgb, uvm_for_debug
 
 
-
+'''
+   Choice of sampler method
+   Choose your hexagon sampler here
+'''
 def sample_colors(uv, regions, texture):
-  # return sample_colors_squarepixels (uv, regions, texture)
-  return polygon_sampler.sample_colors_polygons (uv, regions, texture)
+  # Acceptable speed. Samples aa single point. bware of Alising. No Monte-Carlo, integration or downsampling.
+  return sample_colors_squarepixels (uv, regions, texture)
+
+  # extremely slow. Unusable
+  #return polygon_sampler.sample_colors_polygons (uv, regions, texture)
