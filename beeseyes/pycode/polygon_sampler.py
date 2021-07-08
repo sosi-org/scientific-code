@@ -118,15 +118,20 @@ def create_samples_region1(uv, region, grid_xy0):
     which = [polygon.contains(Point(grid_xy[i,0], grid_xy[i,1])) for i in range(grid_xy.shape[0])]
     return grid_xy[which,:]
 
+import os
 def sample_colors_polygons(uv, regions, texture):
 
   xa = np.arange(0, texture.shape[0], 1.0)
   ya = np.arange(0, texture.shape[1], 1.0)
   grid_xy0 = create_master_grid(xa,ya)
 
+  print('len(regions)', len(regions))
   l = []
   for i in range(len(regions)):
+    print('i', i, flush=True)
     region_xy = create_samples_region1(uv, regions[i], grid_xy0)
+    print('>>>i', i, flush=True)
+    print(region_xy)
     l.append(region_xy)
     plot_scatter_uv(l[-1], False)
   plt.show()
