@@ -181,6 +181,24 @@ def explore_data():
    #print( k for k in a.dtype.fields) # generator
    print( [k for k in a.dtype.fields])
 
+   move_curser_70 = '\r\033[70C'
+   move_curser = lambda col: '\r\033['+str(col)+'C'
+
+   for key in a.dtype.fields:
+      data = fullBeeData[key][0,beeIndex] # np.(nd)array
+      dtype = data[0].dtype
+      print(key, ':', move_curser(20), dtype, move_curser(30),data.shape, end='')
+      #print(data.shape)
+      #print('__index__', data.__index__) # <method-wrapper '__index__' of numpy.ndarray object at 0x12ed0ecf0>
+      #print('__index__()', data.__index__()) # TypeError: only integer scalar arrays can be converted to a scalar index
+      zeros = [0] * len(data.shape)
+      #print(data.__getitem__( *zeros))
+      #print(data.__getitem__( 0))
+      d = data
+      for i in range(len(data.shape)):
+        d = d[0]
+      #print(move_curser_70, '%s:'%(key), d)
+      print(move_curser(70), '%s:'%(key), d)
    exit()
 
 '''
