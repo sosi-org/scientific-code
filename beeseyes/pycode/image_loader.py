@@ -10,10 +10,14 @@ def load_image(image_path):
 
    return pict_array2d
 
-'''
-    Loads texture with physical size in cm
-'''
+
 def load_image_withsize(image_path, sample_px=200, sample_cm=10.0, dpi=None):
+   '''
+      Loads texture with physical size in cm
+      Either specify the `dpi` or the `(sample_px,sample_cm)` pair.
+   '''
+
+   TRANSPOSE = False
 
    texture = load_image(image_path)
 
@@ -22,6 +26,8 @@ def load_image_withsize(image_path, sample_px=200, sample_cm=10.0, dpi=None):
    if (texture.shape[2] == 4):
        texture = texture[:,:,:3]
    # (701, 1162, 3)
+   if (TRANSPOSE):
+     texture = np.transpose(texture, axes=(1,0,2))
 
    # dpi:  in fact, "dots per centimeters", D.P.C.
    # Each circle is 200x200 px^2, 6.0 cm <---> 200 px

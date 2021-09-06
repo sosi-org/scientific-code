@@ -32,13 +32,22 @@ SD_THRESHOLD=0.03 * 10000+1000
 # https://en.wikipedia.org/wiki/Blue_flower#/media/File:Bachelor's_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpg
 # https://en.wikipedia.org/wiki/Blue_flower
 BLUE_FLOWER = "../art/256px-Bachelor's_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpeg"
+#FLOWER_XY = '/Users/a9858770/Documents/xx/3bebe3b139b7e0e01573faabb4c92934.jpeg'
+#BEE_CARTOON = '/Users/a9858770/Documents/bee-walt-Spike_art.PNG.png'
+NEW_FLOWER = '/Users/a9858770/cs/scientific-code/beeseyes/Setup/flower-sept.png'
 
-#BLUE_FLOWER = '/Users/a9858770/Documents/xx/3bebe3b139b7e0e01573faabb4c92934.jpeg'
-#BLUE_FLOWER = '/Users/a9858770/Documents/bee-walt-Spike_art.PNG.png'
+# Figure one is commpletely not aligned (after changing the logic for M)
+TEXTURE_FILENAME = BLUE_FLOWER
+#TEXTURE_FILENAME = NEW_FLOWER
 
 CURRENT_PATH = '/Users/a9858770/cs/scientific-code/beeseyes'
+# 4 x 2 stimuli on a pink background
 EIGHT_PANEL = CURRENT_PATH + '/Setup/IMG_2872.MOV.BkCorrectedPerspCroppedColourContrast.png'
+# pink texture
 PINK_WALLPAPER = CURRENT_PATH + '/Setup/pinkRandomDots.png'
+TEXTURES_FILES = [EIGHT_PANEL, PINK_WALLPAPER]
+#TEXTURES_FILES = [NEW_FLOWER, NEW_FLOWER]
+
 POSITIONS_XLS = CURRENT_PATH + '/Setup/beepath.xlsx'
 
 
@@ -405,7 +414,8 @@ class BeeHead:
         self.pos = bee_pos
 
     def set_eye_position(self, eye_pos):
-        self.pos = eye_pos
+        print(eye_pos.shape, '<<<<')
+        self.pos = eye_pos[None,:]
         assert self.pos.dtype == np.dtype(float)
         assert self.pos.shape == (1,3)
 
@@ -463,7 +473,7 @@ def main():
        = demo_lattice_eyes(EYE_SIZE)
 
 
-    texture = load_image(BLUE_FLOWER)
+    texture = load_image(TEXTURE_FILENAME)
     #  (192, 256, 3)
 
 
@@ -930,7 +940,11 @@ def anim_frame(
     O,D,(u,v) = raycastOmmatidium(corner_points, normals_at_corners, beeHead.R, beeHead.pos, planes[0] )
     assert u.shape ==(corner_points.shape[0],)
 
-
+    assert len(planes) == 1, "A single plane (single side) is supported. Coming soon."
+    if len(textures) == 1:
+      pass
+    else:
+      print ("Warning: A single texture (single side) is supported. Using the first one only. Coming soon.")
 
 
     O_few,D_few,(u_few,v_few) = raycastOmmatidium(
@@ -992,9 +1006,7 @@ def anim_frame(
 
     return (beeHead, regions_rgba, anim_frame_artist)
 
-def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets):
-
-
+def position_source():
     bee_traj = load_trajectory_cached(POSITIONS_XLS)
 
     M, maxy = trajectory_transformation()
@@ -1005,19 +1017,44 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     frameTimes = bee_traj['fTime']
     bee_path = np.dot( bee_traj['RWSmoothed'] - maxy, M.T) + np.array([0,0,0])[None,:]
     bee_directions = bee_traj['direction']
+    return (M, bee_path, bee_directions, frameTimes)
+    #return (M, bee_head_pos, bee_direction)
 
+
+def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets):
+
+
+    #(M, bee_head_pos, bee_direction) = position_source()
+    (M, bee_path, bee_directions, frameTimes) = position_source()
+
+
+    #######################################
+    # Part one: Figure one: non-animated
+    #######################################
+
+    # pick a single frame for first sample
     frame_index = 100
-    bee_head_pos = bee_path[frame_index][None,:]
+    #bee_head_pos = bee_path[frame_index][None,:]
+    #bee_head_pos = bee_path[None, frame_index,:]
+    bee_head_pos = bee_path[frame_index,:]
     bee_direction = bee_directions[frame_index]
     frame_time = frameTimes[frame_index]
 
     print('frame_time', frame_time)
     print('bee_direction', bee_direction)
     print('bee_head_pos', bee_head_pos)
+    #return (M, bee_head_pos, bee_direction)
+
+    # Currently doesnt work. Using hard-coded values:
+    bee_direction = np.array([4.28861,  3.72821,  0.138595])
+    bee_head_pos = np.array([39.1469,  17.99277, 21.7031 ])
+    frame_time = 0.0
+
+    assert len(TEXTURES_FILES) == 2, '''Currently, textures for only only two sides supported for now. Coming soon.'''
 
     # 2D Visualisation of (u,v) on textures
-    texture1, physical_size1, dpi1 = image_loader.load_image_withsize(EIGHT_PANEL, sample_px=200, sample_cm=10.0)
-    texture2, physical_size2, dpi2 = image_loader.load_image_withsize(PINK_WALLPAPER, dpi=dpi1)
+    texture1, physical_size1, dpi1 = image_loader.load_image_withsize(TEXTURES_FILES[0], sample_px=200, sample_cm=10.0)
+    texture2, physical_size2, dpi2 = image_loader.load_image_withsize(TEXTURES_FILES[1], dpi=dpi1)
     assert dpi1 == dpi2
 
     print('physical_size1', physical_size1) # (35.050000000000004, 58.1)
@@ -1041,6 +1078,12 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
         whether_visualise_uv_scatter=True,
         text_description='text'
     )
+    #show first figure
+    # plt.show()
+
+    #######################################
+    # Part two: Figure two: animated, etc
+    #######################################
 
     print('bee_path>>', bee_path)
     # Visualisations
@@ -1098,9 +1141,15 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
         #for frame_index in range(2): # range(len(bee_path)):
         frame_index = animation_frame_index + 100+60
 
-        bee_head_pos = bee_path[frame_index][None,:]
+        bee_head_pos = bee_path[frame_index]
         bee_direction = bee_directions[frame_index]
         frame_time = frameTimes[frame_index, 0]
+
+        print('ok')
+        print(bee_head_pos.shape) # (3,)
+        print(bee_head_pos)
+        print(bee_direction.shape) # (3,)
+        print(bee_direction)
 
         text_description = f'time: {round(frame_time,2)} (s)   frame:{animation_frame_index}'
         anim_fig.clear() # Much faster
