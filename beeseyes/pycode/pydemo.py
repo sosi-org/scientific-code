@@ -1038,6 +1038,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
     #######################################
     # Part one: Figure one: non-animated
+    # Custom mmanual bee position
     #######################################
 
     # pick a single frame for first sample
@@ -1053,9 +1054,13 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     print('bee_head_pos', bee_head_pos)
     #return (M, bee_head_pos, bee_direction)
 
+    # IN_PROGRESS:
+    # requires some refacgtoring/parametrising the scale of the experiment. 
+
     # Currently doesnt work. Using hard-coded values:
-    bee_direction = np.array([4.28861,  3.72821,  0.138595])
-    bee_head_pos = np.array([39.1469,  17.99277, 21.7031 ])
+    RELATIVE_SCALE = 20.0
+    bee_direction = np.array([-RELATIVE_SCALE/2,  -RELATIVE_SCALE/2,  1.0])
+    bee_head_pos = np.array([0,  0, RELATIVE_SCALE*2])
     frame_time = 0.0
 
     assert len(TEXTURES_FILES) == 2, '''Currently, textures for only only two sides supported for now. Coming soon.'''
@@ -1065,12 +1070,16 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     texture2, physical_size2, dpi2 = image_loader.load_image_withsize(TEXTURES_FILES[1], dpi=dpi1)
     assert dpi1 == dpi2
 
+    #RELATIVE_SCALE_OF_EXPERIMENT = 30
+    #RELATIVE_SCALE = 30
     print('physical_size1', physical_size1) # (35.050000000000004, 58.1)
 
     textures = [texture1, texture2]
 
-    plane1 = Plane(*physical_size1)
     #plane2 = Plane(*physical_size2)
+    #plane1 = Plane(*physical_size1)
+    #plane1 = Plane(*physical_size1, C0_pos=(0,0,0))
+    plane1 = Plane(*physical_size1, C0_pos=(-17.5,-26.0,0))
     #planes = [plane1, plane2]
     planes = [plane1,]
 
@@ -1086,8 +1095,9 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
         whether_visualise_uv_scatter=True,
         text_description='text'
     )
-    #show first figure
-    # plt.show()
+    # show first figure, using custom Bee position
+    plt.show()
+    # exit()
 
     #######################################
     # Part two: Figure two: animated, etc

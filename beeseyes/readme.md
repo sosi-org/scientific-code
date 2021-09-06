@@ -6,6 +6,7 @@ calculates input to each eye cell efficiently (by sampling pixels).
 
 
 ## run
+run `source ./p3/bin/activate`
 run `pycode/pydemo.py`
 
 ### Run on MacOS
