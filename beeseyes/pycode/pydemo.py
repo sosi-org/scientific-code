@@ -36,9 +36,7 @@ BLUE_FLOWER = "../art/256px-Bachelor's_button,_Basket_flower,_Boutonniere_flower
 #BEE_CARTOON = '/Users/a9858770/Documents/bee-walt-Spike_art.PNG.png'
 NEW_FLOWER = '/Users/a9858770/cs/scientific-code/beeseyes/Setup/flower-sept.png'
 
-# Figure one is commpletely not aligned (after changing the logic for M)
-TEXTURE_FILENAME = BLUE_FLOWER
-#TEXTURE_FILENAME = NEW_FLOWER
+
 
 CURRENT_PATH = '/Users/a9858770/cs/scientific-code/beeseyes'
 # 4 x 2 stimuli on a pink background
@@ -466,14 +464,23 @@ class BeeHead:
         n=np.linalg.norm(self.R,axis=(0))
         assert np.all(np.isclose(n, (1,1,1)))
 
-def main():
+
+# Uses Voronoi
+def old_demo():
+
+    # Figure one is commpletely not aligned (after changing the logic for M)
+    #TEXTURE_FILENAME = BLUE_FLOWER
+
+    TEXTURE_FILENAME = NEW_FLOWER
 
     EYE_SIZE = 0.1*10 # cm
     eye_points, normals_xyz, rays_origins_e, rays_dirs \
        = demo_lattice_eyes(EYE_SIZE)
 
 
-    texture = load_image(TEXTURE_FILENAME)
+    # Not tested. Previous form was using load_image(), without the dpi specs
+    texture, physical_size0, dpi0 = image_loader.load_image_withsize(TEXTURE_FILENAME, sample_px=200, sample_cm=10.0)
+
     #  (192, 256, 3)
 
 
@@ -492,9 +499,10 @@ def main():
     plt.plot(v, 1-u, '.')
     plt.plot(v6, 1-u6, 'r.')
 
-    sample_hex(u6,v6, texture)
+    # tests `sample_hex()`
+    image_loader.sample_hex(u6,v6, texture)
 
-    # plt.show()
+    plt.show()
 
 def make_whichfacets(sv_vertices, sv_regions, areas, SD_THRESHOLD, AREA_THRESHOLD, MAX_SIDES):
     ommatidia_polygons1, regions_side_count = \
@@ -1188,5 +1196,7 @@ def main2():
 
 main2()
 
-#main()
+# an old demo that tests sample_hex and uses Voronoi
+# old_demo()
+
 plt.show()

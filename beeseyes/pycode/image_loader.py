@@ -2,6 +2,7 @@ import numpy as np
 import scipy.misc
 import imageio
 
+# todo: deprecate public use
 def load_image(image_path):
    img = imageio.imread(image_path)
    pict_array2d = np.asarray(img)
