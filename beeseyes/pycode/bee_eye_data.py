@@ -488,15 +488,15 @@ def polygon_points(sphereIntersect, normals):
    assert sv.points.shape == normals.shape
    normals_at_corners = three_corners_claculat(normals, three_corners, num_vertices)
 
-   #ax3d = ax3dCreate()
+   #ax3d = ax3dCreate(SZ=28.8)
    #print('111')
-   ##visualise_quiver(ax3d, sv.vertices, normals)
+   ##visualise_quiver(ax3d, sv.vertices, normals, color='b')
    #print('2222')
-   ##visualise_quiver(ax3d, sphereIntersect, normals_at_corners)
+   ##visualise_quiver(ax3d, sphereIntersect, normals_at_corners, color='b')
 
-   #visualise_quiver(ax3d, sv.vertices, normals_at_corners, 'r')  # corners
+   #visualise_quiver(ax3d, sv.vertices, normals_at_corners, , color='r')  # corners
    #print('2222')
-   #visualise_quiver(ax3d, sphereIntersect, normals, 'b') # centers
+   #visualise_quiver(ax3d, sphereIntersect, normals, , color='b') # centers
    #plt.show()
 
    areas = sv.calculate_areas()
@@ -567,8 +567,13 @@ def ommatidia_polygons_fast_representation(sv_vertices, sv_regions, maxsides, de
 
 # SZ=8.0*1.2 * 3 == 28,8
 def ax3dCreate(SZ=28.8):
-   ax3d = plt.figure() \
-      .add_subplot(
+   ax3d = None
+   if SZ is None:
+      ax3d = plt.figure() \
+       .add_subplot(projection='3d', autoscale_on=True)
+   else:
+      ax3d = plt.figure() \
+       .add_subplot(
          projection='3d', autoscale_on=True,
          #xlim=(0, +SZ), ylim=(0, +SZ), zlim=(-SZ/2.0, +SZ/2.0)
          #xlim=(0.7, 1.0),  ylim=(-0.3, 0.15),zlim=(-0.2, 0.25)

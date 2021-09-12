@@ -44,7 +44,7 @@ EIGHT_PANEL = CURRENT_PATH + '/Setup/IMG_2872.MOV.BkCorrectedPerspCroppedColourC
 # pink texture
 PINK_WALLPAPER = CURRENT_PATH + '/Setup/pinkRandomDots.png'
 TEXTURES_FILES = [EIGHT_PANEL, PINK_WALLPAPER]
-#TEXTURES_FILES = [NEW_FLOWER, NEW_FLOWER]
+TEXTURES_FILES = [NEW_FLOWER, NEW_FLOWER]
 
 POSITIONS_XLS = CURRENT_PATH + '/Setup/beepath.xlsx'
 
@@ -696,25 +696,37 @@ def aaaaa():
     return (corner_points, normals_at_corners), (center_points, normals_at_center_points), (ommatidia_few_corners_normals, ommatidia_few_corners), selected_regions, selected_center_points, which_facets
 
 def visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, center_points, normals_at_center_points, beeHead, planes):
+    '''
+    3D visualise texture plane (grid)
+    and eye
+    '''
     p0 = beeHead.pos
     print('p0.shape',p0.shape)
 
     def rot(vectos):
         return np.dot(beeHead.R, vectos.T).T
 
-    ax3d = ax3dCreate()
+    # Eye
+    #ax3d = ax3dCreate(SZ=28.8)
+    ax3d = ax3dCreate(SZ=None)
     # rename `corner_points` to `*corners`
-    visualise_quiver(ax3d, rot(corner_points) + p0, rot(normals_at_corners), 'r')  # corners
-    visualise_quiver(ax3d, rot(center_points) + p0, rot(normals_at_center_points), 'b') # centers
+    visualise_quiver(ax3d, rot(corner_points) + p0, rot(normals_at_corners), color='r')  # corners
+    visualise_quiver(ax3d, rot(center_points) + p0, rot(normals_at_center_points), color='b') # centers
 
     general_direction = np.mean(center_points, 0)[None,:]
     visualise_quiver(ax3d, rot(general_direction) + p0, rot(general_direction), color='k') # centers
-    for i in range(len(planes)):
+
+    # All planes
+    if True:
+      for i in range(len(planes)):
         visualise_plane(ax3d, planes[i], color='tab:pink')
+
 
     # adding Visualisation of few points in 3D
     assert ommatidia_few_corners_normals.shape == ommatidia_few_corners.shape
-    visualise_quiver(ax3d, rot(ommatidia_few_corners) + p0, ommatidia_few_corners_normals * 0.01, 'm')
+    visualise_quiver(ax3d, rot(ommatidia_few_corners) + p0, ommatidia_few_corners_normals * 0.01, color='m')
+    #plt.show()
+    #exit()
     return ax3d
 
 
@@ -735,20 +747,33 @@ def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, tit
 
     X = rot(selected_center_points) + p0
 
-    ax3d = ax3dCreate()
-    ax3d.scatter(X[:,0], X[:,1], X[:,2], facecolors=regions_rgb, marker='.')
+    # A permutation: Which actual (in coords) should dbe shown on axes3d's firast axis?
+    _X, _Y, _Z = 0, 1, 2
+    #_X, _Y, _Z = 0, 2, 1 # Show your Ys oon axes3d Z, Zs on Y, Xs on X
+    ax3d = ax3dCreate(SZ=28.8)
+    ax3d.scatter(X[:,_X], X[:,_Y], X[:,_Z], facecolors=regions_rgb, marker='.')
     print('XXX ', X)
     print('regions_rgb ', regions_rgb)
 
-    ax3d.set_xlim(*array_minmax(X[:,0]))
-    ax3d.set_ylim(*array_minmax(X[:,1]))
-    ax3d.set_zlim(*array_minmax(X[:,2]))
-    ax3d.set_xlabel('X')
-    ax3d.set_ylabel('Y')
-    ax3d.set_zlabel('Z')
+    ax3d.set_xlim(*array_minmax(X[:,_X]))
+    ax3d.set_ylim(*array_minmax(X[:,_Y]))
+    ax3d.set_zlim(*array_minmax(X[:,_Z]))
+    set_axis_label(ax3d, _X, 'X')
+    set_axis_label(ax3d, _Y, 'Y')
+    set_axis_label(ax3d, _Z, 'Z')
     ax3d.set_title(title)
 
     return ax3d
+
+def set_axis_label(ax3d, xyz_index, label_text):
+  if xyz_index == 0:
+    ax3d.set_xlabel(label_text)
+  elif xyz_index == 1:
+    ax3d.set_ylabel(label_text)
+  elif xyz_index == 2:
+    ax3d.set_zlabel(label_text)
+  else:
+    raise
 
 def visualise_uv(u,v, u_few, v_few, texture, uv_rgba=None, title=None, fig=None):
     # (u,v) visualisation on plane (pixels)
@@ -996,7 +1021,8 @@ def anim_frame(
 
     if whether_visualise_eye_3d:
         # one center_point for each region. todo: re-index center_point-s based on selected regions
-        visualise_3d_situation_eye(selected_center_points, regions_rgba, beeHead, 'good ones')
+        ax3 = visualise_3d_situation_eye(selected_center_points, regions_rgba, beeHead, 'good ones')
+        #ax3.a
 
 
     if whether_visualise_uv_samples:
@@ -1059,8 +1085,8 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
     # Currently doesnt work. Using hard-coded values:
     RELATIVE_SCALE = 20.0
-    bee_direction = np.array([-RELATIVE_SCALE/2,  -RELATIVE_SCALE/2,  1.0])
-    bee_head_pos = np.array([0,  0, RELATIVE_SCALE*2])
+    bee_direction = np.array([-20.0/2,  -20.0/2*0,  1.0])
+    bee_head_pos = np.array([RELATIVE_SCALE*0.2*5,  RELATIVE_SCALE*0.2*5, RELATIVE_SCALE*0.2])
     frame_time = 0.0
 
     assert len(TEXTURES_FILES) == 2, '''Currently, textures for only only two sides supported for now. Coming soon.'''
