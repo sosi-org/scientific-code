@@ -29,6 +29,10 @@ SD_THRESHOLD=0.03 * 10000+1000
 
 
 
+UNIT_LEN_CM = image_loader.UNIT_LEN_CM
+UNIT_LEN_MM = image_loader.UNIT_LEN_MM
+
+
 # https://en.wikipedia.org/wiki/Blue_flower#/media/File:Bachelor's_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpg
 # https://en.wikipedia.org/wiki/Blue_flower
 BLUE_FLOWER = "../art/256px-Bachelor's_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpeg"
@@ -191,6 +195,10 @@ def one_hexagonal_rays(pindex, hexa_verts_table, points_xyz, normals_xyz):
     # return rays
     return (rays_origins, rays_dirs)
 
+CAST_CLIP_NONE = 'none'
+CAST_CLIP_FRONT = 't>0'
+CAST_CLIP_FULL = 'full'
+
 '''
      Based on `derive_formulas.py`
 '''
@@ -200,7 +208,7 @@ def ray_cast(
               C0 :tuple[float, float, float],
               D,
               O,
-              clip:bool=True
+              clip #clip:bool=True
             ):
    n = D.shape[0]
    assert D.shape == (n,3)
@@ -224,11 +232,21 @@ def ray_cast(
    b = (-dx*oy*uz + dx*oz*uy - dx*uy*z0 + dx*uz*y0 + dy*ox*uz - dy*oz*ux + dy*ux*z0 - dy*uz*x0 - dz*ox*uy + dz*oy*ux - dz*ux*y0 + dz*uy*x0) / denom
    t = (-ox*uy*vz + ox*uz*vy + oy*ux*vz - oy*uz*vx - oz*ux*vy + oz*uy*vx + ux*vy*z0 - ux*vz*y0 - uy*vx*z0 + uy*vz*x0 + uz*vx*y0 - uz*vy*x0) / denom
 
-   if (clip):
-       w = np.logical_and(t > 0,   a > -1.9)
-       w = np.logical_and(w,   b > -1.9)
-       w = np.logical_and(w,   a < 2.9)
-       w = np.logical_and(w,   b < 2.9)
+   if clip == CAST_CLIP_FULL:
+       MIN_A = -1.9
+       MIN_B = -1.9
+       MAX_A = +2.9
+       MAX_B = +2.9
+
+       MIN_A = 0.0
+       MIN_B = 0.0
+       MAX_A = +1.0
+       MAX_B = +1.0
+
+       w = np.logical_and(t > 0,   a > MIN_A)
+       w = np.logical_and(w,   b > MIN_B)
+       w = np.logical_and(w,   a < MAX_A)
+       w = np.logical_and(w,   b < MAX_B)
        #a = a[w]
        #b = b[w]
        #t = t[w]
@@ -236,6 +254,16 @@ def ray_cast(
        a[not_w] = np.NaN
        b[not_w] = np.NaN
        t[not_w] = np.NaN
+   elif clip == CAST_CLIP_FRONT:
+       w = t > 0
+       not_w = np.logical_not(w)
+       a[not_w] = np.NaN
+       b[not_w] = np.NaN
+       t[not_w] = np.NaN
+   elif clip == CAST_CLIP_NONE:
+       pass
+   else:
+       raise
 
    # todo: remove negative `t`
    #print(a)
@@ -338,7 +366,8 @@ def demo_lattice_eyes(EYE_SIZE):
 
 
 
-def raycastOmmatidium(eye_points, rays_dirs, bee_R, bee_pos, plane, clip:bool=True):
+# clip:bool=True
+def raycastOmmatidium(eye_points, rays_dirs, bee_R, bee_pos, plane, clip):
    n = rays_dirs.shape[0]
    assert eye_points.shape == (n, DIM3)
    assert rays_dirs.shape == (n, DIM3)
@@ -417,7 +446,7 @@ class BeeHead:
         assert self.pos.dtype == np.dtype(float)
         assert self.pos.shape == (1,3)
 
-    def set_direction(self, dirc):
+    def set_direction(self, dirc, size_cm):
         #bee_R = Rotation.from_rotvec(dirc, 180, degrees=True).as_matrix()
         #self.R = bee_R
         assert self.R.dtype == np.dtype(float)
@@ -464,6 +493,8 @@ class BeeHead:
         n=np.linalg.norm(self.R,axis=(0))
         assert np.all(np.isclose(n, (1,1,1)))
 
+        self.R = size_cm * B
+
 
 # Uses Voronoi
 def old_demo():
@@ -488,9 +519,9 @@ def old_demo():
 
     beeHead = BeeHead()
 
-    O,D,(u,v) = raycastOmmatidium(eye_points, normals_xyz, beeHead.R, beeHead.pos, plane)
+    O,D,(u,v) = raycastOmmatidium(eye_points, normals_xyz, beeHead.R, beeHead.pos, plane, clip=CAST_CLIP_FULL)
 
-    (rays_origins_transformed, rays_dirs_transformed, (u6,v6)) = raycastOmmatidium(rays_origins_e, rays_dirs, beeHead.R, beeHead.pos, plane)
+    (rays_origins_transformed, rays_dirs_transformed, (u6,v6)) = raycastOmmatidium(rays_origins_e, rays_dirs, beeHead.R, beeHead.pos, plane, clip=CAST_CLIP_FULL)
     visuaise_3d(rays_origins_transformed, rays_dirs_transformed, O, plane)
 
 
@@ -740,12 +771,16 @@ def array_minmax(x):
 def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, title):
     assert selected_center_points.shape[0] == regions_rgb.shape[0]
 
-    p0 = beeHead.pos
+    if beeHead is not None:
+      p0 = beeHead.pos
 
-    def rot(vectors):
-        return np.dot(beeHead.R, vectors.T).T
+      def rot(vectors):
+          return np.dot(beeHead.R, vectors.T).T
 
-    X = rot(selected_center_points) + p0
+      X = rot(selected_center_points) + p0
+
+    else:
+      X = selected_center_points
 
     # A permutation: Which actual (in coords) should dbe shown on axes3d's firast axis?
     _X, _Y, _Z = 0, 1, 2
@@ -950,7 +985,7 @@ def trajectory_transformation():
 
 def anim_frame(
       textures, planes,
-      M, bee_head_pos, bee_direction,
+      M, bee_head_pos, bee_direction, eyeSphereSizeCM,
       corner_points, normals_at_corners,
       ommatidia_few_corners, ommatidia_few_corners_normals,
       selected_regions, which_facets,
@@ -960,17 +995,29 @@ def anim_frame(
       text_description=''
 ):
 
-    head_transformation = -M*10 # -M*10 is adhoc
-
+    head_transformation = -M*10 *1000 # -M*10 is adhoc
     beeHead = BeeHead(head_transformation)
+    # `M` and `head_transformation` are later ignored
+
+    # The size of the unit sphere is multiplied by this `eyeSphereSize`
     beeHead.set_eye_position(bee_head_pos)
     # todo: set_direction() not implemented
-    beeHead.set_direction(bee_direction)
+    beeHead.set_direction(bee_direction, eyeSphereSizeCM)
+
+    xx = corner_points
+    print('@>>>')
+    print(xx.shape) # (6496, 3)
+    # Points on a unit sphere
+    print( np.linalg.norm(xx, axis=1) )
+    print( np.mean(xx, axis=0) )
+
+    print('beeHead.R', beeHead.R)
+
 
     # corners, normals_at_corners (6496, 3) (6496, 3)
     print('corners, normals_at_corners', corner_points.shape, normals_at_corners.shape)
     #for i in range(len(planes)):
-    O,D,(u,v) = raycastOmmatidium(corner_points, normals_at_corners, beeHead.R, beeHead.pos, planes[0] )
+    O,D,(u,v) = raycastOmmatidium(corner_points, normals_at_corners, beeHead.R, beeHead.pos, planes[0], clip=CAST_CLIP_NONE )
     assert u.shape ==(corner_points.shape[0],)
 
     assert len(planes) == 1, "A single plane (single side) is supported. Coming soon."
@@ -979,11 +1026,11 @@ def anim_frame(
     else:
       print ("Warning: A single texture (single side) is supported. Using the first one only. Coming soon.")
 
-
+    # A few other points too
     O_few,D_few,(u_few,v_few) = raycastOmmatidium(
        ommatidia_few_corners, ommatidia_few_corners_normals,
        beeHead.R, beeHead.pos, planes[0],
-       clip=False)
+       clip=CAST_CLIP_NONE)
 
 
     if whether_visualise_uv_scatter:
@@ -1057,6 +1104,26 @@ def position_source():
 
 def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets):
 
+    if False:
+      # PLAIN plot raw eye data
+      ax3 = visualise_3d_situation_eye(center_points, center_points*0.0, None, 'simple eye')
+      # **
+      #ax3 = visualise_3d_situation_eye(corner_points, corner_points*0.0, None, 'simple eye')
+
+      if False:
+            assert X.shape == N.shape
+            assert X.shape[0] == N.shape[0]
+
+            qv = ax3d.quiver( \
+              X[:,0], X[:,1], X[:,2], \
+              N[:,0],N[:,1],N[:,2], \
+              pivot='tail', length=0.1/10, normalize=True, color=color
+              )
+
+      # 0000
+      plt.show()
+      exit()
+
 
     #(M, bee_head_pos, bee_direction) = position_source()
     (M, bee_path, bee_directions, frameTimes) = position_source()
@@ -1083,10 +1150,46 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     # IN_PROGRESS:
     # requires some refacgtoring/parametrising the scale of the experiment. 
 
+    # left eye
+    # lean right
+
+    # Y: -1=nose-up +1=nose-down
+    # X: +1=left (of the honey bee)
+    # Z: -1=front (oops)
+
+    #0.7071067811865475 = sin(45)
+    #0.49999999999999994 = sin(30)
+
     # Currently doesnt work. Using hard-coded values:
-    RELATIVE_SCALE = 20.0
-    bee_direction = np.array([-20.0/2,  -20.0/2*0,  1.0])
-    bee_head_pos = np.array([RELATIVE_SCALE*0.2*5,  RELATIVE_SCALE*0.2*5, RELATIVE_SCALE*0.2])
+    #RELATIVE_SCALE = 20.0 * UNIT_LEN_CM
+    #bee_direction = np.array([-20.0/2,  -20.0/2*0,  1.0])
+    #bee_head_pos = np.array([RELATIVE_SCALE*0.2*5,  RELATIVE_SCALE*0.2*5, RELATIVE_SCALE*0.2])
+
+    # RELATIVE_SCALE = 20.0 * UNIT_LEN_CM
+    #bee_direction = np.array([0.5,  0,  0.86])
+    #bee_head_pos = np.array([RELATIVE_SCALE*0.2*11,  RELATIVE_SCALE*0.2*5, RELATIVE_SCALE*0.2])
+
+    #RELATIVE_SCALE = 20.0 * UNIT_LEN_CM
+    #bee_direction = np.array([0.5,  0,  0.86])
+    #bee_head_pos = np.array([RELATIVE_SCALE*0.2*11,  RELATIVE_SCALE*0.2*5, RELATIVE_SCALE*0.01])
+    #bee_head_pos = np.array([44.0*UNIT_LEN_CM,  20.0*UNIT_LEN_CM, 0.2*UNIT_LEN_CM])
+
+    # picture physical size (80.8, 63.40) (cm x cm)
+    #bee_head_pos = np.array([40.0*UNIT_LEN_CM,  31.0*UNIT_LEN_CM, 1*UNIT_LEN_CM])
+    #bee_head_pos = np.array([50.0*UNIT_LEN_CM,  45.0*UNIT_LEN_CM, -10*UNIT_LEN_CM])
+
+
+    #bee_direction = np.array([0.5,  0,  -0.86])   #looks towards positive-Z, left eye
+    ##bee_head_pos = np.array([50.0*UNIT_LEN_CM,  45.0*UNIT_LEN_CM, -1*UNIT_LEN_CM])
+    #bee_head_pos = np.array([45.0*UNIT_LEN_CM,  45.0*UNIT_LEN_CM, -1*UNIT_LEN_CM])
+    #eyeSphereSizeCM = 2.0 * UNIT_LEN_MM * 0.001
+
+
+    bee_direction = np.array([-0.5,  0,  -0.86])   #looks towards positive-Z, left eye
+    bee_head_pos = np.array([45.0*UNIT_LEN_CM,  45.0*UNIT_LEN_CM, -1*UNIT_LEN_CM])
+    eyeSphereSizeCM = 2.0 * UNIT_LEN_MM * 0.001
+
+
     frame_time = 0.0
 
     assert len(TEXTURES_FILES) == 2, '''Currently, textures for only only two sides supported for now. Coming soon.'''
@@ -1105,14 +1208,16 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     #plane2 = Plane(*physical_size2)
     #plane1 = Plane(*physical_size1)
     #plane1 = Plane(*physical_size1, C0_pos=(0,0,0))
-    plane1 = Plane(*physical_size1, C0_pos=(-17.5,-26.0,0))
+    # Blue flower:
+    #plane1 = Plane(*physical_size1, C0_pos=(-17.5,-26.0,0))  # units in CM
+    plane1 = Plane(*physical_size1, C0_pos=(0.0, 0.0, 0))  # units in CM
     #planes = [plane1, plane2]
     planes = [plane1,]
 
     beeHead, regions_rgba,_ = \
     anim_frame(
         textures, planes,
-        M, bee_head_pos, bee_direction,
+        M, bee_head_pos, bee_direction, eyeSphereSizeCM,
         corner_points, normals_at_corners,
         ommatidia_few_corners, ommatidia_few_corners_normals,
         selected_regions, which_facets,
@@ -1123,7 +1228,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     )
     # show first figure, using custom Bee position
     plt.show()
-    # exit()
+    exit()
 
     #######################################
     # Part two: Figure two: animated, etc
@@ -1195,12 +1300,14 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
         print(bee_direction.shape) # (3,)
         print(bee_direction)
 
+        eyeSphereSizeCM = 1.0 * UNIT_LEN_CM
+
         text_description = f'time: {round(frame_time,2)} (s)   frame:{animation_frame_index}'
         anim_fig.clear() # Much faster
         (beeHead, regions_rgba, anim_frame_artist) = \
         anim_frame(
             textures, planes,
-            M, bee_head_pos, bee_direction,
+            M, bee_head_pos, bee_direction, eyeSphereSizeCM,
             corner_points, normals_at_corners,
             ommatidia_few_corners, ommatidia_few_corners_normals,
             selected_regions, which_facets,

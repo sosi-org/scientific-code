@@ -11,6 +11,8 @@ def load_image(image_path):
 
    return pict_array2d
 
+UNIT_LEN_CM = 1.0
+UNIT_LEN_MM = 0.1
 
 def load_image_withsize(image_path, sample_px=200, sample_cm=10.0, dpi=None):
    '''
