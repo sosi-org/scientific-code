@@ -265,10 +265,12 @@ def ray_cast(
    else:
        raise
 
-   # todo: remove negative `t`
-   #print(a)
-   #print(b)
-   return (a,b)
+   #plane = UV*ab + C0
+   #ray = O + t * D
+   #plane - ray == 0
+   #castedPoints = O + D * t
+
+   return (a,b),t
 
 
 def tuple3_to_np(pxyz):
@@ -367,7 +369,7 @@ def demo_lattice_eyes(EYE_SIZE):
 
 
 # clip:bool=True
-def raycastOmmatidium(eye_points, rays_dirs, bee_R, bee_pos, plane, clip):
+def raycastOmmatidium(eye_points, rays_dirs, bee_R, bee_pos, plane, clip, return_casted_points=False):
    n = rays_dirs.shape[0]
    assert eye_points.shape == (n, DIM3)
    assert rays_dirs.shape == (n, DIM3)
@@ -376,8 +378,15 @@ def raycastOmmatidium(eye_points, rays_dirs, bee_R, bee_pos, plane, clip):
 
    O = np.dot(bee_R, eye_points.T).T + bee_pos
    D = np.dot(bee_R, rays_dirs.T).T
-   (u,v) = ray_cast(plane.U,plane.V,plane.C0, D,O, clip=clip)
-   return O, D, (u,v)
+   (u,v),t = ray_cast(plane.U, plane.V, plane.C0, D,O, clip=clip)
+   if return_casted_points:
+      print(O.shape)
+      print(D.shape)
+      print(t.shape)
+      castedPoints = O + D * t[:, None]
+      return O, D, (u,v), castedPoints
+   else:
+      return O, D, (u,v)
 
 """
 Coordinate system:
@@ -768,7 +777,7 @@ def array_minmax(x):
     (mn,mx) = ((mn-md)*1.2+md, (mx-md)*1.2+md)
     return (mn, mx)
 
-def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, title):
+def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, title, ax3d_reuse=None):
     assert selected_center_points.shape[0] == regions_rgb.shape[0]
 
     if beeHead is not None:
@@ -785,18 +794,22 @@ def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, tit
     # A permutation: Which actual (in coords) should dbe shown on axes3d's firast axis?
     _X, _Y, _Z = 0, 1, 2
     #_X, _Y, _Z = 0, 2, 1 # Show your Ys oon axes3d Z, Zs on Y, Xs on X
-    ax3d = ax3dCreate(SZ=28.8)
-    ax3d.scatter(X[:,_X], X[:,_Y], X[:,_Z], facecolors=regions_rgb, marker='.')
-    print('XXX ', X)
-    print('regions_rgb ', regions_rgb)
+    ax3d = None
+    if ax3d_reuse is None:
+        ax3d = ax3dCreate(SZ=28.8)
+    else:
+        ax3d = ax3d_reuse
 
-    ax3d.set_xlim(*array_minmax(X[:,_X]))
-    ax3d.set_ylim(*array_minmax(X[:,_Y]))
-    ax3d.set_zlim(*array_minmax(X[:,_Z]))
-    set_axis_label(ax3d, _X, 'X')
-    set_axis_label(ax3d, _Y, 'Y')
-    set_axis_label(ax3d, _Z, 'Z')
-    ax3d.set_title(title)
+    ax3d.scatter(X[:,_X], X[:,_Y], X[:,_Z], facecolors=regions_rgb, marker='.')
+
+    if ax3d_reuse is None:
+        ax3d.set_xlim(*array_minmax(X[:,_X]))
+        ax3d.set_ylim(*array_minmax(X[:,_Y]))
+        ax3d.set_zlim(*array_minmax(X[:,_Z]))
+        set_axis_label(ax3d, _X, 'X')
+        set_axis_label(ax3d, _Y, 'Y')
+        set_axis_label(ax3d, _Z, 'Z')
+        ax3d.set_title(title)
 
     return ax3d
 
@@ -985,11 +998,14 @@ def trajectory_transformation():
 
 def anim_frame(
       textures, planes,
-      M, bee_head_pos, bee_direction, eyeSphereSizeCM,
+      M, bee_head_pos, bee_direction, eyeSphereSizeCM,clip,
       corner_points, normals_at_corners,
       ommatidia_few_corners, ommatidia_few_corners_normals,
       selected_regions, which_facets,
+
+      # points to project: no!
       selected_center_points,
+
       whether_visualise_eye_3d, whether_visualise_uv_samples, whether_visualise_uv_scatter,
       animation_fig=None,
       text_description=''
@@ -1004,12 +1020,10 @@ def anim_frame(
     # todo: set_direction() not implemented
     beeHead.set_direction(bee_direction, eyeSphereSizeCM)
 
-    xx = corner_points
-    print('@>>>')
-    print(xx.shape) # (6496, 3)
-    # Points on a unit sphere
-    print( np.linalg.norm(xx, axis=1) )
-    print( np.mean(xx, axis=0) )
+    # xx = corner_points
+    # xx.shape is 6496, 3
+    # Points are on a unit sphere
+    # print( np.linalg.norm(xx, axis=1) )  -> [1,1,1,...]
 
     print('beeHead.R', beeHead.R)
 
@@ -1017,7 +1031,7 @@ def anim_frame(
     # corners, normals_at_corners (6496, 3) (6496, 3)
     print('corners, normals_at_corners', corner_points.shape, normals_at_corners.shape)
     #for i in range(len(planes)):
-    O,D,(u,v) = raycastOmmatidium(corner_points, normals_at_corners, beeHead.R, beeHead.pos, planes[0], clip=CAST_CLIP_NONE )
+    O,D,(u,v),casted_points = raycastOmmatidium(corner_points, normals_at_corners, beeHead.R, beeHead.pos, planes[0], clip=clip, return_casted_points=True)
     assert u.shape ==(corner_points.shape[0],)
 
     assert len(planes) == 1, "A single plane (single side) is supported. Coming soon."
@@ -1059,7 +1073,7 @@ def anim_frame(
     print('non-nan', np.sum(np.logical_not(np.isnan(regions_rgb)), axis=0)) # [14,14,14]
 
     nans = np.isnan(regions_rgb[:,0])
-    one = np.ones((regions_rgb.shape[0],1), dtype=np.float)
+    one = np.ones((regions_rgb.shape[0],1), dtype=float)
     regions_rgba = np.concatenate( (regions_rgb / 255.0, one), axis=1)
     _ALPHA = 3
     regions_rgba[nans, 0:2] = 0.0
@@ -1068,8 +1082,13 @@ def anim_frame(
 
     if whether_visualise_eye_3d:
         # one center_point for each region. todo: re-index center_point-s based on selected regions
-        ax3 = visualise_3d_situation_eye(selected_center_points, regions_rgba, beeHead, 'good ones')
-        #ax3.a
+        ax3 = visualise_3d_situation_eye(selected_center_points, regions_rgba, beeHead, 'eye')
+        # in progress
+        #print('----')
+        #print(selected_center_points.shape, casted_points.shape)
+        #print(regions_rgba.shape)
+        #visualise_3d_situation_eye(casted_points, regions_rgba, beeHead, 'eye', ax3d_reuse=ax3)
+        # reminder: selected_center_points = select_centers(which_facets, center_points)
 
 
     if whether_visualise_uv_samples:
@@ -1103,6 +1122,17 @@ def position_source():
 
 
 def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets):
+
+    FLIP = np.diag([-1.0,1,-1])
+    def mult(a,b, c):
+      return np.dot(a, b.T).T  + c #+ c[None,:]
+    corner_points = mult(FLIP, corner_points, 0)
+    normals_at_corners = mult(FLIP, normals_at_corners, 0)
+    center_points = mult(FLIP, center_points, 0)
+    normals_at_center_points = mult(FLIP, normals_at_center_points, 0)
+    ommatidia_few_corners_normals = mult(FLIP, ommatidia_few_corners_normals, 0)
+    ommatidia_few_corners = mult(FLIP, ommatidia_few_corners, 0)
+    selected_center_points = mult(FLIP, selected_center_points, 0)
 
     if False:
       # PLAIN plot raw eye data
@@ -1185,9 +1215,17 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     #eyeSphereSizeCM = 2.0 * UNIT_LEN_MM * 0.001
 
 
-    bee_direction = np.array([-0.5,  0,  -0.86])   #looks towards positive-Z, left eye
-    bee_head_pos = np.array([45.0*UNIT_LEN_CM,  45.0*UNIT_LEN_CM, -1*UNIT_LEN_CM])
-    eyeSphereSizeCM = 2.0 * UNIT_LEN_MM * 0.001
+    #bee_direction = np.array([-0.5,  0,  -0.86])   #looks towards positive-Z, left eye
+    #bee_head_pos = np.array([45.0*UNIT_LEN_CM,  45.0*UNIT_LEN_CM, -1*UNIT_LEN_CM])
+    #eyeSphereSizeCM = 2.0 * UNIT_LEN_MM * 0.001
+
+    # after flip-ing the eye 180:
+
+    bee_direction = np.array([+0.5,  0,  0.86])   #looks towards positive-Z, left eye
+    bee_head_pos = np.array([45.0*UNIT_LEN_CM,  45.0*UNIT_LEN_CM, -10*UNIT_LEN_CM])
+    eyeSphereSizeCM = 2.0 * UNIT_LEN_MM * 0.1*400
+    #clip=CAST_CLIP_NONE
+    clip=CAST_CLIP_FULL
 
 
     frame_time = 0.0
@@ -1217,7 +1255,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     beeHead, regions_rgba,_ = \
     anim_frame(
         textures, planes,
-        M, bee_head_pos, bee_direction, eyeSphereSizeCM,
+        M, bee_head_pos, bee_direction, eyeSphereSizeCM,clip,
         corner_points, normals_at_corners,
         ommatidia_few_corners, ommatidia_few_corners_normals,
         selected_regions, which_facets,
@@ -1228,7 +1266,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     )
     # show first figure, using custom Bee position
     plt.show()
-    exit()
+    #exit()
 
     #######################################
     # Part two: Figure two: animated, etc
@@ -1302,12 +1340,14 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
         eyeSphereSizeCM = 1.0 * UNIT_LEN_CM
 
+        clip=CAST_CLIP_FULL
+
         text_description = f'time: {round(frame_time,2)} (s)   frame:{animation_frame_index}'
         anim_fig.clear() # Much faster
         (beeHead, regions_rgba, anim_frame_artist) = \
         anim_frame(
             textures, planes,
-            M, bee_head_pos, bee_direction, eyeSphereSizeCM,
+            M, bee_head_pos, bee_direction, eyeSphereSizeCM,clip,
             corner_points, normals_at_corners,
             ommatidia_few_corners, ommatidia_few_corners_normals,
             selected_regions, which_facets,
