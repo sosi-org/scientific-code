@@ -1350,8 +1350,8 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
     # after flip-ing the eye 180:
 
-    bee_direction = np.array([+0.5,  0,  0.86])   #looks towards positive-Z, left eye
-    bee_head_pos = np.array([45.0*UNIT_LEN_CM,  45.0*UNIT_LEN_CM, 20*UNIT_LEN_CM])
+    bee_direction = np.array([-0.5,  0,  0.86])   #looks towards positive-Z, left eye
+    bee_head_pos = np.array([45.0*UNIT_LEN_CM,  45.0*UNIT_LEN_CM, -20*UNIT_LEN_CM])
     eye_sphere_size_cm = 2.0 * UNIT_LEN_MM * 10 # * 0.1*400
     #clip=CAST_CLIP_NONE
     clip=CAST_CLIP_FULL
