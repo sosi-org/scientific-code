@@ -371,7 +371,7 @@ def demo_lattice_eyes(EYE_SIZE):
 
 
 
-def getOmmatidiumOD(eye_points, rays_dirs, bee_R, bee_pos, bee_eye_sphere_size_cm):
+def getActualOmmatidiumRays(eye_points, rays_dirs, bee_R, bee_pos, bee_eye_sphere_size_cm):
    n = rays_dirs.shape[0]
    assert eye_points.shape == (n, DIM3)
    assert rays_dirs.shape == (n, DIM3)
@@ -387,7 +387,7 @@ def getOmmatidiumOD(eye_points, rays_dirs, bee_R, bee_pos, bee_eye_sphere_size_c
 
 # clip:bool=True
 
-def raycastOmmatidium(O, D, plane, clip, return_casted_points=False):
+def raycastRaysOnPlane(O, D, plane, clip, return_casted_points=False):
    (u,v),t = ray_cast(plane.U, plane.V, plane.C0, D,O, clip=clip)
    if return_casted_points:
       assert t.shape == D.shape[:1]
@@ -538,12 +538,12 @@ def old_demo():
 
     eye_size_cm = 1.0 * UNIT_LEN_CM
 
-    O,D = getOmmatidiumOD(eye_points, normals_xyz, beeHead.R, beeHead.pos, eye_size_cm)
-    (u,v) = raycastOmmatidium(O,D, plane, clip=CAST_CLIP_FULL)
+    O,D = getActualOmmatidiumRays(eye_points, normals_xyz, beeHead.R, beeHead.pos, eye_size_cm)
+    (u,v) = raycastRaysOnPlane(O,D, plane, clip=CAST_CLIP_FULL)
 
 
-    rays_origins_transformed, rays_dirs_transformed = getOmmatidiumOD(rays_origins_e, rays_dirs, beeHead.R, beeHead.pos, eye_size_cm)
-    (u6,v6) = raycastOmmatidium(
+    rays_origins_transformed, rays_dirs_transformed = getActualOmmatidiumRays(rays_origins_e, rays_dirs, beeHead.R, beeHead.pos, eye_size_cm)
+    (u6,v6) = raycastRaysOnPlane(
       rays_origins_transformed, rays_dirs_transformed,
       plane, clip=CAST_CLIP_FULL)
     visuaise_3d(rays_origins_transformed, rays_dirs_transformed, O, plane)
@@ -1072,14 +1072,14 @@ def anim_frame(
     print('corners, normals_at_corners', points_to_cast.shape, normals_at_corners.shape)
 
 
-    selected_center_points_actual, __selected_centerpoints_normals_actual = getOmmatidiumOD(selected_center_points, selected_center_points*0,
+    selected_center_points_actual, __selected_centerpoints_normals_actual = getActualOmmatidiumRays(selected_center_points, selected_center_points*0,
       beeHead.R, beeHead.pos, beeHead.eye_size_cm)
 
-    O,D = getOmmatidiumOD(points_to_cast, normals_at_corners,
+    O,D = getActualOmmatidiumRays(points_to_cast, normals_at_corners,
       beeHead.R, beeHead.pos, beeHead.eye_size_cm)
 
     #for i in range(len(planes)):
-    (u,v),casted_points = raycastOmmatidium(
+    (u,v),casted_points = raycastRaysOnPlane(
       O,D,
       planes[0],
       clip=clip,
@@ -1096,11 +1096,11 @@ def anim_frame(
       print ("Warning: A single texture (single side) is supported. Using the first one only. Coming soon.")
 
 
-    O_few,D_few = getOmmatidiumOD(
+    O_few,D_few = getActualOmmatidiumRays(
        ommatidia_few_corners, ommatidia_few_corners_normals,
        beeHead.R, beeHead.pos, eye_sphere_size_cm)
     # A few other points too
-    (u_few,v_few) = raycastOmmatidium(
+    (u_few,v_few) = raycastRaysOnPlane(
        O_few,D_few,
        planes[0],
        clip=CAST_CLIP_NONE)
