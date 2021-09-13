@@ -1009,33 +1009,7 @@ def trajectory_stats(bee_path):
     '''
     #exit()
 
-'''
-Affine transormation for correcting the mismtch between the units in Excel file and assumed orientation of the plane.
-Do do, apply the reverse of this to the plane only.
-The plane's dimentions are correct. But its orientation.
-Todo:
-   Just rescale (nd not rotate) the trajectory data.
-   But apply the reverse of this transform to the plane.
-'''
-def trajectory_transformation():
-    maxy = np.array([7,+372,272])[None,:]
-    M = np.eye(3)
-    # '''
-    M = M * 0
-    # M[to,from]
-    _X = 0
-    _Y = 1
-    _Z = 2
-    M[_X ,_X] = 1.0
-    M[_Y ,_Z] = -1.0
-    M[_Z ,_Y] = -1.0 # should be negative
 
-    # z,x -> (y,x)
-    # z,x,y -> (y,x,z)
-    # x,y,z -> (x,z,y)
-    M = M / 10.0
-
-    return M, maxy
 
 def anim_frame(
       textures, planes,
@@ -1045,7 +1019,8 @@ def anim_frame(
       selected_regions, which_facets,
 
       # points to project: no!
-      selected_center_points,
+      selected_center_points, selected_center_points_normal,
+      #center_points, center_points_normal,
 
       whether_visualise_eye_3d, whether_visualise_uv_samples, whether_visualise_uv_scatter,
       animation_fig=None,
@@ -1071,16 +1046,26 @@ def anim_frame(
 
     print('beeHead.R', beeHead.R)
 
+    # CORNER-based
+    CORNER_BASED = True
 
-    points_to_cast = corner_points #* beeHead.eye_size_cm
-    # corners, normals_at_corners (6496, 3) (6496, 3)
-    print('corners, normals_at_corners', points_to_cast.shape, normals_at_corners.shape)
+    if CORNER_BASED:
+        points_to_cast = corner_points #* beeHead.eye_size_cm
+        normals_to_cast = normals_at_corners
+        # corners, normals_to_cast (6496, 3) (6496, 3)
+        print('corners, normals_to_cast', points_to_cast.shape, normals_to_cast.shape)
+    else:
+        #points_to_cast = selected_center_points
+        #normals_to_cast = selected_center_points_normals
+        points_to_cast = center_points
+        normals_to_cast = center_points_normal
+
 
 
     #selected_center_points_actual, __selected_centerpoints_normals_actual = getActualOmmatidiumRays(selected_center_points, selected_center_points*0,
     #  beeHead.R, beeHead.pos, beeHead.eye_size_cm)
 
-    O,D = getActualOmmatidiumRays(points_to_cast, normals_at_corners,
+    O,D = getActualOmmatidiumRays(points_to_cast, normals_to_cast,
       beeHead.R, beeHead.pos, beeHead.eye_size_cm)
 
     print('@@beeHead.eye_size_cm', beeHead.eye_size_cm)
@@ -1104,6 +1089,7 @@ def anim_frame(
       print ("Warning: A single texture (single side) is supported. Using the first one only. Coming soon.")
 
 
+    # or selected_center_points
     O_few,D_few = getActualOmmatidiumRays(
        ommatidia_few_corners, ommatidia_few_corners_normals,
        beeHead.R, beeHead.pos, eye_sphere_size_cm)
@@ -1124,6 +1110,7 @@ def anim_frame(
 
     # `selected_regions` is ..., which match `which_facets`
 
+    #if CORNER_BASED:
     nfs = np.sum(which_facets)
     #assert selected_uv.shape[0] == nfs
     assert len(selected_regions) == nfs
@@ -1153,6 +1140,14 @@ def anim_frame(
         regions_rgba[nans, _ALPHA] = 0.0
         return regions_rgba
 
+    def alpha1(rgba):
+        _ALPHA = 3
+        nans = np.isnan(rgba[:,0])
+        rgba[nans, 0:2] = 0.0
+        rgba[:, _ALPHA] = 1.0
+        rgba[nans, _ALPHA] = 0.0
+        return rgba
+
     regions_rgba = rgb_to_rgba(regions_rgb)
 
     if whether_visualise_eye_3d:
@@ -1169,13 +1164,21 @@ def anim_frame(
         uv_rgb, *_ = sampling.sample_colors(uv, None, textures[0])
         uv_rgba = rgb_to_rgba(uv_rgb)
         #print('----second')
-        ax3 = visualise_3d_situation_eye(O+np.array([2,0,0])[None,:], uv_rgba, None, 'eye', set_lims=False, ax3d_reuse=ax3)
+        OFFSET = np.array([2,0,0])[None,:]*0
+
+        ax3 = visualise_3d_situation_eye(O+OFFSET, alpha1(uv_rgba*0), None, 'eye', set_lims=False, ax3d_reuse=None)
         visualise_3d_situation_eye(casted_points, uv_rgba, None, 'eye', ax3d_reuse=ax3)
 
-        ax3.set_xlim(-100,100)
-        ax3.set_ylim(-100*0,100)
-        ax3.set_zlim(-100,100)
+        #ax3.set_xlim(-100,100)
+        ax3.set_xlim(0,80)
+        ax3.set_ylim(0,80)
+        #ax3.set_zlim(-100,100)
 
+        #ZS = 5.0
+        ZS = 15.0
+        ax3.set_zlim(20-ZS, 20+ZS)
+        ax3.set_xlim(45-ZS, 45+ZS)
+        ax3.set_ylim(45-ZS, 45+ZS)
 
         #print('second ok')
 
@@ -1200,19 +1203,50 @@ def anim_frame(
 
     return (beeHead, regions_rgba, anim_frame_artist)
 
-def position_source():
+def trajectory_provider():
+
     bee_traj = load_trajectory_cached(POSITIONS_XLS)
 
+    def trajectory_transformation():
+        '''
+        Affine transormation for correcting the mismtch between the units in Excel file and assumed orientation of the plane.
+        Do do, apply the reverse of this to the plane only.
+        The plane's dimentions are correct. But its orientation.
+        Todo:
+          Just rescale (nd not rotate) the trajectory data.
+          But apply the reverse of this transform to the plane.
+        '''
+        maxy = np.array([7,+372,272])[None,:]
+        M = np.eye(3)
+        # '''
+        M = M * 0
+        # M[to,from]
+        _X = 0
+        _Y = 1
+        _Z = 2
+        M[_X ,_X] = 1.0
+        M[_Y ,_Z] = -1.0
+        M[_Z ,_Y] = -1.0 # should be negative
+
+        # z,x -> (y,x)
+        # z,x,y -> (y,x,z)
+        # x,y,z -> (x,z,y)
+        M = M / 10.0
+
+        return M, maxy
+
+    # Apply a linear transformation on bee trajectory
     M, maxy = trajectory_transformation()
 
     print(bee_traj._RWSmoothed)
-
-    print('bee_traj', bee_traj)
-    frameTimes = bee_traj['fTime']
+    #print('bee_traj', bee_traj)
+    frame_times = bee_traj['fTime']
     bee_path = np.dot( bee_traj['RWSmoothed'] - maxy, M.T) + np.array([0,0,0])[None,:]
     bee_directions = bee_traj['direction']
-    return (M, bee_path, bee_directions, frameTimes)
+
     #return (M, bee_head_pos, bee_direction)
+    #return (M, bee_path, bee_directions, frame_times)
+    return (bee_path, bee_directions, frame_times)
 
 
 def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets):
@@ -1249,8 +1283,9 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
       exit()
 
 
-    #(M, bee_head_pos, bee_direction) = position_source()
-    (M, bee_path, bee_directions, frameTimes) = position_source()
+    #(M, bee_head_pos, bee_direction) = trajectory_provider()
+    #(M, bee_path, bee_directions, frame_times) = trajectory_provider()
+    (bee_path, bee_directions, frame_times) = trajectory_provider()
 
 
     #######################################
@@ -1264,7 +1299,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     #bee_head_pos = bee_path[None, frame_index,:]
     bee_head_pos = bee_path[frame_index,:]
     bee_direction = bee_directions[frame_index]
-    frame_time = frameTimes[frame_index]
+    frame_time = frame_times[frame_index]
 
     print('frame_time', frame_time)
     print('bee_direction', bee_direction)
@@ -1346,6 +1381,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     #planes = [plane1, plane2]
     planes = [plane1,]
 
+    selected_center_points_normal = None
     beeHead, regions_rgba,_ = \
     anim_frame(
         textures, planes,
@@ -1353,7 +1389,8 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
         corner_points, normals_at_corners,
         ommatidia_few_corners, ommatidia_few_corners_normals,
         selected_regions, which_facets,
-        selected_center_points,
+        selected_center_points, selected_center_points_normal,
+        #center_points, normals_at_center_points,
         whether_visualise_eye_3d=True, whether_visualise_uv_samples=True,
         whether_visualise_uv_scatter=True,
         text_description='text'
@@ -1424,7 +1461,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
         bee_head_pos = bee_path[frame_index]
         bee_direction = bee_directions[frame_index]
-        frame_time = frameTimes[frame_index, 0]
+        frame_time = frame_times[frame_index, 0]
 
         print('ok')
         print(bee_head_pos.shape) # (3,)
@@ -1441,11 +1478,12 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
         (beeHead, regions_rgba, anim_frame_artist) = \
         anim_frame(
             textures, planes,
-            bee_head_pos, bee_direction, eye_sphere_size_cm,clip,
+            bee_head_pos, bee_direction, eye_sphere_size_cm, clip,
             corner_points, normals_at_corners,
             ommatidia_few_corners, ommatidia_few_corners_normals,
             selected_regions, which_facets,
-            selected_center_points,
+            selected_center_points, selected_center_points_normal,
+            #center_points, normals_at_center_points,
             whether_visualise_eye_3d=False, whether_visualise_uv_samples=True,
             whether_visualise_uv_scatter=False,
             animation_fig=anim_fig,
