@@ -1039,7 +1039,7 @@ def trajectory_transformation():
 
 def anim_frame(
       textures, planes,
-      M, bee_head_pos, bee_direction, eye_sphere_size_cm, clip,
+      bee_head_pos, bee_direction, eye_sphere_size_cm, clip,
       corner_points, normals_at_corners,
       ommatidia_few_corners, ommatidia_few_corners_normals,
       selected_regions, which_facets,
@@ -1052,7 +1052,7 @@ def anim_frame(
       text_description=''
 ):
 
-    head_transformation = -M*10 *1000 # -M*10 is adhoc
+    #head_transformation = -M*10 *1000 # -M*10 is adhoc
     #beeHead = BeeHead(head_transformation)
     beeHead = BeeHead()
     # `M` and `head_transformation` are later ignored
@@ -1349,7 +1349,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     beeHead, regions_rgba,_ = \
     anim_frame(
         textures, planes,
-        M, bee_head_pos, bee_direction, eye_sphere_size_cm, clip,
+        bee_head_pos, bee_direction, eye_sphere_size_cm, clip,
         corner_points, normals_at_corners,
         ommatidia_few_corners, ommatidia_few_corners_normals,
         selected_regions, which_facets,
@@ -1360,7 +1360,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     )
     # show first figure, using custom Bee position
     plt.show()
-    exit()
+    #exit()
 
     #######################################
     # Part two: Figure two: animated, etc
@@ -1441,7 +1441,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
         (beeHead, regions_rgba, anim_frame_artist) = \
         anim_frame(
             textures, planes,
-            M, bee_head_pos, bee_direction, eye_sphere_size_cm,clip,
+            bee_head_pos, bee_direction, eye_sphere_size_cm,clip,
             corner_points, normals_at_corners,
             ommatidia_few_corners, ommatidia_few_corners_normals,
             selected_regions, which_facets,
