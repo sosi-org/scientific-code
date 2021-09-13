@@ -1176,7 +1176,7 @@ def anim_frame(
 
         #ZS = 5.0
         ZS = 15.0
-        ax3.set_zlim(20-ZS, 20+ZS)
+        ax3.set_zlim(-20-ZS, -20+ZS)
         ax3.set_xlim(45-ZS, 45+ZS)
         ax3.set_ylim(45-ZS, 45+ZS)
 
