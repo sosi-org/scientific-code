@@ -381,7 +381,8 @@ def getActualOmmatidiumRays(eye_points, rays_dirs, bee_R, bee_pos, bee_eye_spher
    print((bee_eye_sphere_size_cm))
    assert np.isscalar(bee_eye_sphere_size_cm)
 
-   O = np.dot(bee_R, bee_eye_sphere_size_cm * eye_points.T).T + bee_pos
+   print('@bee_eye_sphere_size_cm', bee_eye_sphere_size_cm)
+   O = np.dot(bee_R, (bee_eye_sphere_size_cm * eye_points).T).T + bee_pos
    D = np.dot(bee_R, rays_dirs.T).T
    return O,D
 
@@ -436,26 +437,29 @@ class Plane:
 in fact, Bee Eye
 '''
 class BeeHead:
-    def __init__(self, matrix1=None):
-        bee = {
-          'pos': (15.0, 15.0, -10.0/3),
-          #'u': (15.0, 15.0, -10.0),
-          'u': (1, 0.1,-0.2), # Bee's right hand  (1,0,-0.2)
-          'v': (0,1,0),  # Bee's top
-        }
+    def __init__(self):
+        #bee = {
+        #  'pos': (15.0, 15.0, -10.0/3),
+        #  #'u': (15.0, 15.0, -10.0),
+        #  'u': (1, 0.1,-0.2), # Bee's right hand  (1,0,-0.2)
+        #  'v': (0,1,0),  # Bee's top
+        #}
+        #
         # bee_R = rotation_matrix(bee)
         #bee_R = np.eye(3)
 
-        bee_R = Rotation.from_euler('x', 180, degrees=True).as_matrix()
-        print('bee_R.shape', bee_R.shape)
-        if matrix1 is not None:
-            bee_R = np.dot( bee_R, matrix1.T)
+        #bee_R = Rotation.from_euler('x', 180, degrees=True).as_matrix()
+        #print('bee_R.shape', bee_R.shape)
+        #if matrix1 is not None:
+        #    bee_R = np.dot( bee_R, matrix1.T)
 
-        bee_pos = tuple3_to_np(bee['pos'])
+        #bee_pos = tuple3_to_np(bee['pos'])
         # self.np = {}
 
-        self.R = bee_R
-        self.pos = bee_pos
+        #self.R = bee_R
+        #self.pos = bee_pos
+        self.R = None
+        self.pos = None
 
     def set_eye_position(self, eye_pos):
         print(eye_pos.shape, '<<<<')
@@ -466,8 +470,8 @@ class BeeHead:
     def set_direction(self, dirc, eye_size_cm):
         #bee_R = Rotation.from_rotvec(dirc, 180, degrees=True).as_matrix()
         #self.R = bee_R
-        assert self.R.dtype == np.dtype(float)
-        assert self.R.shape == (3,3)
+        #assert self.R.dtype == np.dtype(float)
+        #assert self.R.shape == (3,3)
 
         dirc=dirc.ravel()
         n=np.linalg.norm(dirc,axis=0)
@@ -1049,7 +1053,8 @@ def anim_frame(
 ):
 
     head_transformation = -M*10 *1000 # -M*10 is adhoc
-    beeHead = BeeHead(head_transformation)
+    #beeHead = BeeHead(head_transformation)
+    beeHead = BeeHead()
     # `M` and `head_transformation` are later ignored
 
     # The size of the unit sphere is multiplied by this `eyeSphereSize`
@@ -1072,11 +1077,13 @@ def anim_frame(
     print('corners, normals_at_corners', points_to_cast.shape, normals_at_corners.shape)
 
 
-    selected_center_points_actual, __selected_centerpoints_normals_actual = getActualOmmatidiumRays(selected_center_points, selected_center_points*0,
-      beeHead.R, beeHead.pos, beeHead.eye_size_cm)
+    #selected_center_points_actual, __selected_centerpoints_normals_actual = getActualOmmatidiumRays(selected_center_points, selected_center_points*0,
+    #  beeHead.R, beeHead.pos, beeHead.eye_size_cm)
 
     O,D = getActualOmmatidiumRays(points_to_cast, normals_at_corners,
       beeHead.R, beeHead.pos, beeHead.eye_size_cm)
+
+    print('@@beeHead.eye_size_cm', beeHead.eye_size_cm)
 
     #for i in range(len(planes)):
     (u,v),casted_points = raycastRaysOnPlane(
@@ -1086,6 +1093,7 @@ def anim_frame(
       return_casted_points=True)
 
     actual_eyepoints = O
+    print('MEAN & STD', np.mean(O,axis=0), '   STD=', np.std(O,axis=0))
     assert u.shape ==(points_to_cast.shape[0],)
     uv = np.concatenate((u[:,None], v[:,None]), axis=1)
 
@@ -1161,7 +1169,8 @@ def anim_frame(
         uv_rgb, *_ = sampling.sample_colors(uv, None, textures[0])
         uv_rgba = rgb_to_rgba(uv_rgb)
         #print('----second')
-        visualise_3d_situation_eye(casted_points, uv_rgba, beeHead, 'eye', ax3d_reuse=ax3)
+        ax3 = visualise_3d_situation_eye(O+np.array([2,0,0])[None,:], uv_rgba, None, 'eye', set_lims=False, ax3d_reuse=ax3)
+        visualise_3d_situation_eye(casted_points, uv_rgba, None, 'eye', ax3d_reuse=ax3)
 
         ax3.set_xlim(-100,100)
         ax3.set_ylim(-100*0,100)
@@ -1307,8 +1316,8 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     # after flip-ing the eye 180:
 
     bee_direction = np.array([+0.5,  0,  0.86])   #looks towards positive-Z, left eye
-    bee_head_pos = np.array([45.0*UNIT_LEN_CM,  45.0*UNIT_LEN_CM, -10*UNIT_LEN_CM])
-    eye_sphere_size_cm = 2.0 * UNIT_LEN_MM # * 0.1*400
+    bee_head_pos = np.array([45.0*UNIT_LEN_CM,  45.0*UNIT_LEN_CM, 20*UNIT_LEN_CM])
+    eye_sphere_size_cm = 2.0 * UNIT_LEN_MM * 10 # * 0.1*400
     #clip=CAST_CLIP_NONE
     clip=CAST_CLIP_FULL
     print('eye_sphere_size_cm', eye_sphere_size_cm)
