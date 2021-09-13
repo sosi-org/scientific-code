@@ -201,6 +201,8 @@ CAST_CLIP_FULL = 'full'
 
 '''
      Based on `derive_formulas.py`
+
+     Uncasted are returned as NaN
 '''
 def ray_cast(
               U : tuple[float, float, float],
@@ -777,8 +779,22 @@ def array_minmax(x):
     (mn,mx) = ((mn-md)*1.2+md, (mx-md)*1.2+md)
     return (mn, mx)
 
-def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, title, ax3d_reuse=None):
+def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, title, ax3d_reuse=None, set_lims=True):
     assert selected_center_points.shape[0] == regions_rgb.shape[0]
+    assert selected_center_points.shape[1] == 3
+    assert regions_rgb.shape[1] == 4
+    # todo: rename `regions_rgb` to `regions_rgba`
+
+    # shed the NaNs
+    isnan1 = np.isnan(selected_center_points[:,0])
+    isnan2 = np.isnan(regions_rgb[:,0])
+    isnonan = np.logical_not(np.logical_or(isnan1, isnan2))
+
+
+    selected_center_points = selected_center_points[isnonan, :]
+    regions_rgb = regions_rgb[isnonan, :]
+    assert selected_center_points.shape[0] > 0, 'at least one non-NaN point'
+
 
     if beeHead is not None:
       p0 = beeHead.pos
@@ -796,16 +812,24 @@ def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, tit
     #_X, _Y, _Z = 0, 2, 1 # Show your Ys oon axes3d Z, Zs on Y, Xs on X
     ax3d = None
     if ax3d_reuse is None:
-        ax3d = ax3dCreate(SZ=28.8)
+        #ax3d = ax3dCreate(SZ=28.8)   # redundant setlim
+        ax3d = ax3dCreate(SZ=None)
     else:
         ax3d = ax3d_reuse
 
+    print()
+    print(X.shape)
+    print(regions_rgb.shape)
+    print('^^')
     ax3d.scatter(X[:,_X], X[:,_Y], X[:,_Z], facecolors=regions_rgb, marker='.')
+    print('ok')
+
 
     if ax3d_reuse is None:
-        ax3d.set_xlim(*array_minmax(X[:,_X]))
-        ax3d.set_ylim(*array_minmax(X[:,_Y]))
-        ax3d.set_zlim(*array_minmax(X[:,_Z]))
+        if set_lims:
+            ax3d.set_xlim(*array_minmax(X[:,_X]))
+            ax3d.set_ylim(*array_minmax(X[:,_Y]))
+            ax3d.set_zlim(*array_minmax(X[:,_Z]))
         set_axis_label(ax3d, _X, 'X')
         set_axis_label(ax3d, _Y, 'Y')
         set_axis_label(ax3d, _Z, 'Z')
@@ -1028,11 +1052,13 @@ def anim_frame(
     print('beeHead.R', beeHead.R)
 
 
+    points_to_cast = corner_points
     # corners, normals_at_corners (6496, 3) (6496, 3)
-    print('corners, normals_at_corners', corner_points.shape, normals_at_corners.shape)
+    print('corners, normals_at_corners', points_to_cast.shape, normals_at_corners.shape)
     #for i in range(len(planes)):
-    O,D,(u,v),casted_points = raycastOmmatidium(corner_points, normals_at_corners, beeHead.R, beeHead.pos, planes[0], clip=clip, return_casted_points=True)
-    assert u.shape ==(corner_points.shape[0],)
+    O,D,(u,v),casted_points = raycastOmmatidium(points_to_cast, normals_at_corners, beeHead.R, beeHead.pos, planes[0], clip=clip, return_casted_points=True)
+    assert u.shape ==(points_to_cast.shape[0],)
+    uv = np.concatenate((u[:,None], v[:,None]), axis=1)
 
     assert len(planes) == 1, "A single plane (single side) is supported. Coming soon."
     if len(textures) == 1:
@@ -1053,42 +1079,67 @@ def anim_frame(
 
     # selected_center_points = select_centers(which_facets, center_points)
 
-    uv = np.concatenate((u[:,None], v[:,None]), axis=1)
     #selected_uv = select_centers(which_facets, uv)
+
+    # `selected_regions` is ..., which match `which_facets`
 
     nfs = np.sum(which_facets)
     #assert selected_uv.shape[0] == nfs
     assert len(selected_regions) == nfs
     #regions_rgb = sampling.sample_colors(selected_uv, selected_regions, textures[0])
+    # selected_regions describ polygons over uv (i.e. the result will be of different indexing)
     regions_rgb, uvm_debug = sampling.sample_colors(uv, selected_regions, textures[0])
 
     nf =len(selected_regions)
     #assert u.shape[0] == nf
     assert regions_rgb.shape[0] == nf
     assert len(selected_regions) == nf
+    assert nf == nfs
 
     assert selected_center_points.shape[0] == nf
     assert regions_rgb.shape[0] == nf
 
     print('non-nan', np.sum(np.logical_not(np.isnan(regions_rgb)), axis=0)) # [14,14,14]
 
-    nans = np.isnan(regions_rgb[:,0])
-    one = np.ones((regions_rgb.shape[0],1), dtype=float)
-    regions_rgba = np.concatenate( (regions_rgb / 255.0, one), axis=1)
-    _ALPHA = 3
-    regions_rgba[nans, 0:2] = 0.0
-    regions_rgba[:, _ALPHA] = 1.0
-    regions_rgba[nans, _ALPHA] = 0.0
+    # move thisd into visualise_3d_situation_eye
+    def rgb_to_rgba(regions_rgb):
+        nans = np.isnan(regions_rgb[:,0])
+        one = np.ones((regions_rgb.shape[0],1), dtype=float)
+        regions_rgba = np.concatenate( (regions_rgb / 255.0, one), axis=1)
+        _ALPHA = 3
+        regions_rgba[nans, 0:2] = 0.0
+        regions_rgba[:, _ALPHA] = 1.0
+        regions_rgba[nans, _ALPHA] = 0.0
+        return regions_rgba
+
+    regions_rgba = rgb_to_rgba(regions_rgb)
 
     if whether_visualise_eye_3d:
         # one center_point for each region. todo: re-index center_point-s based on selected regions
-        ax3 = visualise_3d_situation_eye(selected_center_points, regions_rgba, beeHead, 'eye')
+        ax3 = visualise_3d_situation_eye(selected_center_points, regions_rgba, beeHead, 'eye', set_lims=False)
         # in progress
-        #print('----')
-        #print(selected_center_points.shape, casted_points.shape)
+        #print('----first')
+        #print(selected_center_points.shape, casted_points.shape)  # (3250, 3) (6496, 3)
         #print(regions_rgba.shape)
+        # fails:
         #visualise_3d_situation_eye(casted_points, regions_rgba, beeHead, 'eye', ax3d_reuse=ax3)
+
+        uv_rgb, *_ = sampling.sample_colors(uv, None, textures[0])
+        uv_rgba = rgb_to_rgba(uv_rgb)
+        #print('----second')
+        visualise_3d_situation_eye(casted_points, uv_rgba, beeHead, 'eye', ax3d_reuse=ax3)
+
+        ax3.set_xlim(-100,100)
+        ax3.set_ylim(-100,100)
+        ax3.set_zlim(-100,100)
+
+
+        #print('second ok')
+
+        # see /Users/a9858770/cs/scientific-code/beeseyes/p3/lib/python3.9/site-packages/matplotlib/axes/_axes.py : 4496
+
         # reminder: selected_center_points = select_centers(which_facets, center_points)
+        plt.show()
 
 
     if whether_visualise_uv_samples:
@@ -1224,8 +1275,8 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     bee_direction = np.array([+0.5,  0,  0.86])   #looks towards positive-Z, left eye
     bee_head_pos = np.array([45.0*UNIT_LEN_CM,  45.0*UNIT_LEN_CM, -10*UNIT_LEN_CM])
     eyeSphereSizeCM = 2.0 * UNIT_LEN_MM * 0.1*400
-    #clip=CAST_CLIP_NONE
-    clip=CAST_CLIP_FULL
+    clip=CAST_CLIP_NONE
+    #clip=CAST_CLIP_FULL
 
 
     frame_time = 0.0
@@ -1255,7 +1306,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     beeHead, regions_rgba,_ = \
     anim_frame(
         textures, planes,
-        M, bee_head_pos, bee_direction, eyeSphereSizeCM,clip,
+        M, bee_head_pos, bee_direction, eyeSphereSizeCM, clip,
         corner_points, normals_at_corners,
         ommatidia_few_corners, ommatidia_few_corners_normals,
         selected_regions, which_facets,
@@ -1266,7 +1317,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     )
     # show first figure, using custom Bee position
     plt.show()
-    #exit()
+    exit()
 
     #######################################
     # Part two: Figure two: animated, etc
