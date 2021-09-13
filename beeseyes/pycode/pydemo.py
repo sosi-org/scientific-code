@@ -371,8 +371,7 @@ def demo_lattice_eyes(EYE_SIZE):
 
 
 
-# clip:bool=True
-def raycastOmmatidium(eye_points, rays_dirs, bee_R, bee_pos, bee_eye_sphere_size_cm, plane, clip, return_casted_points=False):
+def getOmmatidiumOD(eye_points, rays_dirs, bee_R, bee_pos, bee_eye_sphere_size_cm, plane):
    n = rays_dirs.shape[0]
    assert eye_points.shape == (n, DIM3)
    assert rays_dirs.shape == (n, DIM3)
@@ -384,6 +383,11 @@ def raycastOmmatidium(eye_points, rays_dirs, bee_R, bee_pos, bee_eye_sphere_size
 
    O = np.dot(bee_R, bee_eye_sphere_size_cm * eye_points.T).T + bee_pos
    D = np.dot(bee_R, rays_dirs.T).T
+   return O,D
+
+# clip:bool=True
+
+def raycastOmmatidium(O,D, eye_points, rays_dirs, bee_R, bee_pos, bee_eye_sphere_size_cm, plane, clip, return_casted_points=False):
    (u,v),t = ray_cast(plane.U, plane.V, plane.C0, D,O, clip=clip)
    if return_casted_points:
       print(O.shape)
@@ -536,9 +540,14 @@ def old_demo():
 
     eye_size_cm = 1.0 * UNIT_LEN_CM
 
-    O,D,(u,v) = raycastOmmatidium(eye_points, normals_xyz, beeHead.R, beeHead.pos, eye_size_cm, plane, clip=CAST_CLIP_FULL)
+    O,D = getOmmatidiumOD(eye_points, normals_xyz, beeHead.R, beeHead.pos, eye_size_cm, plane)
+    O,D,(u,v) = raycastOmmatidium(O,D, eye_points, normals_xyz, beeHead.R, beeHead.pos, eye_size_cm, plane, clip=CAST_CLIP_FULL)
 
-    (rays_origins_transformed, rays_dirs_transformed, (u6,v6)) = raycastOmmatidium(rays_origins_e, rays_dirs, beeHead.R, beeHead.pos, eye_size_cm, plane, clip=CAST_CLIP_FULL)
+
+    rays_origins_transformed, rays_dirs_transformed = getOmmatidiumOD(rays_origins_e, rays_dirs, beeHead.R, beeHead.pos, eye_size_cm, plane)
+    (rays_origins_transformed, rays_dirs_transformed, (u6,v6)) = raycastOmmatidium(
+      rays_origins_transformed, rays_dirs_transformed,
+      rays_origins_e, rays_dirs, beeHead.R, beeHead.pos, eye_size_cm, plane, clip=CAST_CLIP_FULL)
     visuaise_3d(rays_origins_transformed, rays_dirs_transformed, O, plane)
 
 
@@ -1064,15 +1073,25 @@ def anim_frame(
     # corners, normals_at_corners (6496, 3) (6496, 3)
     print('corners, normals_at_corners', points_to_cast.shape, normals_at_corners.shape)
 
+
+    selected_center_points_actual, __selected_centerpoints_normals_actual = getOmmatidiumOD(selected_center_points, selected_center_points*0,
+      beeHead.R, beeHead.pos, beeHead.eye_size_cm,
+      planes[0])
+
+    O,D = getOmmatidiumOD(points_to_cast, normals_at_corners,
+      beeHead.R, beeHead.pos, beeHead.eye_size_cm,
+      planes[0])
+
     #for i in range(len(planes)):
     O,D,(u,v),casted_points = raycastOmmatidium(
+      O,D,
       points_to_cast, normals_at_corners,
       beeHead.R, beeHead.pos, beeHead.eye_size_cm,
       planes[0],
       clip=clip,
       return_casted_points=True)
 
-    actual_eyepoints = *
+    actual_eyepoints = O
     assert u.shape ==(points_to_cast.shape[0],)
     uv = np.concatenate((u[:,None], v[:,None]), axis=1)
 
@@ -1082,8 +1101,13 @@ def anim_frame(
     else:
       print ("Warning: A single texture (single side) is supported. Using the first one only. Coming soon.")
 
+
+    O_few,D_few = getOmmatidiumOD(
+       ommatidia_few_corners, ommatidia_few_corners_normals,
+       beeHead.R, beeHead.pos, eye_sphere_size_cm, planes[0])
     # A few other points too
     O_few,D_few,(u_few,v_few) = raycastOmmatidium(
+       O_few,D_few,
        ommatidia_few_corners, ommatidia_few_corners_normals,
        beeHead.R, beeHead.pos, eye_sphere_size_cm, planes[0],
        clip=CAST_CLIP_NONE)
@@ -1131,6 +1155,7 @@ def anim_frame(
     regions_rgba = rgb_to_rgba(regions_rgb)
 
     if whether_visualise_eye_3d:
+        #actual_eyepoints
         # one center_point for each region. todo: re-index center_point-s based on selected regions
         ax3 = visualise_3d_situation_eye(selected_center_points, regions_rgba, beeHead, 'eye', set_lims=False)
         # in progress
