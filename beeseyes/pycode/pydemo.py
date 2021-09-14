@@ -28,18 +28,32 @@ AREA_THRESHOLD = 0.02*10 *100000+1000
 SD_THRESHOLD=0.03 * 10000+1000
 
 
+# for ray_cast()
+CAST_CLIP_NONE = 'none'
+CAST_CLIP_FRONT = 't>0'
+CAST_CLIP_FULL = 'full'
+
 
 UNIT_LEN_CM = image_loader.UNIT_LEN_CM
 UNIT_LEN_MM = image_loader.UNIT_LEN_MM
 
+# for TEXTURE_DPI_INFO
+_PIXELS = 'PIXELS'
+_CM = 'CM'
 
 # https://en.wikipedia.org/wiki/Blue_flower#/media/File:Bachelor's_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpg
 # https://en.wikipedia.org/wiki/Blue_flower
 BLUE_FLOWER = "../art/256px-Bachelor's_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpeg"
+BLUE_FLOWER_DPI_INFO = {_PIXELS: 200, _CM: 10.0}
+
 #FLOWER_XY = '/Users/a9858770/Documents/xx/3bebe3b139b7e0e01573faabb4c92934.jpeg'
 #BEE_CARTOON = '/Users/a9858770/Documents/bee-walt-Spike_art.PNG.png'
 NEW_FLOWER = '/Users/a9858770/cs/scientific-code/beeseyes/Setup/flower-sept.png'
 
+
+
+#NEW_FLOWER_DPI_INFO = {_PIXELS: 1268, _CM: 5.0}
+NEW_FLOWER_DPI_INFO = {_PIXELS: 1268, _CM: 3.5}
 
 
 CURRENT_PATH = '/Users/a9858770/cs/scientific-code/beeseyes'
@@ -49,8 +63,18 @@ EIGHT_PANEL = CURRENT_PATH + '/Setup/IMG_2872.MOV.BkCorrectedPerspCroppedColourC
 PINK_WALLPAPER = CURRENT_PATH + '/Setup/pinkRandomDots.png'
 TEXTURES_FILES = [EIGHT_PANEL, PINK_WALLPAPER]
 TEXTURES_FILES = [NEW_FLOWER, NEW_FLOWER]
+TEXTURE_DPI_INFO = NEW_FLOWER_DPI_INFO
+
 
 POSITIONS_XLS = CURRENT_PATH + '/Setup/beepath.xlsx'
+
+def focus_3d(ax3d, focus, zoom_size):
+  ax3d.set_zlim(focus[2]-zoom_size, focus[2]+zoom_size)
+  ax3d.set_xlim(focus[0]-zoom_size, focus[0]+zoom_size)
+  ax3d.set_ylim(focus[1]-zoom_size, focus[1]+zoom_size)
+  ax3d.set_xlabel('x')
+  ax3d.set_ylabel('y')
+  ax3d.set_zlabel('z')
 
 
 def eye_centers(n):
@@ -195,9 +219,6 @@ def one_hexagonal_rays(pindex, hexa_verts_table, points_xyz, normals_xyz):
     # return rays
     return (rays_origins, rays_dirs)
 
-CAST_CLIP_NONE = 'none'
-CAST_CLIP_FRONT = 't>0'
-CAST_CLIP_FULL = 'full'
 
 '''
      Based on `derive_formulas.py`
@@ -531,7 +552,12 @@ def old_demo():
 
 
     # Not tested. Previous form was using load_image(), without the dpi specs
-    texture, physical_size0, dpi0 = image_loader.load_image_withsize(TEXTURE_FILENAME, sample_px=200, sample_cm=10.0)
+    #texture, physical_size0, dpi0 = image_loader.load_image_withsize(TEXTURE_FILENAME, sample_px=200, sample_cm=10.0)
+    texture, physical_size0, dpi0 = image_loader.load_image_withsize(TEXTURE_FILENAME, sample_px=TEXTURE_DPI_INFO[_PIXELS], sample_cm=TEXTURE_DPI_INFO[_CM])
+    #todo: rename: sample_px -> ...
+
+
+
 
     #  (192, 256, 3)
 
@@ -1106,7 +1132,6 @@ def project_colors(all_centers, all_normals, beeHead, plane, plane_texture, clip
     return O, uv_rgba, casted_points, uv
 
 
-
 def anim_frame(
       textures, planes,
       bee_head_pos, bee_direction, eye_sphere_size_cm, clip,
@@ -1230,11 +1255,13 @@ def anim_frame(
     if whether_visualise_eye_3d:
         #actual_eyepoints
         # one center_point for each region. todo: re-index center_point-s based on selected regions
-        ax3 = visualise_3d_situation_eye(selected_center_points, regions_rgba, beeHead, 'eye', set_lims=False)
+        ax3 = visualise_3d_situation_eye(selected_center_points, regions_rgba, beeHead, 'eye only (1)', set_lims=False)
 
-        plt.show()
+        #plt.show()
         # (all_centers, all_normals_at_center_points)
         if all_pair is not None:
+            global FOCUS
+
             (all_centers, all_normals_at_center_points) = all_pair
             #towards neggaaative Z
             all_centers_, all_normals_ = two_eyes(all_centers, all_normals_at_center_points, gap_x=0.4, right=False)
@@ -1246,7 +1273,8 @@ def anim_frame(
             #(_cpoints, _rgba, _casted_points, _uv) = project_colors(points_to_cast, normals_to_cast, beeHead, planes[0], textures[0], clip=CAST_CLIP_NONE)
 
             _ = visualise_3d_situation_eye(_cpoints, alpha1(_rgba*1),  None, 'left eye', set_lims=False, ax3d_reuse=None, flip_axes=False)
-            plt.show()
+            focus_3d(ax3, *FOCUS)
+            #plt.show()
 
             def myrand(points):
               std_scalar = np.linalg.norm(np.std(points, axis=0))
@@ -1254,21 +1282,20 @@ def anim_frame(
               return points + noise
 
             ax3 = plt.figure() .add_subplot(projection='3d', autoscale_on=True)
-            _ = visualise_3d_situation_eye(_cpoints, _rgba,  None, 'eye', set_lims=False, ax3d_reuse=ax3)
+            _ = visualise_3d_situation_eye(_cpoints, _rgba,  None, 'eye2', set_lims=False, ax3d_reuse=ax3)
 
-            _ = visualise_3d_situation_eye(_cpoints + myrand(_cpoints)*0, alpha1(_rgba*0),  None, 'eye', set_lims=False, ax3d_reuse=ax3)
+            _ = visualise_3d_situation_eye(_cpoints + myrand(_cpoints)*0, alpha1(_rgba*1),  None, 'eye3', set_lims=False, ax3d_reuse=ax3)
 
 
-            _ = visualise_3d_situation_eye(_casted_points, _rgba, None, 'eye', set_lims=False, ax3d_reuse=ax3)
-            #_ = visualise_3d_situation_eye(_cpoints, alpha1(_rgba*0),  None, 'eye', set_lims=False, ax3d_reuse=ax3)
-            def focus_3d(ax3, focus, ZS):
-              ax3.set_zlim(focus[2]-ZS, focus[2]+ZS)
-              ax3.set_xlim(focus[0]-ZS, focus[0]+ZS)
-              ax3.set_ylim(focus[1]-ZS, focus[1]+ZS)
-            focus_3d(ax3, [45,45,-2], 15.0)
+            _ = visualise_3d_situation_eye(_casted_points, _rgba, None, 'eye4', set_lims=False, ax3d_reuse=ax3)
+            #_ = visualise_3d_situation_eye(_cpoints, alpha1(_rgba*0),  None, 'eye4*', set_lims=False, ax3d_reuse=ax3)
+
+            #focus_3d(ax3, [45,45,-2], 15.0)
             #focus_3d(ax3, [0, 0, 0], 15.0*3)
+            #focus_3d(ax3, [0, 0, 0], 15.)
+            focus_3d(ax3, *FOCUS)
 
-            plt.show()
+            #plt.show()
 
 
             ax2 = \
@@ -1292,7 +1319,7 @@ def anim_frame(
         #print(selected_center_points.shape, casted_points.shape)  # (3250, 3) (6496, 3)
         #print(regions_rgba.shape)
         # fails:
-        #visualise_3d_situation_eye(casted_points, regions_rgba, beeHead, 'eye', ax3d_reuse=ax3)
+        #visualise_3d_situation_eye(casted_points, regions_rgba, beeHead, 'eye9', ax3d_reuse=ax3)
         plt.show()
         #exit()
 
@@ -1301,19 +1328,23 @@ def anim_frame(
         #print('----second')
         OFFSET = np.array([2,0,0])[None,:]*0
 
-        ax3 = visualise_3d_situation_eye(O+OFFSET, alpha1(uv_rgba*0), None, 'eye', set_lims=False, ax3d_reuse=None)
-        visualise_3d_situation_eye(casted_points, uv_rgba, None, 'eye', ax3d_reuse=ax3,set_lims=False)
+        # todo: reomove
+        ax3 = visualise_3d_situation_eye(O+OFFSET, alpha1(uv_rgba*0), None, 'eye5', set_lims=False, ax3d_reuse=None)
+        visualise_3d_situation_eye(casted_points, uv_rgba, None, 'eye6', ax3d_reuse=ax3,set_lims=False)
 
-        #ax3.set_xlim(-100,100)
-        ax3.set_xlim(0,80)
-        ax3.set_ylim(0,80)
-        #ax3.set_zlim(-100,100)
+        if False:
+            #ax3.set_xlim(-100,100)
+            ax3.set_xlim(0,80)
+            ax3.set_ylim(0,80)
+            #ax3.set_zlim(-100,100)
 
-        #ZS = 5.0
-        ZS = 15.0
-        ax3.set_zlim(-2-ZS, -2+ZS)
-        ax3.set_xlim(45-ZS, 45+ZS)
-        ax3.set_ylim(45-ZS, 45+ZS)
+            #ZS = 5.0
+            ZS = 15.0
+            ax3.set_zlim(-2-ZS, -2+ZS)
+            ax3.set_xlim(45-ZS, 45+ZS)
+            ax3.set_ylim(45-ZS, 45+ZS)
+
+        focus_3d(ax3, *FOCUS)
 
         #print('second ok')
 
@@ -1500,13 +1531,32 @@ def cast_and_visualise(
     #clip=CAST_CLIP_FULL
 
     # Works well. Just needs rotation:
-    bee_direction = np.array([-0.05,  -0.5,  0.86])   #looks towards positive-Z, left eye
+    #bee_direction = np.array([-0.05,  -0.5,  0.86])   #looks towards positive-Z, left eye
     # bee_head_pos = np.array([45.0*UNIT_LEN_CM,  (45.0+0)*UNIT_LEN_CM, -2*UNIT_LEN_CM])
-    bee_head_pos = np.array([41.0,  41.0, -2]) * UNIT_LEN_CM
+    #bee_head_pos = np.array([41.0,  41.0, -2]) * UNIT_LEN_CM
     #bee_head_pos = np.array([41.0,  41.0, -5]) * UNIT_LEN_CM
-    eye_sphere_size_cm = 2.0 * UNIT_LEN_MM
+    #bee_head_pos = np.array([2.5,  2.5, -2]) * UNIT_LEN_CM
+    #bee_head_pos = np.array([0.0,  5.0, -1.5]) * UNIT_LEN_CM
+    #bee_head_pos = np.array([2.0,  3.0, -1.5]) * UNIT_LEN_CM
+    #bee_direction = np.array([-0.05,  -0.5,  0.86])   #looks towards positive-Z, left eye
+    global FOCUS
+    #FOCUS = ([0, 0, 0], 15.)
+    #FOCUS = ([0, 0, 0], 5.)
     #clip=CAST_CLIP_NONE
     clip=CAST_CLIP_FULL
+
+    # After meeting with Hadi (14 Sept)
+    bee_direction = np.array([-0.01,  -0.01,  1.0])
+    #  ... 5cm
+    #bee_head_pos = np.array([2.5,  2.5, -1.5]) * UNIT_LEN_CM
+    #  (4.46 x 3.5) (cm)
+    bee_head_pos = np.array([2.2,  1.75, -1.5]) * UNIT_LEN_CM
+    bee_head_pos = np.array([2.2-1.5,  1.75, -1.0]) * UNIT_LEN_CM
+    # +DOWN, +RIGHT
+    FOCUS = (bee_head_pos, 5.)
+    eye_sphere_size_cm = 2.0 * UNIT_LEN_MM
+    clip=CAST_CLIP_FULL
+
 
     print('eye_sphere_size_cm', eye_sphere_size_cm)
 
@@ -1515,7 +1565,8 @@ def cast_and_visualise(
     assert len(TEXTURES_FILES) == 2, '''Currently, textures for only only two sides supported for now. Coming soon.'''
 
     # 2D Visualisation of (u,v) on textures
-    texture1, physical_size1, dpi1 = image_loader.load_image_withsize(TEXTURES_FILES[0], sample_px=200, sample_cm=10.0)
+    #texture1, physical_size1, dpi1 = image_loader.load_image_withsize(TEXTURES_FILES[0], sample_px=200, sample_cm=10.0)
+    texture1, physical_size1, dpi1 = image_loader.load_image_withsize(TEXTURES_FILES[0], sample_px=TEXTURE_DPI_INFO[_PIXELS], sample_cm=TEXTURE_DPI_INFO[_CM])
     texture2, physical_size2, dpi2 = image_loader.load_image_withsize(TEXTURES_FILES[1], dpi=dpi1)
     assert dpi1 == dpi2
 
