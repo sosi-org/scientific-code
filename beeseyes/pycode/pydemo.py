@@ -1038,7 +1038,7 @@ def alpha1(rgba, alpha_value=1.0):
     rgba[nans, _ALPHA] = 0.0
     return rgba
 
-def two_eyes(all_centers, all_normals_at_center_points, gap_x):
+def two_eyes(all_centers, all_normals_at_center_points, gap_x, left=True, right=True):
     FLIP_XZ = np.diag([-1.0,1,-1])
     def mult(a,b):
       return np.dot(a, b.T).T
@@ -1052,8 +1052,16 @@ def two_eyes(all_centers, all_normals_at_center_points, gap_x):
     centers_right = mult(FLIP_X, centers_left)
     all_normals_right =  mult(FLIP_X, all_normals_left)
 
-    all_centers = np.concatenate((centers_left, centers_right), axis=0)
-    all_normals = np.concatenate((all_normals_left, all_normals_right), axis=0)
+    ptupl = tuple()
+    ntupl = tuple()
+    if left:
+      ptupl = ptupl + tuple([centers_left])
+      ntupl = ntupl + tuple([all_normals_left])
+    if right:
+      ptupl = ptupl + tuple([centers_right])
+      ntupl = ntupl + tuple([all_normals_right])
+    all_centers = np.concatenate(ptupl, axis=0)
+    all_normals = np.concatenate(ntupl, axis=0)
     return all_centers, all_normals
 
 def project_colors(all_centers, all_normals, beeHead, plane, plane_texture, clip):
@@ -1229,7 +1237,7 @@ def anim_frame(
         if all_pair is not None:
             (all_centers, all_normals_at_center_points) = all_pair
             #towards neggaaative Z
-            all_centers_, all_normals_ = two_eyes(all_centers, all_normals_at_center_points, gap_x=0.4)
+            all_centers_, all_normals_ = two_eyes(all_centers, all_normals_at_center_points, gap_x=0.4, right=False)
 
             print('beeHead', beeHead.pos, beeHead.eye_size_cm)
             print(beeHead.pos)
@@ -1237,7 +1245,7 @@ def anim_frame(
             (_cpoints, _rgba, _casted_points, _uv) = project_colors(all_centers_, all_normals_, beeHead, planes[0], textures[0], clip=CAST_CLIP_FULL)
             #(_cpoints, _rgba, _casted_points, _uv) = project_colors(points_to_cast, normals_to_cast, beeHead, planes[0], textures[0], clip=CAST_CLIP_NONE)
 
-            _ = visualise_3d_situation_eye(_cpoints, alpha1(_rgba*1),  None, 'eye', set_lims=False, ax3d_reuse=None, flip_axes=True)
+            _ = visualise_3d_situation_eye(_cpoints, alpha1(_rgba*1),  None, 'left eye', set_lims=False, ax3d_reuse=None, flip_axes=False)
             plt.show()
 
             def myrand(points):
@@ -1494,7 +1502,8 @@ def cast_and_visualise(
     # Works well. Just needs rotation:
     bee_direction = np.array([-0.05,  -0.5,  0.86])   #looks towards positive-Z, left eye
     # bee_head_pos = np.array([45.0*UNIT_LEN_CM,  (45.0+0)*UNIT_LEN_CM, -2*UNIT_LEN_CM])
-    bee_head_pos = np.array([(45.0-4)*UNIT_LEN_CM,  (45.0+0)*UNIT_LEN_CM, -2*UNIT_LEN_CM])
+    bee_head_pos = np.array([41.0,  41.0, -2]) * UNIT_LEN_CM
+    #bee_head_pos = np.array([41.0,  41.0, -5]) * UNIT_LEN_CM
     eye_sphere_size_cm = 2.0 * UNIT_LEN_MM
     #clip=CAST_CLIP_NONE
     clip=CAST_CLIP_FULL
