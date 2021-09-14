@@ -15,6 +15,8 @@ from bee_eye_data import ommatidia_polygons, ommatidia_polygons_fast_representat
 from bee_eye_data import ax3dCreate, visualise_quiver
 from bee_eye_data import make_midpoints, make_deviations, my_index
 
+PRODUCTION_FIGS = True
+
 HEX6 = 6
 DIM3 = 3
 
@@ -869,8 +871,22 @@ def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, tit
     #print(X.shape)
     #print(regions_rgb.shape)
     #print('^^')
-    ax3d.scatter(X[:,_X], X[:,_Y], X[:,_Z], facecolors=regions_rgb, marker='.')
+    h = \
+    ax3d.scatter(X[:,_X], X[:,_Y], X[:,_Z], facecolors=regions_rgb,
+                 #marker='.',
+                 #s=(30.0*3) ** 2
+                 #s=None
+                 #s=(2.0) ** 2
+                 s=(4.0) ** 2
+                 )
     #print('ok')
+
+    if PRODUCTION_FIGS:
+      # ax3d.set_aspect("equal")
+      #h.s=20
+      #h.markersize = 20
+      #h.s=100.0
+      pass
 
     if set_lims:
       assert  ax3d_reuse is None, 'must set `set_lims=False` when `ax3d_reuse` is used'
@@ -1256,7 +1272,7 @@ def anim_frame(
         #actual_eyepoints
         # one center_point for each region. todo: re-index center_point-s based on selected regions
         # todo: remove
-        ax3 = visualise_3d_situation_eye(selected_center_points, regions_rgba, beeHead, 'eye only (1)', set_lims=False)
+        ax3 = visualise_3d_situation_eye(selected_center_points, regions_rgba, beeHead, 'eye only (1) (todo: remove)', set_lims=False)
 
         #plt.show()
         # (all_centers, all_normals_at_center_points)
@@ -1273,9 +1289,21 @@ def anim_frame(
             (_cpoints, _rgba, _casted_points, _uv) = project_colors(all_centers_, all_normals_, beeHead, planes[0], textures[0], clip=CAST_CLIP_FULL)
             #(_cpoints, _rgba, _casted_points, _uv) = project_colors(points_to_cast, normals_to_cast, beeHead, planes[0], textures[0], clip=CAST_CLIP_NONE)
 
-            _ = visualise_3d_situation_eye(_cpoints, alpha1(_rgba*1),  None, 'left eye', set_lims=False, ax3d_reuse=None, flip_axes=False)
-            focus_3d(ax3, *FOCUS)
-            #plt.show()
+            ax3_ = visualise_3d_situation_eye(_cpoints, alpha1(_rgba*1),  None, 'left eye', set_lims=False, ax3d_reuse=None, flip_axes=False)
+            focus_3d(ax3_, *FOCUS)
+            ax3_.view_init(elev=90, azim=91)
+
+            if PRODUCTION_FIGS:
+              ax3_.dist = 10.0
+              ax3_.grid(False)
+              ax3_.set_xticks([])
+              ax3_.set_yticks([])
+              ax3_.set_zticks([])
+              ax3_.set_zticks([])
+              #plt.box(False)
+              plt.axis('off')
+
+            plt.show()
 
             def myrand(points):
               std_scalar = np.linalg.norm(np.std(points, axis=0))
