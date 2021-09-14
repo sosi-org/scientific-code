@@ -799,7 +799,7 @@ def array_minmax(x):
     (mn,mx) = ((mn-md)*1.2+md, (mx-md)*1.2+md)
     return (mn, mx)
 
-def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, title, ax3d_reuse=None, set_lims=True):
+def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, title, ax3d_reuse=None, set_lims=True, flip_axes=False):
     assert selected_center_points.shape[0] == regions_rgb.shape[0]
     assert selected_center_points.shape[1] == 3
     assert regions_rgb.shape[1] == 4
@@ -829,7 +829,9 @@ def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, tit
 
     # A permutation: Which actual (in coords) should dbe shown on axes3d's firast axis?
     _X, _Y, _Z = 0, 1, 2
-    #_X, _Y, _Z = 0, 2, 1 # Show your Ys oon axes3d Z, Zs on Y, Xs on X
+    if flip_axes:
+        assert ax3d_reuse is None
+        _X, _Y, _Z = 0, 2, 1 # Show your Ys oon axes3d Z, Zs on Y, Xs on X
     ax3d = None
     if ax3d_reuse is None:
         #ax3d = ax3dCreate(SZ=28.8)   # redundant setlim
@@ -844,6 +846,8 @@ def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, tit
     ax3d.scatter(X[:,_X], X[:,_Y], X[:,_Z], facecolors=regions_rgb, marker='.')
     #print('ok')
 
+    if set_lims:
+      assert  ax3d_reuse is None, 'must set `set_lims=False` when `ax3d_reuse` is used'
 
     if ax3d_reuse is None:
         if set_lims:
@@ -1091,7 +1095,7 @@ def project_colors(all_centers, all_normals, beeHead, plane, plane_texture, clip
 
     #return _cpoints, _rgba, casted_points
     #return all_centers, uv_rgba, casted_points
-    return O, uv_rgba, casted_points
+    return O, uv_rgba, casted_points, uv
 
 
 
@@ -1230,10 +1234,10 @@ def anim_frame(
             print('beeHead', beeHead.pos, beeHead.eye_size_cm)
             print(beeHead.pos)
             print()
-            (_cpoints, _rgba, _casted_points) = project_colors(all_centers_, all_normals_, beeHead, planes[0], textures[0], clip=CAST_CLIP_FULL)
-            #(_cpoints, _rgba, _casted_points) = project_colors(points_to_cast, normals_to_cast, beeHead, planes[0], textures[0], clip=CAST_CLIP_NONE)
+            (_cpoints, _rgba, _casted_points, _uv) = project_colors(all_centers_, all_normals_, beeHead, planes[0], textures[0], clip=CAST_CLIP_FULL)
+            #(_cpoints, _rgba, _casted_points, _uv) = project_colors(points_to_cast, normals_to_cast, beeHead, planes[0], textures[0], clip=CAST_CLIP_NONE)
 
-            _ = visualise_3d_situation_eye(_cpoints, alpha1(_rgba*0),  None, 'eye', set_lims=False, ax3d_reuse=None)
+            _ = visualise_3d_situation_eye(_cpoints, alpha1(_rgba*1),  None, 'eye', set_lims=False, ax3d_reuse=None, flip_axes=True)
             plt.show()
 
             def myrand(points):
@@ -1241,7 +1245,7 @@ def anim_frame(
               noise = np.random.normal(size=points.shape) * std_scalar
               return points + noise
 
-            ax3 =       ax3d = plt.figure() .add_subplot(projection='3d', autoscale_on=True)
+            ax3 = plt.figure() .add_subplot(projection='3d', autoscale_on=True)
             _ = visualise_3d_situation_eye(_cpoints, _rgba,  None, 'eye', set_lims=False, ax3d_reuse=ax3)
 
             _ = visualise_3d_situation_eye(_cpoints + myrand(_cpoints)*0, alpha1(_rgba*0),  None, 'eye', set_lims=False, ax3d_reuse=ax3)
@@ -1257,8 +1261,24 @@ def anim_frame(
             #focus_3d(ax3, [0, 0, 0], 15.0*3)
 
             plt.show()
+
+
+            ax2 = \
+              visualise_uv(_uv[:,0], _uv[:,1], None, None, textures[0], uv_rgba=_rgba) #, fig=animation_fig)
+            ax2.set_xlim(0,1.0)
+            ax2.set_ylim(0,1.0)
+            ax2.set_aspect('auto')
+            ax2.set_title('sampled pixels: eye pair')
+            #ax2.text(-0.1, 1.1, text_description, size=10, color='k', backgroundcolor='w')
+
+
+
+
+
+
+
             print('okkkkkk')
-            exit()
+            #exit()
         # in progress
         #print('----first')
         #print(selected_center_points.shape, casted_points.shape)  # (3250, 3) (6496, 3)
@@ -1274,7 +1294,7 @@ def anim_frame(
         OFFSET = np.array([2,0,0])[None,:]*0
 
         ax3 = visualise_3d_situation_eye(O+OFFSET, alpha1(uv_rgba*0), None, 'eye', set_lims=False, ax3d_reuse=None)
-        visualise_3d_situation_eye(casted_points, uv_rgba, None, 'eye', ax3d_reuse=ax3)
+        visualise_3d_situation_eye(casted_points, uv_rgba, None, 'eye', ax3d_reuse=ax3,set_lims=False)
 
         #ax3.set_xlim(-100,100)
         ax3.set_xlim(0,80)
@@ -1302,7 +1322,7 @@ def anim_frame(
         ax2.set_xlim(0,1.0)
         ax2.set_ylim(0,1.0)
         ax2.set_aspect('auto')
-        ax2.set_title('sampled pixels')
+        ax2.set_title('sampled pixels*')
 
         ax2.text(-0.1, 1.1, text_description, size=10, color='k', backgroundcolor='w')
 
@@ -1463,11 +1483,22 @@ def cast_and_visualise(
 
     # after flip-ing the eye 180:
 
-    bee_direction = np.array([-0.5,  0,  0.86])   #looks towards positive-Z, left eye
-    bee_head_pos = np.array([45.0*UNIT_LEN_CM,  45.0*UNIT_LEN_CM, -2*UNIT_LEN_CM])
-    eye_sphere_size_cm = 2.0 * UNIT_LEN_MM * 10/10 # * 0.1*400
+    # ###########
+    # Works well. Just needs a minor rotaation
+    # ##########
+    #bee_direction = np.array([-0.5,  0,  0.86])   #looks towards positive-Z, left eye
+    #bee_head_pos = np.array([45.0*UNIT_LEN_CM,  45.0*UNIT_LEN_CM, -2*UNIT_LEN_CM])
+    #eye_sphere_size_cm = 2.0 * UNIT_LEN_MM * 10/10 # * 0.1*400
+    #clip=CAST_CLIP_FULL
+
+    # Works well. Just needs rotation:
+    bee_direction = np.array([-0.05,  -0.5,  0.86])   #looks towards positive-Z, left eye
+    # bee_head_pos = np.array([45.0*UNIT_LEN_CM,  (45.0+0)*UNIT_LEN_CM, -2*UNIT_LEN_CM])
+    bee_head_pos = np.array([(45.0-4)*UNIT_LEN_CM,  (45.0+0)*UNIT_LEN_CM, -2*UNIT_LEN_CM])
+    eye_sphere_size_cm = 2.0 * UNIT_LEN_MM
     #clip=CAST_CLIP_NONE
     clip=CAST_CLIP_FULL
+
     print('eye_sphere_size_cm', eye_sphere_size_cm)
 
     frame_time = 0.0
