@@ -1255,6 +1255,7 @@ def anim_frame(
     if whether_visualise_eye_3d:
         #actual_eyepoints
         # one center_point for each region. todo: re-index center_point-s based on selected regions
+        # todo: remove
         ax3 = visualise_3d_situation_eye(selected_center_points, regions_rgba, beeHead, 'eye only (1)', set_lims=False)
 
         #plt.show()
@@ -1551,7 +1552,7 @@ def cast_and_visualise(
     #bee_head_pos = np.array([2.5,  2.5, -1.5]) * UNIT_LEN_CM
     #  (4.46 x 3.5) (cm)
     bee_head_pos = np.array([2.2,  1.75, -1.5]) * UNIT_LEN_CM
-    bee_head_pos = np.array([2.2-1.5,  1.75, -1.0]) * UNIT_LEN_CM
+    bee_head_pos = np.array([2.2-1.5,  1.75,  -1.0]) * UNIT_LEN_CM
     # +DOWN, +RIGHT
     FOCUS = (bee_head_pos, 5.)
     eye_sphere_size_cm = 2.0 * UNIT_LEN_MM
