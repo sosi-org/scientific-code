@@ -39,7 +39,7 @@ def load_xls(filename_xls, columnset):
         res2d = np.array(res).T
         assert len(res2d.shape) == 2
         assert res2d.shape[1] == len(columns)
-        print('res2d.shape', res2d.shape)
+        #print('res2d.shape', res2d.shape)
         ret[key] = res2d
 
     return ret

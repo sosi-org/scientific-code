@@ -63,7 +63,7 @@ def eye_centers(n):
   X[0::2] += 0.5 # shift
   xc = X.ravel()[:,None]
   yc = Y.ravel()[:,None]
-  print(xc.shape, yc.shape) # (56, 1) (56, 1)
+  #print(xc.shape, yc.shape) # (56, 1) (56, 1)
   c_xyi = np.concatenate((xc, yc), axis=1)
   eta = (np.random.rand(*c_xyi.shape)-0.5) * 0.2
   c_xy  = c_xyi + eta # + m_odd * 0.2
@@ -837,12 +837,12 @@ def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, tit
     else:
         ax3d = ax3d_reuse
 
-    print()
-    print(X.shape)
-    print(regions_rgb.shape)
-    print('^^')
+    #print()
+    #print(X.shape)
+    #print(regions_rgb.shape)
+    #print('^^')
     ax3d.scatter(X[:,_X], X[:,_Y], X[:,_Z], facecolors=regions_rgb, marker='.')
-    print('ok')
+    #print('ok')
 
 
     if ax3d_reuse is None:
@@ -1081,14 +1081,17 @@ def project_colors(all_centers, all_normals, beeHead, plane, plane_texture, clip
         isnan2 = np.isnan(uv_rgba[:,0])
         isnonan = np.logical_not(np.logical_or(isnan1, isnan2))
         all_centers = all_centers[isnonan, :]
+        O=O[isnonan, :]
+        D=D[isnonan, :]
         uv_rgba = uv_rgba[isnonan, :]
         casted_points = casted_points[isnonan, :]
-        assert all_centers.shape[0] > 0, 'at least one non-NaN point'
+        assert O.shape[0] > 0, 'at least one non-NaN point'
         assert uv_rgba.shape[0] > 0, 'at least one non-NaN point'
         assert casted_points.shape[0] > 0, 'at least one non-NaN point'
 
     #return _cpoints, _rgba, casted_points
-    return all_centers, uv_rgba, casted_points
+    #return all_centers, uv_rgba, casted_points
+    return O, uv_rgba, casted_points
 
 
 
@@ -1173,7 +1176,7 @@ def anim_frame(
     # or selected_center_points
     O_few,D_few = getActualOmmatidiumRays(
        ommatidia_few_corners, ommatidia_few_corners_normals,
-       beeHead.R, beeHead.pos, eye_sphere_size_cm)
+       beeHead.R, beeHead.pos, beeHead.eye_size_cm)
     # A few other points too
     (u_few,v_few) = raycastRaysOnPlane(
        O_few,D_few,
@@ -1218,24 +1221,44 @@ def anim_frame(
         ax3 = visualise_3d_situation_eye(selected_center_points, regions_rgba, beeHead, 'eye', set_lims=False)
 
         plt.show()
-
         # (all_centers, all_normals_at_center_points)
         if all_pair is not None:
             (all_centers, all_normals_at_center_points) = all_pair
             #towards neggaaative Z
             all_centers_, all_normals_ = two_eyes(all_centers, all_normals_at_center_points, gap_x=0.4)
 
+            print('beeHead', beeHead.pos, beeHead.eye_size_cm)
+            print(beeHead.pos)
+            print()
             (_cpoints, _rgba, _casted_points) = project_colors(all_centers_, all_normals_, beeHead, planes[0], textures[0], clip=CAST_CLIP_FULL)
             #(_cpoints, _rgba, _casted_points) = project_colors(points_to_cast, normals_to_cast, beeHead, planes[0], textures[0], clip=CAST_CLIP_NONE)
 
-            ax3 = visualise_3d_situation_eye(_cpoints, alpha1(_rgba*0),  None, 'eye', set_lims=False, ax3d_reuse=None)
+            _ = visualise_3d_situation_eye(_cpoints, alpha1(_rgba*0),  None, 'eye', set_lims=False, ax3d_reuse=None)
             plt.show()
 
-            ax3 = visualise_3d_situation_eye(_cpoints, _rgba,  None, 'eye', set_lims=False, ax3d_reuse=None)
-            ax3 = visualise_3d_situation_eye(_casted_points, _rgba, None, 'eye', set_lims=False, ax3d_reuse=ax3)
+            def myrand(points):
+              std_scalar = np.linalg.norm(np.std(points, axis=0))
+              noise = np.random.normal(size=points.shape) * std_scalar
+              return points + noise
+
+            ax3 =       ax3d = plt.figure() .add_subplot(projection='3d', autoscale_on=True)
+            _ = visualise_3d_situation_eye(_cpoints, _rgba,  None, 'eye', set_lims=False, ax3d_reuse=ax3)
+
+            _ = visualise_3d_situation_eye(_cpoints + myrand(_cpoints)*0, alpha1(_rgba*0),  None, 'eye', set_lims=False, ax3d_reuse=ax3)
+
+
+            _ = visualise_3d_situation_eye(_casted_points, _rgba, None, 'eye', set_lims=False, ax3d_reuse=ax3)
+            #_ = visualise_3d_situation_eye(_cpoints, alpha1(_rgba*0),  None, 'eye', set_lims=False, ax3d_reuse=ax3)
+            def focus_3d(ax3, focus, ZS):
+              ax3.set_zlim(focus[2]-ZS, focus[2]+ZS)
+              ax3.set_xlim(focus[0]-ZS, focus[0]+ZS)
+              ax3.set_ylim(focus[1]-ZS, focus[1]+ZS)
+            focus_3d(ax3, [45,45,-2], 15.0)
+            #focus_3d(ax3, [0, 0, 0], 15.0*3)
+
             plt.show()
             print('okkkkkk')
-            #exit()
+            exit()
         # in progress
         #print('----first')
         #print(selected_center_points.shape, casted_points.shape)  # (3250, 3) (6496, 3)
