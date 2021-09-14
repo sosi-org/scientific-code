@@ -752,7 +752,10 @@ def aaaaa():
     selected_center_points = select_centers(which_facets, center_points)
     # `selected_regions` is linked to [indices of] `(corner_points, normals_at_corners)`
 
-    return (corner_points, normals_at_corners), (center_points, normals_at_center_points), (ommatidia_few_corners_normals, ommatidia_few_corners), selected_regions, selected_center_points, which_facets
+    all_centers = center_points
+    all_normals_at_center_points = normals_at_center_points
+
+    return (corner_points, normals_at_corners), (center_points, normals_at_center_points), (ommatidia_few_corners_normals, ommatidia_few_corners), selected_regions, selected_center_points, which_facets, (all_centers,all_normals_at_center_points)
 
 def visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, center_points, normals_at_center_points, beeHead, planes):
     '''
@@ -1007,7 +1010,85 @@ def trajectory_stats(bee_path):
     (42.99566999999999, 371.98803)
     (-21.25277299999999, 272.127343)
     '''
-    #exit()
+
+
+# move thisd into visualise_3d_situation_eye
+def rgb_to_rgba(regions_rgb):
+    one = np.ones((regions_rgb.shape[0],1), dtype=float)
+    regions_rgba = np.concatenate( (regions_rgb / 255.0, one), axis=1)
+
+    _ALPHA = 3
+    nans = np.isnan(regions_rgb[:,0])
+    regions_rgba[nans, 0:2] = 0.0
+    regions_rgba[:, _ALPHA] = 1.0
+    regions_rgba[nans, _ALPHA] = 0.0
+    #regions_rgba = alpha1(regions_rgba)
+    return regions_rgba
+
+def alpha1(rgba, alpha_value=1.0):
+    ''' note: inplace '''
+    _ALPHA = 3
+    nans = np.isnan(rgba[:,0])
+    rgba[nans, 0:2] = 0.0
+    rgba[:, _ALPHA] = alpha_value
+    rgba[nans, _ALPHA] = 0.0
+    return rgba
+
+def two_eyes(all_centers, all_normals_at_center_points, gap_x):
+    FLIP_XZ = np.diag([-1.0,1,-1])
+    def mult(a,b):
+      return np.dot(a, b.T).T
+
+    X1 = np.array([1.0, 0.0, 0.0])
+    gap_d = X1[None,:] * (-gap_x)
+    centers_left = mult(FLIP_XZ, all_centers) + gap_d
+    all_normals_left =  mult(FLIP_XZ, all_normals_at_center_points)
+
+    FLIP_X = np.diag([-1.0,1,1])
+    centers_right = mult(FLIP_X, centers_left)
+    all_normals_right =  mult(FLIP_X, all_normals_left)
+
+    all_centers = np.concatenate((centers_left, centers_right), axis=0)
+    all_normals = np.concatenate((all_normals_left, all_normals_right), axis=0)
+    return all_centers, all_normals
+
+def project_colors(all_centers, all_normals, beeHead, plane, plane_texture, clip):
+
+    O,D = getActualOmmatidiumRays(
+      all_centers, all_normals,
+      beeHead.R, beeHead.pos, beeHead.eye_size_cm)
+
+    print('@@beeHead.eye_size_cm', beeHead.eye_size_cm)
+
+    #for i in range(len(planes)):
+    (u,v),casted_points = raycastRaysOnPlane(
+      O,D,
+      plane,
+      clip=clip,
+      return_casted_points=True)
+
+    uv = np.concatenate((u[:,None], v[:,None]), axis=1)
+
+    uv_rgb, *_ = sampling.sample_colors(uv, None, plane_texture)
+    uv_rgba = rgb_to_rgba(uv_rgb)
+    #uv_rgba = alpha1(uv_rgba*0)
+    #_rgba = uv_rgba
+
+
+    if False:
+        # shed the NaNs
+        isnan1 = np.isnan(uv[:,0])
+        isnan2 = np.isnan(uv_rgba[:,0])
+        isnonan = np.logical_not(np.logical_or(isnan1, isnan2))
+        all_centers = all_centers[isnonan, :]
+        uv_rgba = uv_rgba[isnonan, :]
+        casted_points = casted_points[isnonan, :]
+        assert all_centers.shape[0] > 0, 'at least one non-NaN point'
+        assert uv_rgba.shape[0] > 0, 'at least one non-NaN point'
+        assert casted_points.shape[0] > 0, 'at least one non-NaN point'
+
+    #return _cpoints, _rgba, casted_points
+    return all_centers, uv_rgba, casted_points
 
 
 
@@ -1017,7 +1098,7 @@ def anim_frame(
       corner_points, normals_at_corners,
       ommatidia_few_corners, ommatidia_few_corners_normals,
       selected_regions, which_facets,
-
+      all_pair,
       # points to project: no!
       selected_center_points, selected_center_points_normal,
       #center_points, center_points_normal,
@@ -1129,37 +1210,40 @@ def anim_frame(
 
     print('non-nan', np.sum(np.logical_not(np.isnan(regions_rgb)), axis=0)) # [14,14,14]
 
-    # move thisd into visualise_3d_situation_eye
-    def rgb_to_rgba(regions_rgb):
-        nans = np.isnan(regions_rgb[:,0])
-        one = np.ones((regions_rgb.shape[0],1), dtype=float)
-        regions_rgba = np.concatenate( (regions_rgb / 255.0, one), axis=1)
-        _ALPHA = 3
-        regions_rgba[nans, 0:2] = 0.0
-        regions_rgba[:, _ALPHA] = 1.0
-        regions_rgba[nans, _ALPHA] = 0.0
-        return regions_rgba
-
-    def alpha1(rgba):
-        _ALPHA = 3
-        nans = np.isnan(rgba[:,0])
-        rgba[nans, 0:2] = 0.0
-        rgba[:, _ALPHA] = 1.0
-        rgba[nans, _ALPHA] = 0.0
-        return rgba
-
     regions_rgba = rgb_to_rgba(regions_rgb)
 
     if whether_visualise_eye_3d:
         #actual_eyepoints
         # one center_point for each region. todo: re-index center_point-s based on selected regions
         ax3 = visualise_3d_situation_eye(selected_center_points, regions_rgba, beeHead, 'eye', set_lims=False)
+
+        plt.show()
+
+        # (all_centers, all_normals_at_center_points)
+        if all_pair is not None:
+            (all_centers, all_normals_at_center_points) = all_pair
+            #towards neggaaative Z
+            all_centers_, all_normals_ = two_eyes(all_centers, all_normals_at_center_points, gap_x=0.4)
+
+            (_cpoints, _rgba, _casted_points) = project_colors(all_centers_, all_normals_, beeHead, planes[0], textures[0], clip=CAST_CLIP_FULL)
+            #(_cpoints, _rgba, _casted_points) = project_colors(points_to_cast, normals_to_cast, beeHead, planes[0], textures[0], clip=CAST_CLIP_NONE)
+
+            ax3 = visualise_3d_situation_eye(_cpoints, alpha1(_rgba*0),  None, 'eye', set_lims=False, ax3d_reuse=None)
+            plt.show()
+
+            ax3 = visualise_3d_situation_eye(_cpoints, _rgba,  None, 'eye', set_lims=False, ax3d_reuse=None)
+            ax3 = visualise_3d_situation_eye(_casted_points, _rgba, None, 'eye', set_lims=False, ax3d_reuse=ax3)
+            plt.show()
+            print('okkkkkk')
+            #exit()
         # in progress
         #print('----first')
         #print(selected_center_points.shape, casted_points.shape)  # (3250, 3) (6496, 3)
         #print(regions_rgba.shape)
         # fails:
         #visualise_3d_situation_eye(casted_points, regions_rgba, beeHead, 'eye', ax3d_reuse=ax3)
+        plt.show()
+        #exit()
 
         uv_rgb, *_ = sampling.sample_colors(uv, None, textures[0])
         uv_rgba = rgb_to_rgba(uv_rgb)
@@ -1176,7 +1260,7 @@ def anim_frame(
 
         #ZS = 5.0
         ZS = 15.0
-        ax3.set_zlim(-20-ZS, -20+ZS)
+        ax3.set_zlim(-2-ZS, -2+ZS)
         ax3.set_xlim(45-ZS, 45+ZS)
         ax3.set_ylim(45-ZS, 45+ZS)
 
@@ -1249,18 +1333,24 @@ def trajectory_provider():
     return (bee_path, bee_directions, frame_times)
 
 
-def cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets):
+def cast_and_visualise(
+      corner_points, normals_at_corners,
+      center_points, normals_at_center_points,
+      ommatidia_few_corners_normals, ommatidia_few_corners,
+      selected_regions, selected_center_points,
+      which_facets,
+      all_pair):
 
-    FLIP = np.diag([-1.0,1,-1])
+    FLIP_XZ = np.diag([-1.0,1,-1])
     def mult(a,b, c):
       return np.dot(a, b.T).T  + c #+ c[None,:]
-    corner_points = mult(FLIP, corner_points, 0)
-    normals_at_corners = mult(FLIP, normals_at_corners, 0)
-    center_points = mult(FLIP, center_points, 0)
-    normals_at_center_points = mult(FLIP, normals_at_center_points, 0)
-    ommatidia_few_corners_normals = mult(FLIP, ommatidia_few_corners_normals, 0)
-    ommatidia_few_corners = mult(FLIP, ommatidia_few_corners, 0)
-    selected_center_points = mult(FLIP, selected_center_points, 0)
+    corner_points = mult(FLIP_XZ, corner_points, 0)
+    normals_at_corners = mult(FLIP_XZ, normals_at_corners, 0)
+    center_points = mult(FLIP_XZ, center_points, 0)
+    normals_at_center_points = mult(FLIP_XZ, normals_at_center_points, 0)
+    ommatidia_few_corners_normals = mult(FLIP_XZ, ommatidia_few_corners_normals, 0)
+    ommatidia_few_corners = mult(FLIP_XZ, ommatidia_few_corners, 0)
+    selected_center_points = mult(FLIP_XZ, selected_center_points, 0)
 
     if False:
       # PLAIN plot raw eye data
@@ -1351,8 +1441,8 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
     # after flip-ing the eye 180:
 
     bee_direction = np.array([-0.5,  0,  0.86])   #looks towards positive-Z, left eye
-    bee_head_pos = np.array([45.0*UNIT_LEN_CM,  45.0*UNIT_LEN_CM, -20*UNIT_LEN_CM])
-    eye_sphere_size_cm = 2.0 * UNIT_LEN_MM * 10 # * 0.1*400
+    bee_head_pos = np.array([45.0*UNIT_LEN_CM,  45.0*UNIT_LEN_CM, -2*UNIT_LEN_CM])
+    eye_sphere_size_cm = 2.0 * UNIT_LEN_MM * 10/10 # * 0.1*400
     #clip=CAST_CLIP_NONE
     clip=CAST_CLIP_FULL
     print('eye_sphere_size_cm', eye_sphere_size_cm)
@@ -1389,6 +1479,9 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
         corner_points, normals_at_corners,
         ommatidia_few_corners, ommatidia_few_corners_normals,
         selected_regions, which_facets,
+        #
+        all_pair,
+        #
         selected_center_points, selected_center_points_normal,
         #center_points, normals_at_center_points,
         whether_visualise_eye_3d=True, whether_visualise_uv_samples=True,
@@ -1473,6 +1566,9 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
         clip=CAST_CLIP_FULL
 
+        #(all_centers,all_normals_at_center_points) = (None,None)
+        all_pair = None
+
         text_description = f'time: {round(frame_time,2)} (s)   frame:{animation_frame_index}'
         anim_fig.clear() # Much faster
         (beeHead, regions_rgba, anim_frame_artist) = \
@@ -1482,6 +1578,7 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
             corner_points, normals_at_corners,
             ommatidia_few_corners, ommatidia_few_corners_normals,
             selected_regions, which_facets,
+            all_pair, #(all_centers,all_normals_at_center_points),
             selected_center_points, selected_center_points_normal,
             #center_points, normals_at_center_points,
             whether_visualise_eye_3d=False, whether_visualise_uv_samples=True,
@@ -1506,8 +1603,8 @@ def cast_and_visualise(corner_points, normals_at_corners, center_points, normals
 
 
 def main2():
-   (corner_points, normals_at_corners), (center_points, normals_at_center_points), (ommatidia_few_corners_normals, ommatidia_few_corners), selected_regions, selected_center_points, which_facets = aaaaa()
-   cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets)
+   (corner_points, normals_at_corners), (center_points, normals_at_center_points), (ommatidia_few_corners_normals, ommatidia_few_corners), selected_regions, selected_center_points, which_facets, (all_centers,all_normals_at_center_points) = aaaaa()
+   cast_and_visualise(corner_points, normals_at_corners, center_points, normals_at_center_points, ommatidia_few_corners_normals, ommatidia_few_corners, selected_regions, selected_center_points, which_facets, (all_centers,all_normals_at_center_points))
 
 main2()
 
