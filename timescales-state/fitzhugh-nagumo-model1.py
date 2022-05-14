@@ -142,7 +142,9 @@ for i,param in enumerate(scenarios):
     velocities = velo_s[i]
     # j = repeats = 4
     for j in range(len(velocities)):
-        simulation = velocities[j]  # [2,1500]
+        simulation = velocities[j].copy()  # [2,1500]
+        # fake rescaling W:
+        simulation[1,:] = simulation[1,:] * param['tau']
         d_v = simulation[0,:]
         d_w = simulation[1,:]
         (mm1,mm2, ranges) = minmax(simulation)
@@ -154,6 +156,28 @@ for i,param in enumerate(scenarios):
     np.set_printoptions(precision=2)
     ax[i].set(xlabel=r'$\dot{V}$', ylabel=r'$\dot{W}$',
         title='v:{}, w:{}\n {:<8}'.format(ranges[0][:], ranges[1][:], pname));
+          #np.format_float_positional(ranges[0][:], precision=3),
+          #np.format_float_positional(ranges[1][:], precision=3),
+
+
+fig, ax = plt.subplots(1, len(scenarios), figsize=(5*len(scenarios),5))
+# i = simulation/experiment (with different parameters)
+for i,param in enumerate(scenarios):
+    velocities = velo_s[i]
+    # j = repeats = 4
+    for j in range(len(velocities)):
+        simulation = velocities[j]  # [2,1500]
+        d_v0 = simulation[0,:]
+        d_w0 = simulation[1,:]
+        d_t = time_span
+        d2_v = np.diff(d_v0)/np.diff(time_span)
+        d2_w = np.diff(d_w0)/np.diff(time_span)
+        (mm1,mm2, ranges) = minmax(np.array([d2_v, d2_w]))
+        ax[i].plot(np.array([mm1,mm2]), np.array([mm1,mm2]), 'r--', alpha=.2)
+        ax[i].plot(d2_v, d2_w, 'k-')
+    np.set_printoptions(precision=2)
+    ax[i].set(xlabel=r'$\ddot{V}$', ylabel=r'$\ddot2{W}$',
+        title='ACCELERATION\nv:{}, w:{}\n {:<8}'.format(ranges[0][:], ranges[1][:], pname));
           #np.format_float_positional(ranges[0][:], precision=3),
           #np.format_float_positional(ranges[1][:], precision=3),
 
