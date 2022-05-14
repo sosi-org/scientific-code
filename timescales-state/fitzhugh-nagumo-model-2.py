@@ -1,8 +1,14 @@
 # Based on fitzhugh-nagumo-model-1.py
+# Now refactoring to use sympy for arbitrary models
+
+
+
 # variuos forms of FNM?
 
 # from wonderful page of Guilhem Doulcier:
 # https://www.normalesup.org/~doulcier/teaching/modeling/excitable_systems.html
+# Based on Guilhem Doulcier's work
+
 
 from functools import partial
 import numpy as np
@@ -10,14 +16,14 @@ import scipy.integrate
 import scipy
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches #used to write custom legends
-# %matplotlib inline
+import sympy
+sympy.init_printing()
 
-# Guilhem Doulcier
 doulcier = False
 
-# Implement the flow of the Fitzhugh-Nagumo model.
-# And simulate some trajectories.
-# Try to use small perturbation of the resting potential as inital conditions.
+# doulcier's glossary:
+# displacement:  perturbation
+# autonomous system:  When `t` (float): Time is Not used => autonomous system
 
 if doulcier:
   scenarios = [
@@ -199,8 +205,7 @@ def jacobian_fitznagumo(v, w, a, b, tau, I):
                        [1/tau, -b/tau]])
 
 # Symbolic computation of the Jacobian using sympy...
-import sympy
-sympy.init_printing()
+
 
 # Define variable as symbols for sympy
 v, w = sympy.symbols("v, w")
@@ -223,15 +228,6 @@ sympy.pprint(jac, use_unicode=True)
 # https://docs.sympy.org/latest/tutorial/printing.html
 print()
 print(sympy.pretty(jac))
-
-
-import graphviz
-gd=sympy.dotprint(jac)
-print('\n',gd)
-# from graphviz import Source
-# src = Source(gd)
-# src.render('output.gv', view=True)
-# graphviz.doctest_mark_exe()
 
 plt.show()
 #brew install graphviz
