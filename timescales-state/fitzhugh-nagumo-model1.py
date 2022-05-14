@@ -32,9 +32,11 @@ else:
      {"a":0.7, "b":0.8, "tau":12.5, "I":0.7},
   ]
 
+UPSAMPLEx=5
+
 SIMU_TIME=200
-SIMU_STEPS1=1500
-SIMU_STEPS2=1000
+SIMU_STEPS1=1500*UPSAMPLEx
+SIMU_STEPS2=1000*UPSAMPLEx
 
 time_span = np.linspace(0, SIMU_TIME, num=SIMU_STEPS1)
 
@@ -80,7 +82,8 @@ def get_displacement(
     ic = scipy.integrate.odeint(
           partial(fitzhugh_nagumo, **param),
           y0=[0,0],
-          t= np.linspace(0,SIMU_STEPS2-1, SIMU_STEPS2)
+          #t= np.linspace(0,SIMU_STEPS2-1, SIMU_STEPS2)
+          t= np.linspace(0,SIMU_TIME*UPSAMPLEx, SIMU_STEPS2)
       )[-1]
     # and do some displacement of the potential.
     veocities = []
@@ -223,9 +226,12 @@ print(sympy.pretty(jac))
 
 
 import graphviz
+gd=sympy.dotprint(jac)
+print('\n',gd)
 # from graphviz import Source
-# src = Source(sympy.dotprint(jac))
+# src = Source(gd)
 # src.render('output.gv', view=True)
 # graphviz.doctest_mark_exe()
 
 plt.show()
+#brew install graphviz
