@@ -228,12 +228,12 @@ def model1():
 (v,w), (dvdt,dwdt), (a, b, tau), (I,) = (dyn_vars, dyn_derivs, params, inputs)
 
 # Symbolic expression of the matrix
-sys = sympy.Matrix((dvdt, dwdt))
-var = sympy.Matrix((v, w))
+sys = sympy.Matrix(dyn_derivs)
+var = sympy.Matrix(dyn_vars)
 jac = sys.jacobian(var)
 
 # You can convert jac to a function:
-jacobian_fitznagumo_symbolic = sympy.lambdify((v, w, a, b, tau, I), jac, dummify=False)
+jacobian_fitznagumo_symbolic = sympy.lambdify((*dyn_vars, *params, *inputs), jac, dummify=False)
 
 #jacobian_fitznagumo = jacobian_fitznagumo_symbolic
 sympy.pprint(jac, use_unicode=True)
