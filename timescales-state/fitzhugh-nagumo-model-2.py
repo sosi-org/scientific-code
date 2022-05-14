@@ -58,11 +58,7 @@ def model1():
     (dyn_vars, t, dyn_derivs, model_params, model_inputs) = (v,w), t, (dvdt,dwdt), (a, b, tau), (I,)
     return dyn_vars, t, dyn_derivs, model_params, model_inputs
 
-(dyn_vars, t, dyn_derivs, model_params, model_inputs) = model1()
-#(v,w), t, (dvdt,dwdt), (a, b, tau), (I,) = (dyn_vars, t, dyn_derivs, model_params, model_inputs)
-print((dyn_vars, t, dyn_derivs, model_params, model_inputs))
-# _model = model1()
-
+_model = model1()
 
 UPSAMPLEx=5
 # UPSAMPLEx=1
@@ -73,13 +69,13 @@ SIMU_STEPS2=1000*UPSAMPLEx
 
 time_span = np.linspace(0, SIMU_TIME, num=SIMU_STEPS1)
 
-# is it used?
-#model_lamb = sympy.lambdify((*dyn_vars, *model_params, *model_inputs), dyn_derivs, dummify=False)
 
-
-
-def fitzhugh_nagumo_partial(**model_params_and_inputs):
+def fitzhugh_nagumo_partial(_model, **model_params_and_inputs):
     # print('@FNM', model_params_and_inputs)
+
+    (dyn_vars, t, dyn_derivs, model_params, model_inputs) = _model
+    #(v,w), t, (dvdt,dwdt), (a, b, tau), (I,) = (dyn_vars, t, dyn_derivs, model_params, model_inputs)
+    print((dyn_vars, t, dyn_derivs, model_params, model_inputs))
 
     dyn_vars2 = tuple([deriv_elem.subs(model_params_and_inputs) for deriv_elem in dyn_derivs])
     model_lamb = sympy.lambdify((*dyn_vars,t), dyn_vars2, dummify=False)
@@ -111,7 +107,7 @@ def get_displacement(
   ):
     # We start from the resting point...
     ic = scipy.integrate.odeint(
-          fitzhugh_nagumo_partial(**param),
+          fitzhugh_nagumo_partial(_model, **param),
           y0=[0,0],
           #t= np.linspace(0,SIMU_STEPS2-1, SIMU_STEPS2)
           t= np.linspace(0,SIMU_TIME*UPSAMPLEx, SIMU_STEPS2)
@@ -122,13 +118,13 @@ def get_displacement(
     for displacement in np.linspace(0, dmax, number):
         traj.append(
           scipy.integrate.odeint(
-            fitzhugh_nagumo_partial(**param),
+            fitzhugh_nagumo_partial(_model, **param),
             y0=ic+np.array([displacement,0]),
             #full_output=True, adds a second entry to output
             t=time_span
         ))
         solu = traj[-1]  # v, w = sol.T
-        vel_eval = fitzhugh_nagumo_partial(**param)(solu.T, time_span)
+        vel_eval = fitzhugh_nagumo_partial(_model, **param)(solu.T, time_span)
 
         # vel_eval.shape: # (2, 1500)
         veocities.append(vel_eval)
@@ -218,6 +214,7 @@ def jacobian_fitznagumo(v, w, a, b, tau, I):
                        [1/tau, -b/tau]])
 
 # Symbolic computation of the Jacobian using sympy...
+(dyn_vars, t, dyn_derivs, model_params, model_inputs) = _model
 
 # Symbolic expression of the matrix
 sys = sympy.Matrix(dyn_derivs)
