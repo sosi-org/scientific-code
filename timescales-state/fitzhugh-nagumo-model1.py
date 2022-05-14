@@ -79,20 +79,28 @@ def get_displacement(
           t= np.linspace(0,999, 1000)
       )[-1]
     # and do some displacement of the potential.
+    veocities = []
     traj = []
     for displacement in np.linspace(0, dmax, number):
         traj.append(
           scipy.integrate.odeint(
             partial(fitzhugh_nagumo, **param),
             y0=ic+np.array([displacement,0]),
+            #full_output=True, adds a second entry to output
             t=time_span
         ))
-    return traj
+        solu = traj[-1]  # v, w = sol.T
+        vel_eval = partial(fitzhugh_nagumo, **param)(solu.T, time_span)
+        # vel_eval.shape: # (2, 1500)
+        veocities.append(vel_eval)
+    return traj, veocities
 
 # Do the numerical integration.
 trajectories = {} # We store the trajectories in a dictionnary, it is easier to recover them.
+velo_s = {}
 for i,param in enumerate(scenarios):
-    trajectories[i] = get_displacement(param, number=3, time_span=time_span, dmax=0.5)
+    trajectories[i], velo_s[i] \
+        = get_displacement(param, number=4, time_span=time_span, dmax=0.5)
 
 if doulcier:
   pname = 'doulcier'
@@ -109,5 +117,40 @@ for i,param in enumerate(scenarios):
             w = ax[i].plot(time_span,trajectories[i][j][:,1], color='C1', alpha=.5)
         ax[i].legend([v[0],w[0]],['v','w'])
 plt.tight_layout()
+
+
+
+def minmax(simulation):
+    # minvw = minmax(simulation)
+    mins = np.min(simulation, axis=1)
+    maxs = np.max(simulation, axis=1)
+    #print(mm1,mm2)
+    ranges = np.array([mins, maxs ]).T
+    print('ranges:', ranges)
+    mm1 = np.max(mins, axis=0)
+    mm2 = np.min(maxs, axis=0)
+    return (mm1, mm2, ranges)
+
+# plt.figure()
+fig, ax = plt.subplots(1, len(scenarios), figsize=(5*len(scenarios),5))
+# i = simulation/experiment (with different parameters)
+for i,param in enumerate(scenarios):
+    velocities = velo_s[i]
+    # j = repeats = 4
+    for j in range(len(velocities)):
+        simulation = velocities[j]  # [2,1500]
+        d_v = simulation[0,:]
+        d_w = simulation[1,:]
+        (mm1,mm2, ranges) = minmax(simulation)
+        #ax[i].plot(d_v, d_v, 'r.', alpha=.2)
+        #plt.plot(d_w, d_w, 'r.', alpha=.2)
+        # plt.plot(d_v, d_w, 'k-') #.-
+        ax[i].plot(np.array([mm1,mm2]), np.array([mm1,mm2]), 'r--', alpha=.2)
+        ax[i].plot(d_v, d_w, 'k-')
+    np.set_printoptions(precision=2)
+    ax[i].set(xlabel='Time', ylabel='v, w',
+        title='v:{}, w:{}\n {:<8}'.format(ranges[0][:], ranges[1][:], pname));
+          #np.format_float_positional(ranges[0][:], precision=3),
+          #np.format_float_positional(ranges[1][:], precision=3),
 
 plt.show()
