@@ -25,6 +25,10 @@ doulcier = False
 # displacement:  perturbation
 # autonomous system:  When `t` (float): Time is Not used => autonomous system
 
+
+#def mode_doulcier_1():
+#    pass
+
 if doulcier:
   scenarios = [
      {"a":-.3, "b":1.4, "tau":20, "I":0},
@@ -38,9 +42,10 @@ else:
      {"a":0.7, "b":0.8, "tau":12.5, "I":0.7},
   ]
 
-UPSAMPLEx=5
+# UPSAMPLEx=5
+UPSAMPLEx=1
 
-SIMU_TIME=200
+SIMU_TIME=200 / 5
 SIMU_STEPS1=1500*UPSAMPLEx
 SIMU_STEPS2=1000*UPSAMPLEx
 
@@ -206,18 +211,25 @@ def jacobian_fitznagumo(v, w, a, b, tau, I):
 
 # Symbolic computation of the Jacobian using sympy...
 
+def model1():
+    # Define variable as symbols for sympy
+    v, w = sympy.symbols("v, w")
+    a, b, tau, I = sympy.symbols("a, b, tau, I")
 
-# Define variable as symbols for sympy
-v, w = sympy.symbols("v, w")
-a, b, tau, I = sympy.symbols("a, b, tau, I")
+    # Symbolic expression of the system
+    dvdt = v - v**3 - w + I
+    dwdt = (v - a - b * w)/tau
 
-# Symbolic expression of the system
-dvdt = v - v**3 - w + I
-dwdt = (v - a - b * w)/tau
+    (dyn_vars, dyn_derivs, params, inputs) = (v,w), (dvdt,dwdt), (a, b, tau), (I,)
+    # dynamics vars, dynamics
+    return dyn_vars, dyn_derivs, params, inputs
+
+(dyn_vars, dyn_derivs, params, inputs) = model1()
+(v,w), (dvdt,dwdt), (a, b, tau), (I,) = (dyn_vars, dyn_derivs, params, inputs)
 
 # Symbolic expression of the matrix
-sys = sympy.Matrix([dvdt, dwdt])
-var = sympy.Matrix([v, w])
+sys = sympy.Matrix((dvdt, dwdt))
+var = sympy.Matrix((v, w))
 jac = sys.jacobian(var)
 
 # You can convert jac to a function:
