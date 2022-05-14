@@ -26,8 +26,6 @@ doulcier = False
 # autonomous system:  When `t` (float): Time is Not used => autonomous system
 
 
-#def mode_doulcier_1():
-#    pass
 
 if doulcier:
   scenarios = [
@@ -42,20 +40,6 @@ else:
      {"a":0.7, "b":0.8, "tau":12.5, "I":0.7},
   ]
 
-def model1():
-    # Define variable as symbols for sympy
-    v, w = sympy.symbols("v, w")
-    t = sympy.symbols("t")
-    a, b, tau, I = sympy.symbols("a, b, tau, I")
-
-    # Symbolic expression of the system
-    dvdt = v - v**3 - w + I
-    dwdt = (v - a - b * w)/tau
-
-    (dyn_vars, t, dyn_derivs, model_params, model_inputs) = (v,w), t, (dvdt,dwdt), (a, b, tau), (I,)
-    # dynamics vars, dynamics
-    return dyn_vars, t, dyn_derivs, model_params, model_inputs
-
 def model2():
     # Define variable as symbols for sympy
     v, w = sympy.symbols("v, w")
@@ -63,9 +47,6 @@ def model2():
     a, b, tau, I = sympy.symbols("a, b, tau, I")
 
     # Symbolic expression of the system
-    #dvdt = v - v**3 - w + I
-    #dwdt = (v - a - b * w)/tau
-
     if doulcier:
         dvdt = v - v**3  - w + I     #v - v**3 - w + I
         dwdt = (v - a - b * w)/tau   #(v - a - b * w)/tau
@@ -83,7 +64,6 @@ def model2():
 
 print((dyn_vars, t, dyn_derivs, model_params, model_inputs))
 
-#jacobian_fitznagumo_symbolic = sympy.lambdify((*dyn_vars, *model_params, *model_inputs), jac, dummify=False)
 
 # UPSAMPLEx=5
 UPSAMPLEx=1
@@ -94,64 +74,15 @@ SIMU_STEPS2=1000*UPSAMPLEx
 
 time_span = np.linspace(0, SIMU_TIME, num=SIMU_STEPS1)
 
-'''
-def fitzhugh_nagumo0(x, t, a, b, tau, I):
-
-    #return np.array([x[0] - x[0]**3 - x[1] + I,
-    #                 (x[0] - a - b * x[1])/tau])
-
-    V = x[0]
-    W = x[1]
-    if doulcier:
-        return np.array([
-             V - V**3  - W + I,
-            (V - a - b * W)/tau
-        ])
-    else:
-      # sohail
-      return np.array([
-           V - V**3 /3.0 - W + I,
-          (V + a - b * W)/tau
-      ])
-'''
-
+# is it used?
 model_lamb = sympy.lambdify((*dyn_vars, *model_params, *model_inputs), dyn_derivs, dummify=False)
-#dik1 = {'a':a, 'b':b, 'tau':tau, 'I':I}
-#model_lamb = sympy.lambdify((*dyn_vars, **dik1, *model_inputs), dyn_derivs, dummify=False)
 
-'''
-a2=np.zeros((2,100))
-y = model_lamb(a2[0,:],a2[1,:],1,1,15,0)
-len(y) # 2. tuple
-y[0].shape
-y[1].shape
-'''
 
 # prtial + lambdify
 # https://stackoverflow.com/questions/66924592/lambdify-partially-linear-function-in-sympy
 
-#import code
-#code.interact(local=locals())
-#exit()
 
-#def fitzhugh_nagumo(x, t, *model_params_and_inputs):
-def fitzhugh_nagumo1(x, t, **model_params_and_inputs):
-    print('@FNM', model_params_and_inputs)
-    #dv = V - V**3 /3.0 - W + I
-    #dw = (V + a - b * W)/tau
-    #return np.array([ dv, dw ])
-    assert x.shape[0] == 2
-    x0x1 = tuple(x) # x[0,:],x[1,:]
 
-    import code
-    code.interact(local=locals())
-    exit()
-
-    y = model_lamb(*x0x1, *model_params_and_inputs)
-    # y = (y0,y1)
-    print(y)
-
-    exit()
 
 def fitzhugh_nagumo_partial(**model_params_and_inputs):
     print('@FNM', model_params_and_inputs)
@@ -178,22 +109,7 @@ def fitzhugh_nagumo_partial(**model_params_and_inputs):
         return np.array(y)
     return p
 
-    import code
-    code.interact(local=locals())
-    exit()
 
-    y = model_lamb(*x0x1, *model_params_and_inputs)
-    # y = (y0,y1)
-    print(y)
-
-    exit()
-#fitzhugh_nagumo(np.zeros((2,SIMU_STEPS1)), time_span, 1,1,15,1)
-#fitzhugh_nagumo(np.zeros((2,SIMU_STEPS1)), time_span, **({"a":-.3, "b":1.4, "tau":20, "I":0}))
-#
-
-#import code
-#code.interact(local=locals())
-#exit()
 
 # linspace(start, stop, num=50)
 # ic: Array containing the value of y for each desired time in t, with the initial value y0 in the first row.
