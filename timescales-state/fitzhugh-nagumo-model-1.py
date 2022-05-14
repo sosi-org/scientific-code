@@ -225,13 +225,15 @@ print()
 print(sympy.pretty(jac))
 
 
-import graphviz
-gd=sympy.dotprint(jac)
-print('\n',gd)
-# from graphviz import Source
-# src = Source(gd)
-# src.render('output.gv', view=True)
-# graphviz.doctest_mark_exe()
+if False: # Causes error
+          # AttributeError: 'MutableDenseMatrix' object has no attribute 'args'
+    import graphviz
+    gd=sympy.dotprint(jac)
+    print('\n',gd)
+    # from graphviz import Source
+    # src = Source(gd)
+    # src.render('output.gv', view=True)
+    # graphviz.doctest_mark_exe()
 
 plt.show()
 #brew install graphviz
