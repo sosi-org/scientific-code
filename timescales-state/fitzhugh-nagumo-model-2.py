@@ -213,22 +213,25 @@ def jacobian_fitznagumo(v, w, a, b, tau, I):
     return np.array([[- 3 * v**2 + 1 , -1],
                        [1/tau, -b/tau]])
 
-# Symbolic computation of the Jacobian using sympy...
-(dyn_vars, t, dyn_derivs, model_params, model_inputs) = _model
+def sym_jacobian(_model):
+    # Symbolic computation of the Jacobian using sympy...
+    (dyn_vars, t, dyn_derivs, model_params, model_inputs) = _model
 
-# Symbolic expression of the matrix
-sys = sympy.Matrix(dyn_derivs)
-var = sympy.Matrix(dyn_vars)
-jac = sys.jacobian(var)
+    # Symbolic expression of the matrix
+    sys = sympy.Matrix(dyn_derivs)
+    var = sympy.Matrix(dyn_vars)
+    jac = sys.jacobian(var)
 
-# You can convert jac to a function:
-jacobian_fitznagumo_symbolic = sympy.lambdify((*dyn_vars, *model_params, *model_inputs), jac, dummify=False)
+    # You can convert jac to a function:
+    jacobian_fitznagumo_symbolic = sympy.lambdify((*dyn_vars, *model_params, *model_inputs), jac, dummify=False)
 
-#jacobian_fitznagumo = jacobian_fitznagumo_symbolic
-sympy.pprint(jac, use_unicode=True)
-# https://docs.sympy.org/latest/tutorial/printing.html
-print()
-print(sympy.pretty(jac))
+    #jacobian_fitznagumo = jacobian_fitznagumo_symbolic
+    sympy.pprint(jac, use_unicode=True)
+    # https://docs.sympy.org/latest/tutorial/printing.html
+    print()
+    print(sympy.pretty(jac))
+
+sym_jacobian(_model)
 
 plt.show()
 #brew install graphviz
