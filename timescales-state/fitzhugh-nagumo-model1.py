@@ -32,7 +32,11 @@ else:
      {"a":0.7, "b":0.8, "tau":12.5, "I":0.7},
   ]
 
-time_span = np.linspace(0, 200, num=1500)
+SIMU_TIME=200
+SIMU_STEPS1=1500
+SIMU_STEPS2=1000
+
+time_span = np.linspace(0, SIMU_TIME, num=SIMU_STEPS1)
 
 def fitzhugh_nagumo(x, t, a, b, tau, I):
     """Time derivative of the Fitzhugh-Nagumo neural model.
@@ -69,14 +73,14 @@ def fitzhugh_nagumo(x, t, a, b, tau, I):
 
 def get_displacement(
         param, dmax=0.5,
-        time_span=np.linspace(0,200, 1000),
+        time_span=np.linspace(0, SIMU_TIME, SIMU_STEPS2),
         number=20
   ):
     # We start from the resting point...
     ic = scipy.integrate.odeint(
           partial(fitzhugh_nagumo, **param),
           y0=[0,0],
-          t= np.linspace(0,999, 1000)
+          t= np.linspace(0,SIMU_STEPS2-1, SIMU_STEPS2)
       )[-1]
     # and do some displacement of the potential.
     veocities = []
@@ -148,7 +152,7 @@ for i,param in enumerate(scenarios):
         ax[i].plot(np.array([mm1,mm2]), np.array([mm1,mm2]), 'r--', alpha=.2)
         ax[i].plot(d_v, d_w, 'k-')
     np.set_printoptions(precision=2)
-    ax[i].set(xlabel='Time', ylabel='v, w',
+    ax[i].set(xlabel=r'$\dot{V}$', ylabel=r'$\dot{W}$',
         title='v:{}, w:{}\n {:<8}'.format(ranges[0][:], ranges[1][:], pname));
           #np.format_float_positional(ranges[0][:], precision=3),
           #np.format_float_positional(ranges[1][:], precision=3),
