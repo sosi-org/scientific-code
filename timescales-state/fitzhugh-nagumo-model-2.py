@@ -234,8 +234,6 @@ def symb_jacobian(_model):
 
     return jacobian_fitznagumo_symbolic
 
-symb_jacobian(_model)
-
 jacobian_fitznagumo = symb_jacobian(_model)
 
 
