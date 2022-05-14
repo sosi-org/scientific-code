@@ -6,28 +6,6 @@ set -xu
 
 source ~/cs/implisolid/scripts/bash-utils.sh
 
-function chk_virtualenv(){
-    # a solution based on `virutalenv`
-
-    #set -ex
-    if [[  -d ./p2-for-me ]]
-    then
-    # exists
-    return 0
-    #else
-    # does not exist
-    #return 0
-    fi
-
-    echo "INSTALLING THEM"
-
-    # brew install virtualenv
-
-    virtualenv -v --python=python2 p2-for-me
-    source ./p2-for-me/bin/activate
-    pip install numpy
-    pip install matplotlib
-}
 
 function chk_venv(){
     # a solution based on `venv` as opposed to `virutalenv`
