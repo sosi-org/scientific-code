@@ -212,8 +212,10 @@ def jacobian_fitznagumo(v, w, a, b, tau, I):
     Return: np.array 2x2"""
     return np.array([[- 3 * v**2 + 1 , -1],
                        [1/tau, -b/tau]])
+    # for `doulcier` only
+    # yes it matches the sym_jacobian() when I set doulcier=True
 
-def sym_jacobian(_model):
+def symb_jacobian(_model):
     # Symbolic computation of the Jacobian using sympy...
     (dyn_vars, t, dyn_derivs, model_params, model_inputs) = _model
 
@@ -231,7 +233,7 @@ def sym_jacobian(_model):
     print()
     print(sympy.pretty(jac))
 
-sym_jacobian(_model)
+symb_jacobian(_model)
 
 plt.show()
 #brew install graphviz
