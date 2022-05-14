@@ -1,8 +1,6 @@
 # Based on fitzhugh-nagumo-model-1.py
 # Now refactoring to use sympy for arbitrary models
 
-
-
 # variuos forms of FNM?
 
 # from wonderful page of Guilhem Doulcier:
@@ -41,7 +39,7 @@ else:
      {"a":0.7, "b":0.8, "tau":12.5, "I":0.7},
   ]
 
-def model2():
+def model1():
     # Define variable as symbols for sympy
     v, w = sympy.symbols("v, w")
     t = sympy.symbols("t")
@@ -49,21 +47,21 @@ def model2():
 
     # Symbolic expression of the system
     if doulcier:
-        dvdt = v - v**3  - w + I     #v - v**3 - w + I
-        dwdt = (v - a - b * w)/tau   #(v - a - b * w)/tau
+        dvdt = v - v**3  - w + I
+        dwdt = (v - a - b * w)/tau
     else:
         # sohail
-        dvdt = v - v**3 /3.0 - w + I    # v - v**3 - w + I
-        dwdt = (v + a - b * w)/tau      # (v - a - b * w)/tau
+        dvdt = v - v**3 /3.0 - w + I
+        dwdt = (v + a - b * w)/tau
 
-    (dyn_vars, t, dyn_derivs, model_params, model_inputs) = (v,w), t, (dvdt,dwdt), (a, b, tau), (I,)
     # dynamics vars, dynamics
+    (dyn_vars, t, dyn_derivs, model_params, model_inputs) = (v,w), t, (dvdt,dwdt), (a, b, tau), (I,)
     return dyn_vars, t, dyn_derivs, model_params, model_inputs
 
-(dyn_vars, t, dyn_derivs, model_params, model_inputs) = model2()
-(v,w), t, (dvdt,dwdt), (a, b, tau), (I,) = (dyn_vars, t, dyn_derivs, model_params, model_inputs)
-
+(dyn_vars, t, dyn_derivs, model_params, model_inputs) = model1()
+#(v,w), t, (dvdt,dwdt), (a, b, tau), (I,) = (dyn_vars, t, dyn_derivs, model_params, model_inputs)
 print((dyn_vars, t, dyn_derivs, model_params, model_inputs))
+# _model = model1()
 
 
 UPSAMPLEx=5
@@ -76,7 +74,7 @@ SIMU_STEPS2=1000*UPSAMPLEx
 time_span = np.linspace(0, SIMU_TIME, num=SIMU_STEPS1)
 
 # is it used?
-model_lamb = sympy.lambdify((*dyn_vars, *model_params, *model_inputs), dyn_derivs, dummify=False)
+#model_lamb = sympy.lambdify((*dyn_vars, *model_params, *model_inputs), dyn_derivs, dummify=False)
 
 
 
