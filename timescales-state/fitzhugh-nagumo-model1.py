@@ -1,7 +1,8 @@
 
 # variuos forms of FNM?
 
-# from wonderful page: https://www.normalesup.org/~doulcier/teaching/modeling/excitable_systems.html
+# from wonderful page of Guilhem Doulcier:
+# https://www.normalesup.org/~doulcier/teaching/modeling/excitable_systems.html
 
 from functools import partial
 import numpy as np
@@ -11,15 +12,26 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches #used to write custom legends
 # %matplotlib inline
 
+# Guilhem Doulcier
+doulcier = False
+
 # Implement the flow of the Fitzhugh-Nagumo model.
 # And simulate some trajectories.
 # Try to use small perturbation of the resting potential as inital conditions.
 
-scenarios = [
+if doulcier:
+  scenarios = [
      {"a":-.3, "b":1.4, "tau":20, "I":0},
      {"a":-.3, "b":1.4, "tau":20, "I":0.23},
      {"a":-.3, "b":1.4, "tau":20, "I":0.5}
-]
+  ]
+else:
+  scenarios = [
+     {"a":0.7, "b":0.8, "tau":12.5, "I":0},
+     {"a":0.7, "b":0.8, "tau":12.5, "I":0.23},
+     {"a":0.7, "b":0.8, "tau":12.5, "I":0.5}
+  ]
+
 time_span = np.linspace(0, 200, num=1500)
 
 def fitzhugh_nagumo(x, t, a, b, tau, I):
@@ -32,8 +44,26 @@ def fitzhugh_nagumo(x, t, a, b, tau, I):
        I (float): Constant stimulus current.
     Return: dx/dt (array size 2)
     """
+    '''
     return np.array([x[0] - x[0]**3 - x[1] + I,
                      (x[0] - a - b * x[1])/tau])
+    '''
+    V = x[0]
+    W = x[1]
+    if doulcier:
+        return np.array([
+             V - V**3  - W + I,
+            (V - a - b * W)/tau
+        ])
+    else:
+      # sohail
+      return np.array([
+           V - V**3 /3.0 - W + I,
+          (V + a - b * W)/tau
+      ])
+
+#
+
 def get_displacement(param, dmax=0.5,time_span=np.linspace(0,200, 1000), number=20):
     # We start from the resting point...
     ic = scipy.integrate.odeint(partial(fitzhugh_nagumo, **param),
@@ -52,11 +82,16 @@ trajectories = {} # We store the trajectories in a dictionnary, it is easier to 
 for i,param in enumerate(scenarios):
     trajectories[i] = get_displacement(param, number=3, time_span=time_span, dmax=0.5)
 
+if doulcier:
+  pname = 'doulcier'
+else:
+  pname = '@sohale'
+
 # Draw the trajectories.
 fig, ax = plt.subplots(1, len(scenarios), figsize=(5*len(scenarios),5))
 for i,param in enumerate(scenarios):
         ax[i].set(xlabel='Time', ylabel='v, w',
-                     title='{}'.format(param))
+                     title='{:<8} {}'.format(pname, param))
         for j in range(len(trajectories[i])):
             v = ax[i].plot(time_span,trajectories[i][j][:,0], color='C0')
             w = ax[i].plot(time_span,trajectories[i][j][:,1], color='C1', alpha=.5)
