@@ -87,6 +87,8 @@ function chk_venv(){
             --trusted-host files.pythonhosted.org \
             --trusted-host pypi.org \
             matplotlib
+
+
 }
 
 MAKE_HAPPEN "./p3-for-me/bin/activate" || {
@@ -94,11 +96,20 @@ MAKE_HAPPEN "./p3-for-me/bin/activate" || {
 chk_venv
 }
 
-echo "Main script"
 source ./p3-for-me/bin/activate
+
+export PIPFLAGS="--trusted-host pypi.python.org \
+    --trusted-host files.pythonhosted.org \
+    --trusted-host pypi.org"
+echo ">>>>$PIPFLAGS"
+
+MAKE_HAPPEN "./p3-for-me/lib/python3.9/site-packages/scipy/LICENSE.txt" || {
+  pip install $PIPFLAGS scipy
+}
+
+echo "Main script"
 
 python --version
 
-# python action1.py
 
-python action2.py
+python fitzhugh-nagumo-model1.py
