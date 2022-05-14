@@ -6,6 +6,12 @@ set -xu
 
 source ~/cs/implisolid/scripts/bash-utils.sh
 
+export PIPFLAGS="\
+    --trusted-host pypi.python.org \
+    --trusted-host files.pythonhosted.org \
+    --trusted-host pypi.org"
+echo ">>>>$PIPFLAGS"
+
 
 function chk_venv(){
     # a solution based on `venv` as opposed to `virutalenv`
@@ -48,24 +54,17 @@ function chk_venv(){
 
     python -m \
         pip install \
-            --trusted-host pypi.python.org \
-            --trusted-host files.pythonhosted.org \
-            --trusted-host pypi.org \
+            $PIPFLAGS \
             --upgrade pip
 
     #python -m \
         pip install \
-            --trusted-host pypi.python.org \
-            --trusted-host files.pythonhosted.org \
-            --trusted-host pypi.org \
+            $PIPFLAGS \
             numpy
 
         pip install \
-            --trusted-host pypi.python.org \
-            --trusted-host files.pythonhosted.org \
-            --trusted-host pypi.org \
+            $PIPFLAGS \
             matplotlib
-
 
 }
 
@@ -76,10 +75,6 @@ chk_venv
 
 source ./p3-for-me/bin/activate
 
-export PIPFLAGS="--trusted-host pypi.python.org \
-    --trusted-host files.pythonhosted.org \
-    --trusted-host pypi.org"
-echo ">>>>$PIPFLAGS"
 
 MAKE_HAPPEN "./p3-for-me/lib/python3.9/site-packages/scipy/LICENSE.txt" || {
   pip install $PIPFLAGS scipy
@@ -97,4 +92,5 @@ echo "Main script"
 python --version
 
 
-python fitzhugh-nagumo-model-1.py
+# python fitzhugh-nagumo-model-1.py
+python fitzhugh-nagumo-model-2.py
