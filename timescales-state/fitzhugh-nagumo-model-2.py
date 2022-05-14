@@ -92,7 +92,7 @@ def fitzhugh_nagumo_partial(_model, **model_params_and_inputs):
         #print(y[0].shape)
         dvdw = np.array(y)
         #print(dvdw.shape)
-        assert len(dvdw.shape) == 2 or dvdw.shape==(2,) 
+        assert len(dvdw.shape) == 2 or dvdw.shape==(2,)
         assert dvdw.shape == dvdw.shape == (ndim,) or (ndim, x.shape[1])
         # either (2,n)  or (2,)
         return dvdw
@@ -227,13 +227,92 @@ def symb_jacobian(_model):
     # You can convert jac to a function:
     jacobian_fitznagumo_symbolic = sympy.lambdify((*dyn_vars, *model_params, *model_inputs), jac, dummify=False)
 
-    #jacobian_fitznagumo = jacobian_fitznagumo_symbolic
     sympy.pprint(jac, use_unicode=True)
     # https://docs.sympy.org/latest/tutorial/printing.html
     print()
     print(sympy.pretty(jac))
 
+    return jacobian_fitznagumo_symbolic
+
 symb_jacobian(_model)
+
+jacobian_fitznagumo = symb_jacobian(_model)
+
+
+# by doulcier
+def stability(jacobian):
+    """ Stability of the equilibrium given its associated 2x2 jacobian matrix.
+    Use the eigenvalues.
+    Args:
+        jacobian (np.array 2x2): the jacobian matrix at the equilibrium point.
+    Return:
+        (string) status of equilibrium point.
+    """
+
+    eigv = np.linalg.eigvals(jacobian)
+
+    if all(np.real(eigv)==0) and all(np.imag(eigv)!=0):
+        nature = "Center"
+    elif np.real(eigv)[0]*np.real(eigv)[1]<0:
+        nature = "Saddle"
+    else:
+        stability = 'Unstable' if all(np.real(eigv)>0) else 'Stable'
+        nature = stability + (' focus' if all(np.imag(eigv)!=0) else ' node')
+    return nature
+
+def stability_alt(jacobian):
+    """ Stability of the equilibrium given its associated 2x2 jacobian matrix.
+    Use the trace and determinant.
+    Args:
+        jacobian (np.array 2x2): the jacobian matrix at the equilibrium point.
+    Return:
+        (string) status of equilibrium point.
+    """
+
+    determinant = np.linalg.det(jacobian)
+    trace = np.matrix.trace(jacobian)
+    if np.isclose(trace, 0):
+        nature = "Center (Hopf)"
+    elif np.isclose(determinant, 0):
+        nature = "Transcritical (Saddle-Node)"
+    elif determinant < 0:
+        nature = "Saddle"
+    else:
+        nature = "Stable" if trace < 0 else "Unstable"
+        nature += " focus" if (trace**2 - 4 * determinant) < 0 else " node"
+    return nature
+
+
+# todo: write this symbollically:
+def find_roots(a,b,I, tau):
+    # The coeficients of the polynomial equation are:
+    # 1           * v**3
+    # 0           * v**2
+    # - (1/b - 1) * v**1
+    # - (a/b + I) * v**0
+    coef = [1, 0, 1/b - 1, - a/b - I]
+
+    # We are only interested in real roots.
+    # np.isreal(x) returns True only if x is real.
+    # The following line filter the list returned by np.roots
+    # and only keep the real values.
+    roots = [np.real(r) for r in np.roots(coef) if np.isreal(r)]
+
+    # We store the position of the equilibrium.
+    return [[r, r - r**3 + I] for r in roots]
+
+eqnproot = {}
+for i, param in enumerate(scenarios):
+    eqnproot[i] = find_roots(**param)
+
+#
+eqstability = {}
+for i, param in enumerate(scenarios):
+    eqstability[i] = []
+    for e in eqnproot[i]:
+        J = jacobian_fitznagumo(e[0],e[1], **param)
+        eqstability[i].append(stability(J))
+print(eqstability)
 
 plt.show()
 #brew install graphviz
