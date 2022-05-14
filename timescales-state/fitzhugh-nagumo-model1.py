@@ -27,9 +27,9 @@ if doulcier:
   ]
 else:
   scenarios = [
-     {"a":0.7, "b":0.8, "tau":12.5, "I":0},
      {"a":0.7, "b":0.8, "tau":12.5, "I":0.23},
-     {"a":0.7, "b":0.8, "tau":12.5, "I":0.5}
+     {"a":0.7, "b":0.8, "tau":12.5, "I":0.5},
+     {"a":0.7, "b":0.8, "tau":12.5, "I":0.7},
   ]
 
 time_span = np.linspace(0, 200, num=1500)
@@ -64,17 +64,29 @@ def fitzhugh_nagumo(x, t, a, b, tau, I):
 
 #
 
-def get_displacement(param, dmax=0.5,time_span=np.linspace(0,200, 1000), number=20):
+# linspace(start, stop, num=50)
+# ic: Array containing the value of y for each desired time in t, with the initial value y0 in the first row.
+
+def get_displacement(
+        param, dmax=0.5,
+        time_span=np.linspace(0,200, 1000),
+        number=20
+  ):
     # We start from the resting point...
-    ic = scipy.integrate.odeint(partial(fitzhugh_nagumo, **param),
-                                                      y0=[0,0],
-                                                      t= np.linspace(0,999, 1000))[-1]
+    ic = scipy.integrate.odeint(
+          partial(fitzhugh_nagumo, **param),
+          y0=[0,0],
+          t= np.linspace(0,999, 1000)
+      )[-1]
     # and do some displacement of the potential.
     traj = []
-    for displacement in np.linspace(0,dmax, number):
-        traj.append(scipy.integrate.odeint(partial(fitzhugh_nagumo, **param),
-                                                      y0=ic+np.array([displacement,0]),
-                                                      t=time_span))
+    for displacement in np.linspace(0, dmax, number):
+        traj.append(
+          scipy.integrate.odeint(
+            partial(fitzhugh_nagumo, **param),
+            y0=ic+np.array([displacement,0]),
+            t=time_span
+        ))
     return traj
 
 # Do the numerical integration.
