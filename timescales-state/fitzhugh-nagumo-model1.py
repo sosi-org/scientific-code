@@ -153,4 +153,51 @@ for i,param in enumerate(scenarios):
           #np.format_float_positional(ranges[0][:], precision=3),
           #np.format_float_positional(ranges[1][:], precision=3),
 
+# symbolic
+
+def jacobian_fitznagumo(v, w, a, b, tau, I):
+    """ Jacobian matrix of the ODE system modeling Fitzhugh-Nagumo's excitable system
+    Args
+    ====
+        v (float): Membrane potential
+        w (float): Recovery variable
+        a,b (float): Parameters
+        tau (float): Recovery timescale.
+    Return: np.array 2x2"""
+    return np.array([[- 3 * v**2 + 1 , -1],
+                       [1/tau, -b/tau]])
+
+# Symbolic computation of the Jacobian using sympy...
+import sympy
+sympy.init_printing()
+
+# Define variable as symbols for sympy
+v, w = sympy.symbols("v, w")
+a, b, tau, I = sympy.symbols("a, b, tau, I")
+
+# Symbolic expression of the system
+dvdt = v - v**3 - w + I
+dwdt = (v - a - b * w)/tau
+
+# Symbolic expression of the matrix
+sys = sympy.Matrix([dvdt, dwdt])
+var = sympy.Matrix([v, w])
+jac = sys.jacobian(var)
+
+# You can convert jac to a function:
+jacobian_fitznagumo_symbolic = sympy.lambdify((v, w, a, b, tau, I), jac, dummify=False)
+
+#jacobian_fitznagumo = jacobian_fitznagumo_symbolic
+sympy.pprint(jac, use_unicode=True)
+# https://docs.sympy.org/latest/tutorial/printing.html
+print()
+print(sympy.pretty(jac))
+
+
+import graphviz
+# from graphviz import Source
+# src = Source(sympy.dotprint(jac))
+# src.render('output.gv', view=True)
+# graphviz.doctest_mark_exe()
+
 plt.show()

@@ -84,6 +84,13 @@ echo ">>>>$PIPFLAGS"
 MAKE_HAPPEN "./p3-for-me/lib/python3.9/site-packages/scipy/LICENSE.txt" || {
   pip install $PIPFLAGS scipy
 }
+MAKE_HAPPEN "./p3-for-me/lib/python3.9/site-packages/sympy/__init__.py" || {
+  pip install $PIPFLAGS sympy
+}
+
+MAKE_HAPPEN "./p3-for-me/lib/python3.9/site-packages/graphviz/__init__.py" || {
+  pip install $PIPFLAGS graphviz
+}
 
 echo "Main script"
 
