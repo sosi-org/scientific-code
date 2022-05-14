@@ -97,4 +97,4 @@ echo "Main script"
 python --version
 
 
-python fitzhugh-nagumo-model1.py
+python fitzhugh-nagumo-model-1.py
