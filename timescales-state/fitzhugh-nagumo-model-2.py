@@ -24,7 +24,8 @@ doulcier = False
 # doulcier's glossary:
 # displacement:  perturbation
 # autonomous system:  When `t` (float): Time is Not used => autonomous system
-
+# Membrane potential:  v
+# Recovery variable:  w
 
 
 if doulcier:
@@ -65,8 +66,8 @@ def model2():
 print((dyn_vars, t, dyn_derivs, model_params, model_inputs))
 
 
-# UPSAMPLEx=5
-UPSAMPLEx=1
+UPSAMPLEx=5
+# UPSAMPLEx=1
 
 SIMU_TIME=200
 SIMU_STEPS1=1500*UPSAMPLEx
@@ -78,40 +79,31 @@ time_span = np.linspace(0, SIMU_TIME, num=SIMU_STEPS1)
 model_lamb = sympy.lambdify((*dyn_vars, *model_params, *model_inputs), dyn_derivs, dummify=False)
 
 
-# prtial + lambdify
-# https://stackoverflow.com/questions/66924592/lambdify-partially-linear-function-in-sympy
-
-
-
 
 def fitzhugh_nagumo_partial(**model_params_and_inputs):
-    print('@FNM', model_params_and_inputs)
+    # print('@FNM', model_params_and_inputs)
 
-    #dyn_vars2 = dyn_derivs.subs(model_params_and_inputs)
     dyn_vars2 = tuple([deriv_elem.subs(model_params_and_inputs) for deriv_elem in dyn_derivs])
-    #model_lamb = sympy.lambdify((*dyn_vars, *model_params, *model_inputs), dyn_derivs, dummify=False)
-    print('>>>dyn_vars2', dyn_vars2)
-    #t = sympy.symbols("t")
     model_lamb = sympy.lambdify((*dyn_vars,t), dyn_vars2, dummify=False)
+    ndim = len(dyn_derivs)
 
     def p(x, t):
-        #dv = V - V**3 /3.0 - W + I
-        #dw = (V + a - b * W)/tau
-        #return np.array([ dv, dw ])
-        assert x.shape[0] == 2
+        # either ((2,n), (n,))  or ((2,), ())
+        # is_scalar =
+        #print(x.shape, 'x.shape')
+        assert x.shape[0] == ndim
         x0x1 = tuple(x) # x[0,:],x[1,:]
         y = model_lamb(*x0x1, t)
-        print(y)
         assert len(y) == 2
-        # print(len(y), type(y[0]),y[0].shape , y[1].shape)
-        #exit()
-        print(np.array(y).shape, '@@<')
-        return np.array(y)
+        #print(y[0].shape)
+        dvdw = np.array(y)
+        #print(dvdw.shape)
+        assert len(dvdw.shape) == 2 or dvdw.shape==(2,) 
+        assert dvdw.shape == dvdw.shape == (ndim,) or (ndim, x.shape[1])
+        # either (2,n)  or (2,)
+        return dvdw
     return p
 
-
-
-# linspace(start, stop, num=50)
 # ic: Array containing the value of y for each desired time in t, with the initial value y0 in the first row.
 
 def get_displacement(
@@ -121,7 +113,6 @@ def get_displacement(
   ):
     # We start from the resting point...
     ic = scipy.integrate.odeint(
-          #partial(fitzhugh_nagumo, **param),
           fitzhugh_nagumo_partial(**param),
           y0=[0,0],
           #t= np.linspace(0,SIMU_STEPS2-1, SIMU_STEPS2)
@@ -133,14 +124,12 @@ def get_displacement(
     for displacement in np.linspace(0, dmax, number):
         traj.append(
           scipy.integrate.odeint(
-            # partial(fitzhugh_nagumo, **param),
             fitzhugh_nagumo_partial(**param),
             y0=ic+np.array([displacement,0]),
             #full_output=True, adds a second entry to output
             t=time_span
         ))
         solu = traj[-1]  # v, w = sol.T
-        #vel_eval = partial(fitzhugh_nagumo, **param)(solu.T, time_span)
         vel_eval = fitzhugh_nagumo_partial(**param)(solu.T, time_span)
 
         # vel_eval.shape: # (2, 1500)
@@ -171,19 +160,15 @@ for i,param in enumerate(scenarios):
 plt.tight_layout()
 
 
-
 def minmax(simulation):
-    # minvw = minmax(simulation)
     mins = np.min(simulation, axis=1)
     maxs = np.max(simulation, axis=1)
-    #print(mm1,mm2)
     ranges = np.array([mins, maxs ]).T
     print('ranges:', ranges)
     mm1 = np.max(mins, axis=0)
     mm2 = np.min(maxs, axis=0)
     return (mm1, mm2, ranges)
 
-# plt.figure()
 fig, ax = plt.subplots(1, len(scenarios), figsize=(5*len(scenarios),5))
 # i = simulation/experiment (with different parameters)
 for i,param in enumerate(scenarios):
@@ -196,18 +181,13 @@ for i,param in enumerate(scenarios):
         d_v = simulation[0,:]
         d_w = simulation[1,:]
         (mm1,mm2, ranges) = minmax(simulation)
-        #ax[i].plot(d_v, d_v, 'r.', alpha=.2)
-        #plt.plot(d_w, d_w, 'r.', alpha=.2)
-        # plt.plot(d_v, d_w, 'k-') #.-
         ax[i].plot(np.array([mm1,mm2]), np.array([mm1,mm2]), 'r--', alpha=.2)
         ax[i].plot(d_v, d_w, 'k-')
     np.set_printoptions(precision=2)
     ax[i].set(xlabel=r'$\dot{V}$', ylabel=r'$\dot{W}$',
         title='v:{}, w:{}\n {:<8}'.format(ranges[0][:], ranges[1][:], pname));
-          #np.format_float_positional(ranges[0][:], precision=3),
-          #np.format_float_positional(ranges[1][:], precision=3),
 
-
+# Second derivative
 fig, ax = plt.subplots(1, len(scenarios), figsize=(5*len(scenarios),5))
 # i = simulation/experiment (with different parameters)
 for i,param in enumerate(scenarios):
@@ -226,8 +206,6 @@ for i,param in enumerate(scenarios):
     np.set_printoptions(precision=2)
     ax[i].set(xlabel=r'$\ddot{V}$', ylabel=r'$\ddot2{W}$',
         title='ACCELERATION\nv:{}, w:{}\n {:<8}'.format(ranges[0][:], ranges[1][:], pname));
-          #np.format_float_positional(ranges[0][:], precision=3),
-          #np.format_float_positional(ranges[1][:], precision=3),
 
 # symbolic
 
@@ -235,8 +213,6 @@ def jacobian_fitznagumo(v, w, a, b, tau, I):
     """ Jacobian matrix of the ODE system modeling Fitzhugh-Nagumo's excitable system
     Args
     ====
-        v (float): Membrane potential
-        w (float): Recovery variable
         a,b (float): Parameters
         tau (float): Recovery timescale.
     Return: np.array 2x2"""
@@ -258,7 +234,6 @@ sympy.pprint(jac, use_unicode=True)
 # https://docs.sympy.org/latest/tutorial/printing.html
 print()
 print(sympy.pretty(jac))
-
 
 plt.show()
 #brew install graphviz
