@@ -42,6 +42,22 @@ else:
      {"a":0.7, "b":0.8, "tau":12.5, "I":0.7},
   ]
 
+def model1():
+    # Define variable as symbols for sympy
+    v, w = sympy.symbols("v, w")
+    a, b, tau, I = sympy.symbols("a, b, tau, I")
+
+    # Symbolic expression of the system
+    dvdt = v - v**3 - w + I
+    dwdt = (v - a - b * w)/tau
+
+    (dyn_vars, dyn_derivs, model_params, model_inputs) = (v,w), (dvdt,dwdt), (a, b, tau), (I,)
+    # dynamics vars, dynamics
+    return dyn_vars, dyn_derivs, model_params, model_inputs
+
+(dyn_vars, dyn_derivs, model_params, model_inputs) = model1()
+(v,w), (dvdt,dwdt), (a, b, tau), (I,) = (dyn_vars, dyn_derivs, model_params, model_inputs)
+
 # UPSAMPLEx=5
 UPSAMPLEx=1
 
@@ -210,22 +226,6 @@ def jacobian_fitznagumo(v, w, a, b, tau, I):
                        [1/tau, -b/tau]])
 
 # Symbolic computation of the Jacobian using sympy...
-
-def model1():
-    # Define variable as symbols for sympy
-    v, w = sympy.symbols("v, w")
-    a, b, tau, I = sympy.symbols("a, b, tau, I")
-
-    # Symbolic expression of the system
-    dvdt = v - v**3 - w + I
-    dwdt = (v - a - b * w)/tau
-
-    (dyn_vars, dyn_derivs, model_params, model_inputs) = (v,w), (dvdt,dwdt), (a, b, tau), (I,)
-    # dynamics vars, dynamics
-    return dyn_vars, dyn_derivs, model_params, model_inputs
-
-(dyn_vars, dyn_derivs, model_params, model_inputs) = model1()
-(v,w), (dvdt,dwdt), (a, b, tau), (I,) = (dyn_vars, dyn_derivs, model_params, model_inputs)
 
 # Symbolic expression of the matrix
 sys = sympy.Matrix(dyn_derivs)
