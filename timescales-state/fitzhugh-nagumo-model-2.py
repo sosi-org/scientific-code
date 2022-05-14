@@ -45,42 +45,61 @@ else:
 def model1():
     # Define variable as symbols for sympy
     v, w = sympy.symbols("v, w")
+    t = sympy.symbols("t")
     a, b, tau, I = sympy.symbols("a, b, tau, I")
 
     # Symbolic expression of the system
     dvdt = v - v**3 - w + I
     dwdt = (v - a - b * w)/tau
 
-    (dyn_vars, dyn_derivs, model_params, model_inputs) = (v,w), (dvdt,dwdt), (a, b, tau), (I,)
+    (dyn_vars, t, dyn_derivs, model_params, model_inputs) = (v,w), t, (dvdt,dwdt), (a, b, tau), (I,)
     # dynamics vars, dynamics
-    return dyn_vars, dyn_derivs, model_params, model_inputs
+    return dyn_vars, t, dyn_derivs, model_params, model_inputs
 
-(dyn_vars, dyn_derivs, model_params, model_inputs) = model1()
-(v,w), (dvdt,dwdt), (a, b, tau), (I,) = (dyn_vars, dyn_derivs, model_params, model_inputs)
+def model2():
+    # Define variable as symbols for sympy
+    v, w = sympy.symbols("v, w")
+    t = sympy.symbols("t")
+    a, b, tau, I = sympy.symbols("a, b, tau, I")
+
+    # Symbolic expression of the system
+    #dvdt = v - v**3 - w + I
+    #dwdt = (v - a - b * w)/tau
+
+    if doulcier:
+        dvdt = v - v**3  - w + I     #v - v**3 - w + I
+        dwdt = (v - a - b * w)/tau   #(v - a - b * w)/tau
+    else:
+        # sohail
+        dvdt = v - v**3 /3.0 - w + I    # v - v**3 - w + I
+        dwdt = (v + a - b * w)/tau      # (v - a - b * w)/tau
+
+    (dyn_vars, t, dyn_derivs, model_params, model_inputs) = (v,w), t, (dvdt,dwdt), (a, b, tau), (I,)
+    # dynamics vars, dynamics
+    return dyn_vars, t, dyn_derivs, model_params, model_inputs
+
+(dyn_vars, t, dyn_derivs, model_params, model_inputs) = model2()
+(v,w), t, (dvdt,dwdt), (a, b, tau), (I,) = (dyn_vars, t, dyn_derivs, model_params, model_inputs)
+
+print((dyn_vars, t, dyn_derivs, model_params, model_inputs))
+
+#jacobian_fitznagumo_symbolic = sympy.lambdify((*dyn_vars, *model_params, *model_inputs), jac, dummify=False)
 
 # UPSAMPLEx=5
 UPSAMPLEx=1
 
-SIMU_TIME=200 / 5
+SIMU_TIME=200
 SIMU_STEPS1=1500*UPSAMPLEx
 SIMU_STEPS2=1000*UPSAMPLEx
 
 time_span = np.linspace(0, SIMU_TIME, num=SIMU_STEPS1)
 
-def fitzhugh_nagumo(x, t, a, b, tau, I):
-    """Time derivative of the Fitzhugh-Nagumo neural model.
-    Args:
-       x (array size 2): [Membrane potential, Recovery variable]
-       a, b (float): Parameters.
-       tau (float): Time scale.
-       t (float): Time (Not used: autonomous system)
-       I (float): Constant stimulus current.
-    Return: dx/dt (array size 2)
-    """
-    '''
-    return np.array([x[0] - x[0]**3 - x[1] + I,
-                     (x[0] - a - b * x[1])/tau])
-    '''
+'''
+def fitzhugh_nagumo0(x, t, a, b, tau, I):
+
+    #return np.array([x[0] - x[0]**3 - x[1] + I,
+    #                 (x[0] - a - b * x[1])/tau])
+
     V = x[0]
     W = x[1]
     if doulcier:
@@ -94,8 +113,87 @@ def fitzhugh_nagumo(x, t, a, b, tau, I):
            V - V**3 /3.0 - W + I,
           (V + a - b * W)/tau
       ])
+'''
 
+model_lamb = sympy.lambdify((*dyn_vars, *model_params, *model_inputs), dyn_derivs, dummify=False)
+#dik1 = {'a':a, 'b':b, 'tau':tau, 'I':I}
+#model_lamb = sympy.lambdify((*dyn_vars, **dik1, *model_inputs), dyn_derivs, dummify=False)
+
+'''
+a2=np.zeros((2,100))
+y = model_lamb(a2[0,:],a2[1,:],1,1,15,0)
+len(y) # 2. tuple
+y[0].shape
+y[1].shape
+'''
+
+# prtial + lambdify
+# https://stackoverflow.com/questions/66924592/lambdify-partially-linear-function-in-sympy
+
+#import code
+#code.interact(local=locals())
+#exit()
+
+#def fitzhugh_nagumo(x, t, *model_params_and_inputs):
+def fitzhugh_nagumo1(x, t, **model_params_and_inputs):
+    print('@FNM', model_params_and_inputs)
+    #dv = V - V**3 /3.0 - W + I
+    #dw = (V + a - b * W)/tau
+    #return np.array([ dv, dw ])
+    assert x.shape[0] == 2
+    x0x1 = tuple(x) # x[0,:],x[1,:]
+
+    import code
+    code.interact(local=locals())
+    exit()
+
+    y = model_lamb(*x0x1, *model_params_and_inputs)
+    # y = (y0,y1)
+    print(y)
+
+    exit()
+
+def fitzhugh_nagumo_partial(**model_params_and_inputs):
+    print('@FNM', model_params_and_inputs)
+
+    #dyn_vars2 = dyn_derivs.subs(model_params_and_inputs)
+    dyn_vars2 = tuple([deriv_elem.subs(model_params_and_inputs) for deriv_elem in dyn_derivs])
+    #model_lamb = sympy.lambdify((*dyn_vars, *model_params, *model_inputs), dyn_derivs, dummify=False)
+    print('>>>dyn_vars2', dyn_vars2)
+    #t = sympy.symbols("t")
+    model_lamb = sympy.lambdify((*dyn_vars,t), dyn_vars2, dummify=False)
+
+    def p(x, t):
+        #dv = V - V**3 /3.0 - W + I
+        #dw = (V + a - b * W)/tau
+        #return np.array([ dv, dw ])
+        assert x.shape[0] == 2
+        x0x1 = tuple(x) # x[0,:],x[1,:]
+        y = model_lamb(*x0x1, t)
+        print(y)
+        assert len(y) == 2
+        # print(len(y), type(y[0]),y[0].shape , y[1].shape)
+        #exit()
+        print(np.array(y).shape, '@@<')
+        return np.array(y)
+    return p
+
+    import code
+    code.interact(local=locals())
+    exit()
+
+    y = model_lamb(*x0x1, *model_params_and_inputs)
+    # y = (y0,y1)
+    print(y)
+
+    exit()
+#fitzhugh_nagumo(np.zeros((2,SIMU_STEPS1)), time_span, 1,1,15,1)
+#fitzhugh_nagumo(np.zeros((2,SIMU_STEPS1)), time_span, **({"a":-.3, "b":1.4, "tau":20, "I":0}))
 #
+
+#import code
+#code.interact(local=locals())
+#exit()
 
 # linspace(start, stop, num=50)
 # ic: Array containing the value of y for each desired time in t, with the initial value y0 in the first row.
@@ -107,7 +205,8 @@ def get_displacement(
   ):
     # We start from the resting point...
     ic = scipy.integrate.odeint(
-          partial(fitzhugh_nagumo, **param),
+          #partial(fitzhugh_nagumo, **param),
+          fitzhugh_nagumo_partial(**param),
           y0=[0,0],
           #t= np.linspace(0,SIMU_STEPS2-1, SIMU_STEPS2)
           t= np.linspace(0,SIMU_TIME*UPSAMPLEx, SIMU_STEPS2)
@@ -118,13 +217,16 @@ def get_displacement(
     for displacement in np.linspace(0, dmax, number):
         traj.append(
           scipy.integrate.odeint(
-            partial(fitzhugh_nagumo, **param),
+            # partial(fitzhugh_nagumo, **param),
+            fitzhugh_nagumo_partial(**param),
             y0=ic+np.array([displacement,0]),
             #full_output=True, adds a second entry to output
             t=time_span
         ))
         solu = traj[-1]  # v, w = sol.T
-        vel_eval = partial(fitzhugh_nagumo, **param)(solu.T, time_span)
+        #vel_eval = partial(fitzhugh_nagumo, **param)(solu.T, time_span)
+        vel_eval = fitzhugh_nagumo_partial(**param)(solu.T, time_span)
+
         # vel_eval.shape: # (2, 1500)
         veocities.append(vel_eval)
     return traj, veocities
@@ -240,6 +342,7 @@ sympy.pprint(jac, use_unicode=True)
 # https://docs.sympy.org/latest/tutorial/printing.html
 print()
 print(sympy.pretty(jac))
+
 
 plt.show()
 #brew install graphviz
