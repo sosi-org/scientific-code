@@ -293,10 +293,13 @@ def symbolic_nullclines(_model, param):
         c = sympy.symbols("c", real=REAL_ONLY)
         nlc1 = dv  # dv=0
         #nlc1 = dw # dw=0
+
+        # The "scan"ning line/shape
         #lin1 = v-c # single root solution
         lin1 = w-c  # multiple roots
         # lin1 = v-c+w
         # lin1 = v*v-c+w*w
+
         print('nlc1', nlc1)
         print('lin1', lin1)
         eq3m = Matrix([nlc1, lin1])
@@ -327,7 +330,8 @@ def symbolic_nullclines(_model, param):
         # c is the free parameter for the "curve". Since it's aa null-cline, we need (exactly) one free ariable for it
         # todo: rename c to s
         solution_lambda_list = [
-            sympy.lambdify((c,), solt_vw, dummify=False)
+            # `modules=["scipy", "numpy"]`` is essential for the correct calculation of nullclines (generalised approach). Especiaally when there are multiple roots.
+            sympy.lambdify((c,), solt_vw, dummify=False, modules=["scipy", "numpy"] )
                 for solt_vw in solution_sympy_list ]
         # each is a function that returns ndim
 
