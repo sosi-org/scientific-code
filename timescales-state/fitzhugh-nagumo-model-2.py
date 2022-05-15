@@ -213,12 +213,39 @@ for i,param in enumerate(scenarios):
 ##############################################
 
 # todo: null-clines
-def plot_isocline(ax, a, b, tau, I, color='k', style='--', opacity=.5, vmin=-1,vmax=1):
+def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacity=.5, vmin=-1,vmax=1):
     """Plot the null iscolines of the Fitzhugh nagumo system"""
     v = np.linspace(vmin,vmax,100)
 
+    print()
+    # see https://github.com/sosi-org/scientific-code/blob/633224dc72692c13acc8263e21c933119eeaaf69/beeseyes/pycode/derive_formulas.py
+    dv = _model[2][0].subs(param)
+    w = _model[0][1]
+    print('dv_', dv)
+    print('w', w)
+    from sympy import Eq #as Equation
+    # https://docs.sympy.org/latest/modules/core.html?highlight=eq#sympy.core.relational.Equality
+    # https://docs.sympy.org/latest/modules/solvers/solvers.html
+    zero = 0 * dv # ? sympy.core.numbers.Zero
+    eq1 = Eq(dv, zero)
+    sympy.pprint(eq1, use_unicode=True)
+    c = sympy.symbols("c")
+    eq2 = Eq(v, c*0, evaluate=False)
+    sympy.pprint(eq2, use_unicode=True)
+    # _.doit()
+    # simplify(_)
+    #solutions = sympy.solve(eq, (a,b,t),force=True, manual=True, set=True)
+    solutions = sympy.solve([eq1,eq2], (w,),force=True, manual=True, set=True)
+    print('solutions', solutions)
+    print('solutions[0]', solutions[0])
+    #sympy.core.numbers.Zero
+    #sol_a = solution[0][0]
+    #sol_b = solution[0][1]
+    #sol_t = solution[0][2]
+
     import code
-    code.interact(local=locals())
+    #code.interact(local=locals())
+    print('bye')
     exit()
     # v - v**3  - w + I == 0
     # w=...
@@ -230,7 +257,7 @@ def plot_isocline(ax, a, b, tau, I, color='k', style='--', opacity=.5, vmin=-1,v
 
 fig, ax = plt.subplots(1, 3, figsize=(18, 6))
 for i, sc in enumerate(scenarios):
-    plot_isocline(ax[i], **sc)
+    plot_isocline(_model, sc, ax[i], **sc)
     ax[i].set(xlabel='v', ylabel='w',
               title='{}'.format(sc))
 
