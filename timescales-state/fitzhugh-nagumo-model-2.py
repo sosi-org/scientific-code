@@ -91,9 +91,9 @@ def model1():
 # will need to be parametrised in proper variables (not consts)
 _ηVAR_V = 0
 _ηVAR_W = 1
-_NDIM_VW = 2  # "across dims". try to avoid
+_ηNDIM_VW = 2  # "across dims". try to avoid
 
-# (_NDIM_VW, 1500) is more readable than (2, 1500)
+# (_ηNDIM_VW, 1500) is more readable than (2, 1500)
 
 
 _model = model1()
@@ -120,19 +120,19 @@ def fitzhugh_nagumo_partial(_model, **model_params_and_inputs):
 
     # ηLAMB_NPARRAY: receives ndarray, returns ndarray
     def p(x, t):
-        # either args=((_NDIM_VW,n), (n,))  or args=((_NDIM_VW,), ())
+        # either args=((_ηNDIM_VW,n), (n,))  or args=((_ηNDIM_VW,), ())
         # is_scalar =
         #print(x.shape, 'x.shape')
         assert x.shape[ηSIM_NDIM] == ndim
         x0x1 = tuple(x) # x[0,:],x[1,:]
         y = model_lamb(*x0x1, t)
-        assert len(y) == _NDIM_VW
+        assert len(y) == _ηNDIM_VW
         #print(y[0].shape)
         dvdw = np.array(y)
         #print(dvdw.shape)
-        assert len(dvdw.shape) == _NDIM_VW or dvdw.shape==(_NDIM_VW,)
+        assert len(dvdw.shape) == _ηNDIM_VW or dvdw.shape==(_ηNDIM_VW,)
         assert dvdw.shape == dvdw.shape == (ndim,) or (ndim, x.shape[ηSIM_BINS])
-        # either (_NDIM_VW,n)  or (_NDIM_VW,)
+        # either (_ηNDIM_VW,n)  or (_ηNDIM_VW,)
         return dvdw
 
     # ηLAMB_ASLIST: receives list, returns list
@@ -176,7 +176,7 @@ def get_displacement(
         solu = traj[-1]  # v, w = sol.T
         vel_eval = fitzhugh_nagumo_partial(_model, **param)[ηLAMB_NPARRAY](solu.T, time_span)
 
-        # vel_eval.shape: # (_NDIM_VW, 1500)
+        # vel_eval.shape: # (_ηNDIM_VW, 1500)
         veocities.append(vel_eval)
     return traj, veocities
 
