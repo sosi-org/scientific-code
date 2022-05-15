@@ -109,7 +109,6 @@ time_span = np.linspace(0, SIMU_TIME, num=SIMU_STEPS1)
 
 
 def fitzhugh_nagumo_partial(_model, **model_params_and_inputs):
-    # print('@FNM', model_params_and_inputs)
 
     (dyn_vars, t, dyn_derivs, model_params, model_inputs) = _model
     #(v,w), t, (dvdt,dwdt), (a, b, tau), (I,) = (dyn_vars, t, dyn_derivs, model_params, model_inputs)
@@ -260,41 +259,25 @@ def symbolic_nullclines(_model, param):
     # symbolic (algebraic) null-clines:
     print()
     print(param)
-    # see https://github.com/sosi-org/scientific-code/blob/633224dc72692c13acc8263e21c933119eeaaf69/beeseyes/pycode/derive_formulas.py
     dv = _model[M_DYN_I][_VAR_I_V].subs(param)
     dw = _model[M_DYN_I][_VAR_I_W].subs(param)
     w = _model[M_VARS_I][_VAR_I_W]
     v = _model[M_VARS_I][_VAR_I_V]
-    print('dv_', dv)
-    print('w', w)
-    from sympy import Eq #as Equation
-    # https://docs.sympy.org/latest/modules/core.html?highlight=eq#sympy.core.relational.Equality
-    # https://docs.sympy.org/latest/modules/solvers/solvers.html
-    if False:
-        zero = 0 * dv # ? sympy.core.numbers.Zero
-        eq1 = Eq(dv, zero)
-        sympy.pprint(eq1, use_unicode=True)
-        c = sympy.symbols("c")
-        eq2 = Eq(v, c*0, evaluate=False)
-        sympy.pprint(eq2, use_unicode=True)
-        # _.doit()
-        # simplify(_)
-        #solutions = sympy.solve(eq, (a,b,t),force=True, manual=True, set=True)
-        solutions = sympy.solve([eq1,eq2], (w,),force=True, manual=True, set=True)
-        print('solutions', solutions)  # ([w], {(-v**3 + v,)})
-        print('solutions[0]', solutions[0])
-        #sympy.core.numbers.Zero
-        #sol_a = solution[0][0]
-        #sol_b = solution[0][1]
-        #sol_t = solution[0][2]
+
+    from sympy import Eq
+
     if True:
         from sympy import Matrix
         from sympy import solve
         c = sympy.symbols("c", real=REAL_ONLY)
+
+        # v - v**3  - w + I == 0
+        # w == c
+
         nlc1 = dv  # dv=0
         #nlc1 = dw # dw=0
 
-        # The "scan"ning line/shape
+        # The "scan"ning line/shape (guiding shape)
         #lin1 = v-c # single root solution
         lin1 = w-c  # multiple roots
         # lin1 = v-c+w
@@ -302,58 +285,42 @@ def symbolic_nullclines(_model, param):
 
         print('nlc1', nlc1)
         print('lin1', lin1)
+
         eq3m = Matrix([nlc1, lin1])
         zero0 =  Matrix([0,0])
-        #eq3 = Eq(matr, c*0, evaluate=False)
-        # unexplored option: evaluate=False
+        # also: zero= c*0 ,  0 * dv , sympy.core.numbers.Zero
+        # unexplored option: `Eq(..., evaluate=False)`
         eq3 = Eq(eq3m, zero0)
-        sympy.pprint(eq3)
-        print('gonna solv')
-        #solutions = solve(eq3, (w,c),force=True, manual=True, set=True)
-        #solutions = solve(eq3, (w,),force=True, manual=True, set=True)
-        #vars_list, _solution_set = solutions = solve(eq3, (w,),force=True, set=True)
+        sympy.pprint(eq3, use_unicode=True)
+        print('Going to solve')
+        vars_list, _solution_set = \
+            solve(eq3, (v,w),force=True, set=True)
+        # Alternative: sympy.solve([eq1,eq2], (w,), force=True, manual=True, set=True)
         # ([w], {(-v**3 + v,)})
-        vars_list, _solution_set = solutions = solve(eq3, (v,w),force=True, set=True)
         # convert set to list
-        print((vars_list))  # (v,w)
-        print((_solution_set))
-        print()
-        print(list(_solution_set))  # len = number of roots
+        # vars_list: # (v,w)
+        # len = number of roots:
         solution_sympy_list = list(_solution_set)
-        # each solution is a tuple, for (v,w)
-        print(solution_sympy_list[0]) # has two elements
-        print(len(solution_sympy_list[0]))
-        print()
-        #solution_lambda_list = [
-        #    sympy.lambdify((c,), solt, dummify=False)
-        #        for solt in solution_sympy_list ]
-        # c is the free parameter for the "curve". Since it's aa null-cline, we need (exactly) one free ariable for it
+        # each solution is a tuple, for (v,w). has 2=ndim elements
+
+        # todo: c -> s
         # todo: rename c to s
+        # c is the free parameter for the "curve". Since it's aa null-cline, we need (exactly) one free ariable for it
         solution_lambda_list = [
             # `modules=["scipy", "numpy"]`` is essential for the correct calculation of nullclines (generalised approach). Especiaally when there are multiple roots.
             sympy.lambdify((c,), solt_vw, dummify=False, modules=["scipy", "numpy"] )
                 for solt_vw in solution_sympy_list ]
-        # each is a function that returns ndim
+
+        # each is a function that returns a tuple of size `ndim``
 
         return solution_sympy_list, solution_lambda_list
 
 
-        # without  `set=True`: returns list of solutions?
-        #[(-v**3 + v,)]
 
-    # solve: set=True:
-    # simplify=True
-    # "check=True (default) will run through the symbol tags to elimate unwanted solutions. If no assumptions are included, all possible solutions will be returned"
-    # why didi I choose this? "manual=True (default is False). Do not use the polys/matrix method to solve a system of equations, solve them one at a time as you might “manually.”"
-    import code
-    #code.interact(local=locals())
-    print('bye')
-    exit()
-    # v - v**3  - w + I == 0
-    # w=...
+# Nullclines
 
 square_nc = False
-# todo: null-clines
+
 def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacity=.5, vmin=-5,vmax=5):
     """Plot the null iscolines of the Fitzhugh nagumo system"""
     # todo: rename v_np
@@ -361,6 +328,7 @@ def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacit
     s_np = np.linspace(-10,+10, 1000)
 
     nc_solution_list, nc_lambdas = symbolic_nullclines(_model, param)
+
     ctr = 0
     for ncl in nc_lambdas:
       c = s_np
@@ -369,8 +337,8 @@ def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacit
       #ax.plot(c, vw_tuple, style, color=color, alpha=opacity)
       v_ = vw_tuple[_VAR_I_V]+np.random.randn(1)*0.001
       w_ = vw_tuple[_VAR_I_W]+np.random.randn(1)*0.001
-      # why float
-      print('-----',v_.shape,v_.dtype,'  w',w_.shape, w_.dtype)
+
+      print('-----',v_.shape,v_.dtype,'  w',w_.shape, w_.dtype) # why float
       wch_ =np.logical_and(np.isreal(v_),np.isreal(v_))
       v_ = v_[wch_]
       w_ = w_[wch_]
@@ -378,13 +346,15 @@ def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacit
       #w_ = np.abs(w_)
       #v_ = np.real(v_)
       #w_ = np.real(w_)
+
       COLS = ['r','g','b', 'm']; ctr += 1
       ax.plot(v_, w_, '.', color=COLS[ctr], alpha=opacity)
+      # todo: indent
+
     ax.plot(v, v - v**3 + I, style, color=color, alpha=opacity)
     # (v - a - b * w)/tau == 0
     # w=...
     ax.plot(v, (v - a)/b, style, color=color, alpha=opacity)
-    # todo: adapt to the generatlised symbolic _model
     if (square_nc):
         #ax.set_aspect('equal', adjustable='box')
         # adjustable='datalim')
@@ -402,11 +372,8 @@ def plot_vector_field(ax, param, xrange, yrange, steps=50):
     # Compute the vector field
     x = np.linspace(xrange[0], xrange[1], steps)
     y = np.linspace(yrange[0], yrange[1], steps)
-    X,Y = np.meshgrid(x,y)
-    print(X.shape)
-    #exit()
+    X,Y = np.meshgrid(x,y)  # each shape: (50,50)
 
-    # dx,dy = fitzhugh_nagumo([X,Y],0,**param)
     dxdy = fitzhugh_nagumo_partial(_model, **param)[I_LAMB_ASLIST]([X,Y], 0.0)
 
     dx,dy = dxdy[:2]
@@ -433,7 +400,7 @@ for i, sc in enumerate(scenarios):
           title='{}'.format(sc))
 ##############################################
 
-# symbolic
+# symbolic and hardcoded Jacobian
 
 def jacobian_fitznagumo(v, w, a, b, tau, I):
     """ Jacobian matrix of the ODE system modeling Fitzhugh-Nagumo's excitable system

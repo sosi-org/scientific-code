@@ -43,6 +43,7 @@ model_lamb = sympy.lambdify((*dyn_vars,t), dyn_vars2, dummify=False)
           #np.format_float_positional(ranges[0][:], precision=3),
           #np.format_float_positional(ranges[1][:], precision=3),
 
+#sympy.core.numbers.Zero
 
 #sympy `solve` notes:
 # todo: why is v defined here?
@@ -67,8 +68,8 @@ def symbolic_nullclines(_model, param):
         c = sympy.symbols("c")
         eq2 = Eq(v, c*0, evaluate=False)
         sympy.pprint(eq2, use_unicode=True)
-        # _.doit()
-        # simplify(_)
+        # _.doit()      # doit()
+        # simplify(_)   # simplify()
         #solutions = sympy.solve(eq, (a,b,t),force=True, manual=True, set=True)
         solutions = sympy.solve([eq1,eq2], (w,),force=True, manual=True, set=True)
         print('solutions', solutions)  # ([w], {(-v**3 + v,)})
