@@ -320,16 +320,13 @@ square_nc = False
 
 def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacity=.5, vmin=-5,vmax=5):
     """Plot the null iscolines of the Fitzhugh nagumo system"""
-    # todo: rename v_np
-    v = np.linspace(vmin,vmax,100)
-    s_np = np.linspace(-10,+10, 1000)
 
     nc_solution_list, nc_lambdas = symbolic_nullclines(_model, param)
 
     ctr = 0
     for ncl in nc_lambdas:
+      s_np = np.linspace(-10,+10, 1000)
       _s = s_np
-      #_s = v
       vw_tuple = ncl(_s) # t
       #ax.plot(_s, vw_tuple, style, color=color, alpha=opacity)
       v_ = vw_tuple[_VAR_I_V]+np.random.randn(1)*0.001
@@ -348,10 +345,11 @@ def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacit
       ax.plot(v_, w_, '.', color=COLS[ctr], alpha=opacity)
       # todo: indent
 
-    ax.plot(v, v - v**3 + I, style, color=color, alpha=opacity)
+    v_np = np.linspace(vmin,vmax,100)
+    ax.plot(v_np, v_np - v_np**3 + I, style, color=color, alpha=opacity)
     # (v - a - b * w)/tau == 0
     # w=...
-    ax.plot(v, (v - a)/b, style, color=color, alpha=opacity)
+    ax.plot(v_np, (v_np - a)/b, style, color=color, alpha=opacity)
     if (square_nc):
         #ax.set_aspect('equal', adjustable='box')
         # adjustable='datalim')
