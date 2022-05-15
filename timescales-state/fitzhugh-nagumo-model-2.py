@@ -267,26 +267,28 @@ def symbolic_nullclines(_model, param):
     from sympy import Eq
     from sympy import Matrix
     from sympy import solve
-    c = sympy.symbols("c", real=REAL_ONLY)
+
+    # _s is the free parameter for the "curve". Since it's aa null-cline, we need (exactly) one free ariable for it
+    _s = sympy.symbols("s", real=REAL_ONLY)
 
     # v - v**3  - w + I == 0
-    # w == c
+    # w == _s
 
     nlc1 = dv  # dv=0
     #nlc1 = dw # dw=0
 
     # The "scan"ning line/shape (guiding shape)
-    #lin1 = v-c # single root solution
-    lin1 = w-c  # multiple roots
-    # lin1 = v-c+w
-    # lin1 = v*v-c+w*w
+    #lin1 = v-_s # single root solution
+    lin1 = w-_s  # multiple roots
+    # lin1 = v-_s+w
+    # lin1 = v*v-_s+w*w
 
     print('nlc1', nlc1)
     print('lin1', lin1)
 
     eq3m = Matrix([nlc1, lin1])
     zero0 =  Matrix([0,0])
-    # also: zero= c*0 ,  0 * dv , sympy.core.numbers.Zero
+    # also: zero= _s*0 ,  0 * dv , sympy.core.numbers.Zero
     # unexplored option: `Eq(..., evaluate=False)`
     eq3 = Eq(eq3m, zero0)
     sympy.pprint(eq3, use_unicode=True)
@@ -301,12 +303,9 @@ def symbolic_nullclines(_model, param):
     solution_sympy_list = list(_solution_set)
     # each solution is a tuple, for (v,w). has 2=ndim elements
 
-    # todo: c -> s
-    # todo: rename c to s
-    # c is the free parameter for the "curve". Since it's aa null-cline, we need (exactly) one free ariable for it
     solution_lambda_list = [
         # `modules=["scipy", "numpy"]`` is essential for the correct calculation of nullclines (generalised approach). Especiaally when there are multiple roots.
-        sympy.lambdify((c,), solt_vw, dummify=False, modules=["scipy", "numpy"] )
+        sympy.lambdify((_s,), solt_vw, dummify=False, modules=["scipy", "numpy"] )
             for solt_vw in solution_sympy_list ]
 
     # each is a function that returns a tuple of size `ndim``
@@ -329,10 +328,10 @@ def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacit
 
     ctr = 0
     for ncl in nc_lambdas:
-      c = s_np
-      #c = v
-      vw_tuple = ncl(c) # t
-      #ax.plot(c, vw_tuple, style, color=color, alpha=opacity)
+      _s = s_np
+      #_s = v
+      vw_tuple = ncl(_s) # t
+      #ax.plot(_s, vw_tuple, style, color=color, alpha=opacity)
       v_ = vw_tuple[_VAR_I_V]+np.random.randn(1)*0.001
       w_ = vw_tuple[_VAR_I_W]+np.random.randn(1)*0.001
 
