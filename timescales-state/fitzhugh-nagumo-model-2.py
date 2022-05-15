@@ -17,7 +17,7 @@ import matplotlib.patches as mpatches #used to write custom legends
 import sympy
 sympy.init_printing()
 
-doulcier = True
+doulcier = False
 REAL_ONLY = False # whether try to remove complex roots at the symbolic calculations
 
 # doulcier's glossary:
@@ -69,6 +69,8 @@ def get_ranges(sc):
     xrange = (-1, 1)
     yrange = [(1/sc['b'])*(x-sc['a']) for x in xrange]
     return (xrange, yrange)
+    # todo: rename v,w
+    # todo: symbolic
 
 # Magical Indices (for readability)
 # Consts:  For magical numbers

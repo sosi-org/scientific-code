@@ -136,8 +136,8 @@ def symbolic_nullclines(_model, param):
 # todo: from, to 👉, 👈
 # ✝︎ ⌶ ▶︎ ▶️⤵️ ℹ️ ❕ 📏 📎 💈 🎗 ☝️
 
-📎M_VARS
-M📎_VARS
+# 📎M_VARS
+# M📎_VARS
 
 
 #{
