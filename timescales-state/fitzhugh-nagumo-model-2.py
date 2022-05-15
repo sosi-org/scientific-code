@@ -254,18 +254,20 @@ def symbolic_nullclines(_model, param):
         eq3m = Matrix([nlc1, lin1])
         zero0 =  Matrix([0,0])
         #eq3 = Eq(matr, c*0, evaluate=False)
+        # unexplored option: evaluate=False
         eq3 = Eq(eq3m, zero0)
         sympy.pprint(eq3)
         print('gonna solv')
         #solutions = solve(eq3, (w,c),force=True, manual=True, set=True)
-        solutions = solve(eq3, (w,),force=True, manual=True, set=True)
-        #vars, _solution_set = solutions = solve(eq3, (w,),force=True, set=True)
-        #print(solutions)
+        #solutions = solve(eq3, (w,),force=True, manual=True, set=True)
+        vars_list, _solution_set = solutions = solve(eq3, (w,),force=True, set=True)
         # ([w], {(-v**3 + v,)})
-        #print(type(solutions)) # tuple len=2
-        print(type(solutions[0])) # list
-        print(type(solutions[1])) # set
-        print(type(solutions[0][0])) # Symbol
+        # convert set to list
+        print(list(_solution_set))
+        solution_list = list(_solution_set)
+
+        # return solution_list
+
 
         # without  `set=True`: returns list of solutions?
         #[(-v**3 + v,)]
