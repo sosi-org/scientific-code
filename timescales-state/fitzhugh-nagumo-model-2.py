@@ -69,19 +69,19 @@ def model1():
 #
 # # "model" data structure
 #  i.e. (dyn_vars, t, dyn_derivs, model_params, model_inputs)
-M_VARS_I = 0  # dynamics vars
-M_DYN_I = 2  # dynamics
-M_TIME_I = 1
-M_PARAMS_I = 3
-M_EXOGIPUTS_I = 4 # exogenous inputs
+I_M_VARS = 0  # dynamics vars
+I_M_DYN = 2   # The dynamics
+I_M_TIME = 1
+I_M_PARAMS = 3
+I_M_EXOG_INPUTS = 4 # exogenous inputs. I_ext
 
 # The io format, for (return value of) `fitzhugh_nagumo_partial()`
 I_LAMB_NPARRAY = 0 #M_SYMBOLIC_.I
 I_LAMB_ASLIST = 1 # M_LAMBDA_.I
 
 # for data structure for "integration"/ode results
-SIM_I_NDIM = 0
-SIM_I_BINS = 1   # dimention for "bin"s if simulation and integration
+I_SIM_NDIM = 0
+I_SIM_BINS = 1   # dimention for "bin"s if simulation and integration
                 # means "across bins"
                 # was S IM_I_BIN
 
@@ -89,8 +89,8 @@ SIM_I_BINS = 1   # dimention for "bin"s if simulation and integration
 # Avoid such hardcoded indexing though
 # every usage will be a technical debt when we generalise to higher dimensional equations
 # will need to be parametrised in proper variables (not consts)
-_VAR_I_V = 0
-_VAR_I_W = 1
+_I_VAR_V = 0
+_I_VAR_W = 1
 _NDIM_VW = 2  # "across dims". try to avoid
 
 # (_NDIM_VW, 1500) is more readable than (2, 1500)
@@ -98,8 +98,8 @@ _NDIM_VW = 2  # "across dims". try to avoid
 
 _model = model1()
 
-UPSAMPLEx=5
-# UPSAMPLEx=1
+UPSAMPLEx = 5
+# UPSAMPLEx = 1
 
 SIMU_TIME=200
 SIMU_STEPS1=1500*UPSAMPLEx
@@ -123,7 +123,7 @@ def fitzhugh_nagumo_partial(_model, **model_params_and_inputs):
         # either args=((_NDIM_VW,n), (n,))  or args=((_NDIM_VW,), ())
         # is_scalar =
         #print(x.shape, 'x.shape')
-        assert x.shape[SIM_I_NDIM] == ndim
+        assert x.shape[I_SIM_NDIM] == ndim
         x0x1 = tuple(x) # x[0,:],x[1,:]
         y = model_lamb(*x0x1, t)
         assert len(y) == _NDIM_VW
@@ -131,7 +131,7 @@ def fitzhugh_nagumo_partial(_model, **model_params_and_inputs):
         dvdw = np.array(y)
         #print(dvdw.shape)
         assert len(dvdw.shape) == _NDIM_VW or dvdw.shape==(_NDIM_VW,)
-        assert dvdw.shape == dvdw.shape == (ndim,) or (ndim, x.shape[SIM_I_BINS])
+        assert dvdw.shape == dvdw.shape == (ndim,) or (ndim, x.shape[I_SIM_BINS])
         # either (_NDIM_VW,n)  or (_NDIM_VW,)
         return dvdw
 
@@ -198,15 +198,15 @@ for i,param in enumerate(scenarios):
         ax[i].set(xlabel='Time', ylabel='v, w',
                      title='{:<8} {}'.format(pname, param))
         for j in range(len(trajectories[i])):
-            v = ax[i].plot(time_span,trajectories[i][j][:,_VAR_I_V], color='C0')
-            w = ax[i].plot(time_span,trajectories[i][j][:,_VAR_I_W], color='C1', alpha=.5)
+            v = ax[i].plot(time_span,trajectories[i][j][:,_I_VAR_V], color='C0')
+            w = ax[i].plot(time_span,trajectories[i][j][:,_I_VAR_W], color='C1', alpha=.5)
         ax[i].legend([v[0],w[0]],['v','w'])
 plt.tight_layout()
 
 
 def minmax(simulation):
-    mins = np.min(simulation, axis=SIM_I_BINS)
-    maxs = np.max(simulation, axis=SIM_I_BINS)
+    mins = np.min(simulation, axis=I_SIM_BINS)
+    maxs = np.max(simulation, axis=I_SIM_BINS)
     ranges = np.array([mins, maxs ]).T
     print('ranges:', ranges)
     mm1 = np.max(mins, axis=0)
@@ -221,9 +221,9 @@ for i,param in enumerate(scenarios):
     for j in range(len(velocities)):
         simulation = velocities[j].copy()  # [2,1500]
         # fake rescaling W:
-        # simulation[_VAR_I_W,:] = simulation[_VAR_I_W,:] * param['tau']
-        d_v = simulation[_VAR_I_V,:]
-        d_w = simulation[_VAR_I_W,:]
+        # simulation[_I_VAR_W,:] = simulation[_I_VAR_W,:] * param['tau']
+        d_v = simulation[_I_VAR_V,:]
+        d_w = simulation[_I_VAR_W,:]
         (mm1,mm2, ranges) = minmax(simulation)
         ax[i].plot(np.array([mm1,mm2]), np.array([mm1,mm2]), 'r--', alpha=.2)
         ax[i].plot(d_v, d_w, 'k-')
@@ -239,8 +239,8 @@ for i,param in enumerate(scenarios):
     # j = repeats = 4
     for j in range(len(velocities)):
         simulation = velocities[j]  # [2,1500]
-        d_v0 = simulation[_VAR_I_V,:]
-        d_w0 = simulation[_VAR_I_W,:]
+        d_v0 = simulation[_I_VAR_V,:]
+        d_w0 = simulation[_I_VAR_W,:]
         d_t = time_span
         d2_v = np.diff(d_v0)/np.diff(time_span)
         d2_w = np.diff(d_w0)/np.diff(time_span)
@@ -259,10 +259,10 @@ def symbolic_nullclines(_model, param):
     # symbolic (algebraic) null-clines:
     print()
     print(param)
-    dv = _model[M_DYN_I][_VAR_I_V].subs(param)
-    dw = _model[M_DYN_I][_VAR_I_W].subs(param)
-    w = _model[M_VARS_I][_VAR_I_W]
-    v = _model[M_VARS_I][_VAR_I_V]
+    dv = _model[I_M_DYN][_I_VAR_V].subs(param)
+    dw = _model[I_M_DYN][_I_VAR_W].subs(param)
+    w = _model[I_M_VARS][_I_VAR_W]
+    v = _model[I_M_VARS][_I_VAR_V]
 
     from sympy import Eq
     from sympy import Matrix
@@ -332,9 +332,9 @@ def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacit
       _s = s_np
       vw_tuple = ncl(_s) # t
       #ax.plot(_s, vw_tuple, style, color=color, alpha=opacity)
-      print('@', vw_tuple[_VAR_I_V].shape)
-      v_ = vw_tuple[_VAR_I_V] + np.random.randn(*vw_tuple[_VAR_I_V].shape) * 0.01
-      w_ = vw_tuple[_VAR_I_W] + np.random.randn(*vw_tuple[_VAR_I_W].shape) * 0.01
+      print('@', vw_tuple[_I_VAR_V].shape)
+      v_ = vw_tuple[_I_VAR_V] + np.random.randn(*vw_tuple[_I_VAR_V].shape) * 0.01
+      w_ = vw_tuple[_I_VAR_W] + np.random.randn(*vw_tuple[_I_VAR_W].shape) * 0.01
 
       print('-----',v_.shape,v_.dtype,'  w',w_.shape, w_.dtype) # why float
       wch_ =np.logical_and(np.isreal(v_),np.isreal(v_))
@@ -506,7 +506,7 @@ eqstability = {}
 for i, param in enumerate(scenarios):
     eqstability[i] = []
     for e in eqnproot[i]:
-        J = jacobian_fitznagumo(e[_VAR_I_V],e[_VAR_I_W], **param)
+        J = jacobian_fitznagumo(e[_I_VAR_V],e[_I_VAR_W], **param)
         eqstability[i].append(stability(J))
 print(eqstability)
 
