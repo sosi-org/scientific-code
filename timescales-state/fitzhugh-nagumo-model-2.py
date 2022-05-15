@@ -220,6 +220,7 @@ def symbolic_nullclines(_model, param):
     # see https://github.com/sosi-org/scientific-code/blob/633224dc72692c13acc8263e21c933119eeaaf69/beeseyes/pycode/derive_formulas.py
     dv = _model[2][0].subs(param)
     w = _model[0][1]
+    v = _model[0][0]
     print('dv_', dv)
     print('w', w)
     from sympy import Eq #as Equation
@@ -236,7 +237,7 @@ def symbolic_nullclines(_model, param):
         # simplify(_)
         #solutions = sympy.solve(eq, (a,b,t),force=True, manual=True, set=True)
         solutions = sympy.solve([eq1,eq2], (w,),force=True, manual=True, set=True)
-        print('solutions', solutions)
+        print('solutions', solutions)  # ([w], {(-v**3 + v,)})
         print('solutions[0]', solutions[0])
         #sympy.core.numbers.Zero
         #sol_a = solution[0][0]
@@ -258,8 +259,21 @@ def symbolic_nullclines(_model, param):
         print('gonna solv')
         #solutions = solve(eq3, (w,c),force=True, manual=True, set=True)
         solutions = solve(eq3, (w,),force=True, manual=True, set=True)
-        print(solutions)
+        #vars, _solution_set = solutions = solve(eq3, (w,),force=True, set=True)
+        #print(solutions)
+        # ([w], {(-v**3 + v,)})
+        #print(type(solutions)) # tuple len=2
+        print(type(solutions[0])) # list
+        print(type(solutions[1])) # set
+        print(type(solutions[0][0])) # Symbol
 
+        # without  `set=True`: returns list of solutions?
+        #[(-v**3 + v,)]
+
+    # solve: set=True:
+    # simplify=True
+    # "check=True (default) will run through the symbol tags to elimate unwanted solutions. If no assumptions are included, all possible solutions will be returned"
+    # why didi I choose this? "manual=True (default is False). Do not use the polys/matrix method to solve a system of equations, solve them one at a time as you might “manually.”"
     import code
     #code.interact(local=locals())
     print('bye')
