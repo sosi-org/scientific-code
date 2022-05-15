@@ -218,11 +218,11 @@ plt.tight_layout()
 def minmax(simulation):
     mins = np.min(simulation, axis=ηSIM_BINS)
     maxs = np.max(simulation, axis=ηSIM_BINS)
-    ranges = np.array([mins, maxs ]).T
-    print('ranges:', ranges)
-    mm1 = np.max(mins, axis=0)
-    mm2 = np.min(maxs, axis=0)
-    return (mm1, mm2, ranges)
+    effective_ranges = np.array([mins, maxs ]).T
+    print('effective_ranges:', effective_ranges)
+    sqmin = np.max(mins, axis=0)
+    sqmax = np.min(maxs, axis=0)
+    return (sqmin, sqmax, effective_ranges)
 
 # plot First derivative
 fig, ax = plt.subplots(1, len(scenarios), figsize=(5*len(scenarios),5))
@@ -236,12 +236,12 @@ for i,param in enumerate(scenarios):
         # simulation[_ηVAR_W,:] = simulation[_ηVAR_W,:] * param['tau']
         d_v = simulation[_ηVAR_V,:]
         d_w = simulation[_ηVAR_W,:]
-        (mm1,mm2, ranges) = minmax(simulation)
-        ax[i].plot(np.array([mm1,mm2]), np.array([mm1,mm2]), 'r--', alpha=.2)
+        (sqmin,sqmax, effective_ranges) = minmax(simulation)
+        ax[i].plot(np.array([sqmin,sqmax]), np.array([sqmin,sqmax]), 'r--', alpha=.2)
         ax[i].plot(d_v, d_w, 'k-')
     np.set_printoptions(precision=2)
     ax[i].set(xlabel=r'$\dot{V}$', ylabel=r'$\dot{W}$',
-        title='v:{}, w:{}\n {:<8}'.format(ranges[0][:], ranges[1][:], pname));
+        title='v:{}, w:{}\n {:<8}'.format(effective_ranges[0][:], effective_ranges[1][:], pname));
     (xrange, yrange) = get_ranges(param)
     # ax[i].set(xlim=(xrange[0], xrange[1]), ylim=(yrange[0], yrange[1]))
 
@@ -258,13 +258,12 @@ for i,param in enumerate(scenarios):
         d_t = time_span
         d2_v = np.diff(d_v0)/np.diff(time_span)
         d2_w = np.diff(d_w0)/np.diff(time_span)
-        (mm1,mm2, ranges) = minmax(np.array([d2_v, d2_w]))
-        ax[i].plot(np.array([mm1,mm2]), np.array([mm1,mm2]), 'r--', alpha=.2)
+        (sqmin,sqmax, effective_ranges) = minmax(np.array([d2_v, d2_w]))
+        ax[i].plot(np.array([sqmin,sqmax]), np.array([sqmin,sqmax]), 'r--', alpha=.2)
         ax[i].plot(d2_v, d2_w, 'k-')
     np.set_printoptions(precision=2)
     ax[i].set(xlabel=r'$\ddot{V}$', ylabel=r'$\ddot2{W}$',
-        title='ACCELERATION\nv:{}, w:{}\n {:<8}'.format(ranges[0][:], ranges[1][:], pname))
-    # todo: rename `ranges`
+        title='ACCELERATION\nv:{}, w:{}\n {:<8}'.format(effective_ranges[0][:], effective_ranges[1][:], pname))
     (xrange, yrange) = get_ranges(param)
     ax[i].set(xlim=(xrange[0], xrange[1]) ) #, ylim=(yrange[0], yrange[1]))
 
