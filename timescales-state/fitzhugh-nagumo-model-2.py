@@ -17,7 +17,7 @@ import matplotlib.patches as mpatches #used to write custom legends
 import sympy
 sympy.init_printing()
 
-doulcier = False
+doulcier = True
 
 # doulcier's glossary:
 # displacement:  perturbation
@@ -96,7 +96,16 @@ def fitzhugh_nagumo_partial(_model, **model_params_and_inputs):
         assert dvdw.shape == dvdw.shape == (ndim,) or (ndim, x.shape[1])
         # either (2,n)  or (2,)
         return dvdw
-    return p
+    def p3(xy_list,t):
+          # print(len(xy_list))
+          # print(xy_list[0].shape)
+          assert len(xy_list) == ndim
+          # to make suree (*xy,t) align correctly
+          dvdw = model_lamb(*xy_list, t)
+          assert len(dvdw) == ndim
+          return dvdw
+
+    return p,p3
 
 # ic: Array containing the value of y for each desired time in t, with the initial value y0 in the first row.
 
@@ -107,7 +116,7 @@ def get_displacement(
   ):
     # We start from the resting point...
     ic = scipy.integrate.odeint(
-          fitzhugh_nagumo_partial(_model, **param),
+          fitzhugh_nagumo_partial(_model, **param)[0],
           y0=[0,0],
           #t= np.linspace(0,SIMU_STEPS2-1, SIMU_STEPS2)
           t= np.linspace(0,SIMU_TIME*UPSAMPLEx, SIMU_STEPS2)
@@ -118,13 +127,13 @@ def get_displacement(
     for displacement in np.linspace(0, dmax, number):
         traj.append(
           scipy.integrate.odeint(
-            fitzhugh_nagumo_partial(_model, **param),
+            fitzhugh_nagumo_partial(_model, **param)[0],
             y0=ic+np.array([displacement,0]),
             #full_output=True, adds a second entry to output
             t=time_span
         ))
         solu = traj[-1]  # v, w = sol.T
-        vel_eval = fitzhugh_nagumo_partial(_model, **param)(solu.T, time_span)
+        vel_eval = fitzhugh_nagumo_partial(_model, **param)[0](solu.T, time_span)
 
         # vel_eval.shape: # (2, 1500)
         veocities.append(vel_eval)
@@ -200,6 +209,52 @@ for i,param in enumerate(scenarios):
     np.set_printoptions(precision=2)
     ax[i].set(xlabel=r'$\ddot{V}$', ylabel=r'$\ddot2{W}$',
         title='ACCELERATION\nv:{}, w:{}\n {:<8}'.format(ranges[0][:], ranges[1][:], pname));
+
+##############################################
+
+def plot_isocline(ax, a, b, tau, I, color='k', style='--', opacity=.5, vmin=-1,vmax=1):
+    """Plot the null iscolines of the Fitzhugh nagumo system"""
+    v = np.linspace(vmin,vmax,100)
+    ax.plot(v, v - v**3 + I, style, color=color, alpha=opacity)
+    ax.plot(v, (v - a)/b, style, color=color, alpha=opacity)
+    # todo: adapt to the generatlised symbolic _model
+
+fig, ax = plt.subplots(1, 3, figsize=(18, 6))
+for i, sc in enumerate(scenarios):
+    plot_isocline(ax[i], **sc)
+    ax[i].set(xlabel='v', ylabel='w',
+              title='{}'.format(sc))
+
+##############################################
+
+def plot_vector_field(ax, param, xrange, yrange, steps=50):
+    # Compute the vector field
+    x = np.linspace(xrange[0], xrange[1], steps)
+    y = np.linspace(yrange[0], yrange[1], steps)
+    X,Y = np.meshgrid(x,y)
+    print(X.shape)
+    #exit()
+
+    # dx,dy = fitzhugh_nagumo([X,Y],0,**param)
+    dxdy = fitzhugh_nagumo_partial(_model, **param)[1]([X,Y], 0)
+
+    dx,dy = dxdy[:2]
+
+    # streamplot is an alternative to quiver
+    # that looks nicer when your vector filed is
+    # continuous.
+    ax.streamplot(X,Y,dx, dy, color=(0,0,0,.1))
+
+    ax.set(xlim=(xrange[0], xrange[1]), ylim=(yrange[0], yrange[1]))
+
+fig, ax = plt.subplots(1, 3, figsize=(20, 6))
+for i, sc in enumerate(scenarios):
+    xrange = (-1, 1)
+    yrange = [(1/sc['b'])*(x-sc['a']) for x in xrange]
+    plot_vector_field(ax[i], sc, xrange, yrange)
+    ax[i].set(xlabel='v', ylabel='w',
+          title='{}'.format(sc))
+##############################################
 
 # symbolic
 
