@@ -59,6 +59,17 @@ def model1():
     (dyn_vars, t, dyn_derivs, model_params, model_inputs) = (v,w), t, (dvdt,dwdt), (a, b, tau), (I,)
     return dyn_vars, t, dyn_derivs, model_params, model_inputs
 
+
+# phase plane panel range
+# PPrange
+# phpp = {'xrange': , 'yrange':,}
+def get_ranges(sc):
+    # todo: xrange with regards to square_nc
+    #xrange = (-1*5, 1*5)
+    xrange = (-1, 1)
+    yrange = [(1/sc['b'])*(x-sc['a']) for x in xrange]
+    return (xrange, yrange)
+
 # Magical Indices (for readability)
 # Consts:  For magical numbers
 # Not every 0 is the same. Not every 1 is the same.
@@ -213,6 +224,7 @@ def minmax(simulation):
     mm2 = np.min(maxs, axis=0)
     return (mm1, mm2, ranges)
 
+# plot First derivative
 fig, ax = plt.subplots(1, len(scenarios), figsize=(5*len(scenarios),5))
 # i = simulation/experiment (with different parameters)
 for i,param in enumerate(scenarios):
@@ -230,8 +242,10 @@ for i,param in enumerate(scenarios):
     np.set_printoptions(precision=2)
     ax[i].set(xlabel=r'$\dot{V}$', ylabel=r'$\dot{W}$',
         title='v:{}, w:{}\n {:<8}'.format(ranges[0][:], ranges[1][:], pname));
+    (xrange, yrange) = get_ranges(param)
+    # ax[i].set(xlim=(xrange[0], xrange[1]), ylim=(yrange[0], yrange[1]))
 
-# Second derivative
+# plot Second derivative
 fig, ax = plt.subplots(1, len(scenarios), figsize=(5*len(scenarios),5))
 # i = simulation/experiment (with different parameters)
 for i,param in enumerate(scenarios):
@@ -249,7 +263,10 @@ for i,param in enumerate(scenarios):
         ax[i].plot(d2_v, d2_w, 'k-')
     np.set_printoptions(precision=2)
     ax[i].set(xlabel=r'$\ddot{V}$', ylabel=r'$\ddot2{W}$',
-        title='ACCELERATION\nv:{}, w:{}\n {:<8}'.format(ranges[0][:], ranges[1][:], pname));
+        title='ACCELERATION\nv:{}, w:{}\n {:<8}'.format(ranges[0][:], ranges[1][:], pname))
+    # todo: rename `ranges`
+    (xrange, yrange) = get_ranges(param)
+    ax[i].set(xlim=(xrange[0], xrange[1]) ) #, ylim=(yrange[0], yrange[1]))
 
 ##############################################
 
@@ -364,6 +381,8 @@ for i, sc in enumerate(scenarios):
     plot_isocline(_model, sc, ax[i], **sc)
     ax[i].set(xlabel='v', ylabel='w',
               title='{}'.format(sc))
+    (xrange, yrange) = get_ranges(sc)
+    ax[i].set(xlim=(xrange[0], xrange[1]) ) #, ylim=(yrange[0], yrange[1]))
 
 ##############################################
 
@@ -390,13 +409,12 @@ def plot_vector_field(ax, param, xrange, yrange, steps=50):
 
 fig, ax = plt.subplots(1, 3, figsize=(20, 6))
 for i, sc in enumerate(scenarios):
-    # todo: xrange with regards to square_nc
-    #xrange = (-1*5, 1*5)
-    xrange = (-1, 1)
-    yrange = [(1/sc['b'])*(x-sc['a']) for x in xrange]
+    (xrange, yrange) = get_ranges(sc)
     plot_vector_field(ax[i], sc, xrange, yrange)
     ax[i].set(xlabel='v', ylabel='w',
           title='{}'.format(sc))
+    ax[i].set(xlim=(xrange[0], xrange[1]), ylim=(yrange[0], yrange[1]))
+
 ##############################################
 
 # symbolic and hardcoded Jacobian
