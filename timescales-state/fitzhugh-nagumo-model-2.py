@@ -18,6 +18,7 @@ import sympy
 sympy.init_printing()
 
 doulcier = True
+REAL_ONLY = False # whether try to remove complex roots at the symbolic calculations
 
 # doulcier's glossary:
 # displacement:  perturbation
@@ -41,8 +42,8 @@ else:
 
 def model1():
     # Define variable as symbols for sympy
-    v, w = sympy.symbols("v, w", real=True)
-    t = sympy.symbols("t", real=True)
+    v, w = sympy.symbols("v, w", real=REAL_ONLY)
+    t = sympy.symbols("t", real=REAL_ONLY)
     a, b, tau, I = sympy.symbols("a, b, tau, I")
 
     # Symbolic expression of the system
@@ -258,12 +259,12 @@ for i,param in enumerate(scenarios):
 def symbolic_nullclines(_model, param):
     # symbolic (algebraic) null-clines:
     print()
+    print(param)
     # see https://github.com/sosi-org/scientific-code/blob/633224dc72692c13acc8263e21c933119eeaaf69/beeseyes/pycode/derive_formulas.py
     dv = _model[M_DYN_I][_VAR_I_V].subs(param)
     dw = _model[M_DYN_I][_VAR_I_W].subs(param)
     w = _model[M_VARS_I][_VAR_I_W]
     v = _model[M_VARS_I][_VAR_I_V]
-    #v = sympy.Symbol(v, real=True)
     print('dv_', dv)
     print('w', w)
     from sympy import Eq #as Equation
@@ -289,11 +290,13 @@ def symbolic_nullclines(_model, param):
     if True:
         from sympy import Matrix
         from sympy import solve
-        c = sympy.symbols("c", real=True)
+        c = sympy.symbols("c", real=REAL_ONLY)
         nlc1 = dv  # dv=0
         #nlc1 = dw # dw=0
         #lin1 = v-c # single root solution
         lin1 = w-c  # multiple roots
+        # lin1 = v-c+w
+        # lin1 = v*v-c+w*w
         print('nlc1', nlc1)
         print('lin1', lin1)
         eq3m = Matrix([nlc1, lin1])
@@ -347,15 +350,16 @@ def symbolic_nullclines(_model, param):
 
 square_nc = False
 # todo: null-clines
-def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacity=.5, vmin=-1,vmax=1):
+def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacity=.5, vmin=-5,vmax=5):
     """Plot the null iscolines of the Fitzhugh nagumo system"""
     # todo: rename v_np
     v = np.linspace(vmin,vmax,100)
-    w_np = np.linspace(vmin,vmax,1000)
+    s_np = np.linspace(-10,+10, 1000)
 
     nc_solution_list, nc_lambdas = symbolic_nullclines(_model, param)
+    ctr = 0
     for ncl in nc_lambdas:
-      c = w_np
+      c = s_np
       #c = v
       vw_tuple = ncl(c) # t
       #ax.plot(c, vw_tuple, style, color=color, alpha=opacity)
@@ -366,7 +370,12 @@ def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacit
       wch_ =np.logical_and(np.isreal(v_),np.isreal(v_))
       v_ = v_[wch_]
       w_ = w_[wch_]
-      ax.plot(v_, w_, '.', color='r', alpha=opacity)
+      #v_ = np.abs(v_)
+      #w_ = np.abs(w_)
+      #v_ = np.real(v_)
+      #w_ = np.real(w_)
+      COLS = ['r','g','b', 'm']; ctr += 1
+      ax.plot(v_, w_, '.', color=COLS[ctr], alpha=opacity)
     ax.plot(v, v - v**3 + I, style, color=color, alpha=opacity)
     # (v - a - b * w)/tau == 0
     # w=...

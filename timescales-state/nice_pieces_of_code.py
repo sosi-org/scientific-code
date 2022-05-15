@@ -122,15 +122,34 @@ def symbolic_nullclines(_model, param):
         return solution_sympy_list, solution_lambda_list
 
 
-        # without  `set=True`: returns list of solutions?
-        #[(-v**3 + v,)]
+# without  `set=True`: returns list of solutions?
+#[(-v**3 + v,)]
 
-    # solve: set=True:
-    # simplify=True
-    # "check=True (default) will run through the symbol tags to elimate unwanted solutions. If no assumptions are included, all possible solutions will be returned"
-    # why didi I choose this? "manual=True (default is False). Do not use the polys/matrix method to solve a system of equations, solve them one at a time as you might “manually.”"
+# solve: set=True:
+# simplify=True
+# "check=True (default) will run through the symbol tags to elimate unwanted solutions. If no assumptions are included, all possible solutions will be returned"
+# why didi I choose this? "manual=True (default is False). Do not use the polys/matrix method to solve a system of equations, solve them one at a time as you might “manually.”"
 
 
 # index-larifying for ranges, etc.
 # todo: from, to 👉, 👈
 # ✝︎ ⌶ ▶︎ ▶️⤵️ ℹ️ ❕ 📏 📎 💈 🎗 ☝️
+
+
+
+#{
+#  (-(27*c/2 + sqrt(729*c**2 - 108)/2)**(1/3)/3 - 1/(27*c/2 + sqrt(729*c**2 - 108)/2)**(1/3), c),
+#  (-(-1/2 + sqrt(3)*I/2)*(27*c/2 + sqrt(729*c**2 - 108)/2)**(1/3)/3 - 1/((-1/2 + sqrt(3)*I/2)*(27*c/2 + sqrt(729*c**2 - 108)/2)**(1/3)), c),
+#  (-(-1/2 - sqrt(3)*I/2)*(27*c/2 + sqrt(729*c**2 - 108)/2)**(1/3)/3 - 1/((-1/2 - sqrt(3)*I/2)*(27*c/2 + sqrt(729*c**2 - 108)/2)**(1/3)), c)
+#}
+
+print('======')
+for solt_vw in solution_sympy_list:
+print()
+sympy.pprint(solt_vw)
+print(vars_list)
+print('=====')
+#exit()
+
+# solve by this
+sympy.lambdify((c,), solt_vw, dummify=False, modules=["scipy", "numpy"])  # modules=["math", "mpmath", "sympy"])
