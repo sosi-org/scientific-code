@@ -362,7 +362,7 @@ def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacit
       #w_ = np.real(w_)
 
       COLS = ['r','g','b', 'm']; ctr += 1
-      ax.plot(v_, w_, '-', color=COLS[ctr], linewidth=4, alpha=0.1)
+      ax.plot(v_, w_, '-', color=COLS[ctr], linewidth=5, alpha=0.3)
       # todo: indent
 
     v_np = np.linspace(vmin,vmax,100)
