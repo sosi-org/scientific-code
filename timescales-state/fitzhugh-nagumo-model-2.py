@@ -293,24 +293,27 @@ def symbolic_nullclines(_model, param):
     eq3 = Eq(eq3m, zero0)
     sympy.pprint(eq3, use_unicode=True)
     print('Going to solve')
+    ##################
+
     vars_list, _solution_set = \
         solve(eq3, (v,w),force=True, set=True)
+
+    ##################
     # Alternative: sympy.solve([eq1,eq2], (w,), force=True, manual=True, set=True)
     # ([w], {(-v**3 + v,)})
-    # convert set to list
     # vars_list: # (v,w)
-    # len = number of roots:
-    solution_sympy_list = list(_solution_set)
+    # convert set to list. len = number of roots:
+    solution_list_sympy = list(_solution_set)
     # each solution is a tuple, for (v,w). has 2=ndim elements
 
     solution_lambda_list = [
         # `modules=["scipy", "numpy"]`` is essential for the correct calculation of nullclines (generalised approach). Especiaally when there are multiple roots.
         sympy.lambdify((_s,), solt_vw, dummify=False, modules=["scipy", "numpy"] )
-            for solt_vw in solution_sympy_list ]
+            for solt_vw in solution_list_sympy ]
 
-    # each is a function that returns a tuple of size `ndim``
+    # each is a function that returns a tuple of size `ndim`
 
-    return solution_sympy_list, solution_lambda_list
+    return solution_list_sympy, solution_lambda_list
 
 
 
