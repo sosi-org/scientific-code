@@ -41,8 +41,8 @@ else:
 
 def model1():
     # Define variable as symbols for sympy
-    v, w = sympy.symbols("v, w")
-    t = sympy.symbols("t")
+    v, w = sympy.symbols("v, w", real=True)
+    t = sympy.symbols("t", real=True)
     a, b, tau, I = sympy.symbols("a, b, tau, I")
 
     # Symbolic expression of the system
@@ -219,8 +219,10 @@ def symbolic_nullclines(_model, param):
     print()
     # see https://github.com/sosi-org/scientific-code/blob/633224dc72692c13acc8263e21c933119eeaaf69/beeseyes/pycode/derive_formulas.py
     dv = _model[2][0].subs(param)
+    dw = _model[2][1].subs(param)
     w = _model[0][1]
     v = _model[0][0]
+    #v = sympy.Symbol(v, real=True)
     print('dv_', dv)
     print('w', w)
     from sympy import Eq #as Equation
@@ -246,9 +248,11 @@ def symbolic_nullclines(_model, param):
     if True:
         from sympy import Matrix
         from sympy import solve
-        c = sympy.symbols("c")
-        nlc1 = dv
-        lin1 = v-c
+        c = sympy.symbols("c", real=True)
+        nlc1 = dv  # dv=0
+        #nlc1 = dw # dw=0
+        #lin1 = v-c # single root solution
+        lin1 = w-c  # multiple roots
         print('nlc1', nlc1)
         print('lin1', lin1)
         eq3m = Matrix([nlc1, lin1])
@@ -260,13 +264,30 @@ def symbolic_nullclines(_model, param):
         print('gonna solv')
         #solutions = solve(eq3, (w,c),force=True, manual=True, set=True)
         #solutions = solve(eq3, (w,),force=True, manual=True, set=True)
-        vars_list, _solution_set = solutions = solve(eq3, (w,),force=True, set=True)
+        #vars_list, _solution_set = solutions = solve(eq3, (w,),force=True, set=True)
         # ([w], {(-v**3 + v,)})
+        vars_list, _solution_set = solutions = solve(eq3, (v,w),force=True, set=True)
         # convert set to list
-        print(list(_solution_set))
-        solution_list = list(_solution_set)
+        print((vars_list))  # (v,w)
+        print((_solution_set))
+        print()
+        print(list(_solution_set))  # len = number of roots
+        solution_sympy_list = list(_solution_set)
+        # each solution is a tuple, for (v,w)
+        print(solution_sympy_list[0]) # has two elements
+        print(len(solution_sympy_list[0]))
+        print()
+        #solution_lambda_list = [
+        #    sympy.lambdify((c,), solt, dummify=False)
+        #        for solt in solution_sympy_list ]
+        # c is the free parameter for the "curve". Since it's aa null-cline, we need (exactly) one free ariable for it
+        # todo: rename c to s
+        solution_lambda_list = [
+            sympy.lambdify((c,), solt_vw, dummify=False)
+                for solt_vw in solution_sympy_list ]
+        # each is a function that returns ndim
 
-        # return solution_list
+        return solution_sympy_list, solution_lambda_list
 
 
         # without  `set=True`: returns list of solutions?
@@ -286,9 +307,24 @@ def symbolic_nullclines(_model, param):
 # todo: null-clines
 def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacity=.5, vmin=-1,vmax=1):
     """Plot the null iscolines of the Fitzhugh nagumo system"""
+    # todo: rename v_np
     v = np.linspace(vmin,vmax,100)
+    w_np = np.linspace(vmin,vmax,1000)
 
-    q= symbolic_nullclines(_model, param)
+    nc_solution_list, nc_lambdas = symbolic_nullclines(_model, param)
+    for ncl in nc_lambdas:
+      c = w_np
+      #c = v
+      vw_tuple = ncl(c) # t
+      #ax.plot(c, vw_tuple, style, color=color, alpha=opacity)
+      v_ = vw_tuple[0]
+      w_ = vw_tuple[1]+np.random.rand(1)*0.001
+      # why float
+      print('-----',v_.shape,v_.dtype,'  w',w_.shape, w_.dtype)
+      wch_ =np.logical_and(np.isreal(v_),np.isreal(v_))
+      v_ = v_[wch_]
+      w_ = w_[wch_]
+      ax.plot(v_, w_, '.', color='r', alpha=opacity)
     ax.plot(v, v - v**3 + I, style, color=color, alpha=opacity)
     # (v - a - b * w)/tau == 0
     # w=...
