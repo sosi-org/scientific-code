@@ -58,6 +58,43 @@ def model1():
     (dyn_vars, t, dyn_derivs, model_params, model_inputs) = (v,w), t, (dvdt,dwdt), (a, b, tau), (I,)
     return dyn_vars, t, dyn_derivs, model_params, model_inputs
 
+# Magical Indices (for readability)
+# Consts:  For magical numbers
+# Not every 0 is the same. Not every 1 is the same.
+# Now you can search all 0s in that capacity.
+# Naming mth eindices. Use unicode to make these shorter.
+# It is just about "naming" aand labelling, not about configurating.
+# It is not for eliminatig magical numbers. It has a higher purpose.
+#
+# # "model" data structure
+#  i.e. (dyn_vars, t, dyn_derivs, model_params, model_inputs)
+M_VARS_I = 0  # dynamics vars
+M_DYN_I = 2  # dynamics
+M_TIME_I = 1
+M_PARAMS_I = 3
+M_EXOGIPUTS_I = 4 # exogenous inputs
+
+# The io format, for (return value of) `fitzhugh_nagumo_partial()`
+I_LAMB_NPARRAY = 0 #M_SYMBOLIC_.I
+I_LAMB_ASLIST = 1 # M_LAMBDA_.I
+
+# for data structure for "integration"/ode results
+SIM_I_NDIM = 0
+SIM_I_BINS = 1   # dimention for "bin"s if simulation and integration
+                # means "across bins"
+                # was S IM_I_BIN
+
+# Try to avoid the following
+# Avoid such hardcoded indexing though
+# every usage will be a technical debt when we generalise to higher dimensional equations
+# will need to be parametrised in proper variables (not consts)
+_VAR_I_V = 0
+_VAR_I_W = 1
+_NDIM_VW = 2  # "across dims". try to avoid
+
+# (_NDIM_VW, 1500) is more readable than (2, 1500)
+
+
 _model = model1()
 
 UPSAMPLEx=5
@@ -81,21 +118,24 @@ def fitzhugh_nagumo_partial(_model, **model_params_and_inputs):
     model_lamb = sympy.lambdify((*dyn_vars,t), dyn_vars2, dummify=False)
     ndim = len(dyn_derivs)
 
+    # I_LAMB_NPARRAY: receives ndarray, returns ndarray
     def p(x, t):
-        # either ((2,n), (n,))  or ((2,), ())
+        # either args=((_NDIM_VW,n), (n,))  or args=((_NDIM_VW,), ())
         # is_scalar =
         #print(x.shape, 'x.shape')
-        assert x.shape[0] == ndim
+        assert x.shape[SIM_I_NDIM] == ndim
         x0x1 = tuple(x) # x[0,:],x[1,:]
         y = model_lamb(*x0x1, t)
-        assert len(y) == 2
+        assert len(y) == _NDIM_VW
         #print(y[0].shape)
         dvdw = np.array(y)
         #print(dvdw.shape)
-        assert len(dvdw.shape) == 2 or dvdw.shape==(2,)
-        assert dvdw.shape == dvdw.shape == (ndim,) or (ndim, x.shape[1])
-        # either (2,n)  or (2,)
+        assert len(dvdw.shape) == _NDIM_VW or dvdw.shape==(_NDIM_VW,)
+        assert dvdw.shape == dvdw.shape == (ndim,) or (ndim, x.shape[SIM_I_BINS])
+        # either (_NDIM_VW,n)  or (_NDIM_VW,)
         return dvdw
+
+    # I_LAMB_ASLIST: receives list, returns list
     def p3(xy_list,t):
           # print(len(xy_list))
           # print(xy_list[0].shape)
@@ -105,6 +145,7 @@ def fitzhugh_nagumo_partial(_model, **model_params_and_inputs):
           assert len(dvdw) == ndim
           return dvdw
 
+    # I_LAMB_NPARRAY, I_LAMB_ASLIST
     return p,p3
 
 # ic: Array containing the value of y for each desired time in t, with the initial value y0 in the first row.
@@ -116,7 +157,7 @@ def get_displacement(
   ):
     # We start from the resting point...
     ic = scipy.integrate.odeint(
-          fitzhugh_nagumo_partial(_model, **param)[0],
+          fitzhugh_nagumo_partial(_model, **param)[I_LAMB_NPARRAY],
           y0=[0,0],
           #t= np.linspace(0,SIMU_STEPS2-1, SIMU_STEPS2)
           t= np.linspace(0,SIMU_TIME*UPSAMPLEx, SIMU_STEPS2)
@@ -127,15 +168,15 @@ def get_displacement(
     for displacement in np.linspace(0, dmax, number):
         traj.append(
           scipy.integrate.odeint(
-            fitzhugh_nagumo_partial(_model, **param)[0],
+            fitzhugh_nagumo_partial(_model, **param)[I_LAMB_NPARRAY],
             y0=ic+np.array([displacement,0]),
             #full_output=True, adds a second entry to output
             t=time_span
         ))
         solu = traj[-1]  # v, w = sol.T
-        vel_eval = fitzhugh_nagumo_partial(_model, **param)[0](solu.T, time_span)
+        vel_eval = fitzhugh_nagumo_partial(_model, **param)[I_LAMB_NPARRAY](solu.T, time_span)
 
-        # vel_eval.shape: # (2, 1500)
+        # vel_eval.shape: # (_NDIM_VW, 1500)
         veocities.append(vel_eval)
     return traj, veocities
 
@@ -157,15 +198,15 @@ for i,param in enumerate(scenarios):
         ax[i].set(xlabel='Time', ylabel='v, w',
                      title='{:<8} {}'.format(pname, param))
         for j in range(len(trajectories[i])):
-            v = ax[i].plot(time_span,trajectories[i][j][:,0], color='C0')
-            w = ax[i].plot(time_span,trajectories[i][j][:,1], color='C1', alpha=.5)
+            v = ax[i].plot(time_span,trajectories[i][j][:,_VAR_I_V], color='C0')
+            w = ax[i].plot(time_span,trajectories[i][j][:,_VAR_I_W], color='C1', alpha=.5)
         ax[i].legend([v[0],w[0]],['v','w'])
 plt.tight_layout()
 
 
 def minmax(simulation):
-    mins = np.min(simulation, axis=1)
-    maxs = np.max(simulation, axis=1)
+    mins = np.min(simulation, axis=SIM_I_BINS)
+    maxs = np.max(simulation, axis=SIM_I_BINS)
     ranges = np.array([mins, maxs ]).T
     print('ranges:', ranges)
     mm1 = np.max(mins, axis=0)
@@ -180,9 +221,9 @@ for i,param in enumerate(scenarios):
     for j in range(len(velocities)):
         simulation = velocities[j].copy()  # [2,1500]
         # fake rescaling W:
-        simulation[1,:] = simulation[1,:] * param['tau']
-        d_v = simulation[0,:]
-        d_w = simulation[1,:]
+        # simulation[_VAR_I_W,:] = simulation[_VAR_I_W,:] * param['tau']
+        d_v = simulation[_VAR_I_V,:]
+        d_w = simulation[_VAR_I_W,:]
         (mm1,mm2, ranges) = minmax(simulation)
         ax[i].plot(np.array([mm1,mm2]), np.array([mm1,mm2]), 'r--', alpha=.2)
         ax[i].plot(d_v, d_w, 'k-')
@@ -198,8 +239,8 @@ for i,param in enumerate(scenarios):
     # j = repeats = 4
     for j in range(len(velocities)):
         simulation = velocities[j]  # [2,1500]
-        d_v0 = simulation[0,:]
-        d_w0 = simulation[1,:]
+        d_v0 = simulation[_VAR_I_V,:]
+        d_w0 = simulation[_VAR_I_W,:]
         d_t = time_span
         d2_v = np.diff(d_v0)/np.diff(time_span)
         d2_w = np.diff(d_w0)/np.diff(time_span)
@@ -218,10 +259,10 @@ def symbolic_nullclines(_model, param):
     # symbolic (algebraic) null-clines:
     print()
     # see https://github.com/sosi-org/scientific-code/blob/633224dc72692c13acc8263e21c933119eeaaf69/beeseyes/pycode/derive_formulas.py
-    dv = _model[2][0].subs(param)
-    dw = _model[2][1].subs(param)
-    w = _model[0][1]
-    v = _model[0][0]
+    dv = _model[M_DYN_I][_VAR_I_V].subs(param)
+    dw = _model[M_DYN_I][_VAR_I_W].subs(param)
+    w = _model[M_VARS_I][_VAR_I_W]
+    v = _model[M_VARS_I][_VAR_I_V]
     #v = sympy.Symbol(v, real=True)
     print('dv_', dv)
     print('w', w)
@@ -318,8 +359,8 @@ def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacit
       #c = v
       vw_tuple = ncl(c) # t
       #ax.plot(c, vw_tuple, style, color=color, alpha=opacity)
-      v_ = vw_tuple[0]+np.random.randn(1)*0.001
-      w_ = vw_tuple[1]+np.random.randn(1)*0.001
+      v_ = vw_tuple[_VAR_I_V]+np.random.randn(1)*0.001
+      w_ = vw_tuple[_VAR_I_W]+np.random.randn(1)*0.001
       # why float
       print('-----',v_.shape,v_.dtype,'  w',w_.shape, w_.dtype)
       wch_ =np.logical_and(np.isreal(v_),np.isreal(v_))
@@ -353,7 +394,7 @@ def plot_vector_field(ax, param, xrange, yrange, steps=50):
     #exit()
 
     # dx,dy = fitzhugh_nagumo([X,Y],0,**param)
-    dxdy = fitzhugh_nagumo_partial(_model, **param)[1]([X,Y], 0)
+    dxdy = fitzhugh_nagumo_partial(_model, **param)[I_LAMB_ASLIST]([X,Y], 0.0)
 
     dx,dy = dxdy[:2]
 
@@ -486,7 +527,7 @@ eqstability = {}
 for i, param in enumerate(scenarios):
     eqstability[i] = []
     for e in eqnproot[i]:
-        J = jacobian_fitznagumo(e[0],e[1], **param)
+        J = jacobian_fitznagumo(e[_VAR_I_V],e[_VAR_I_W], **param)
         eqstability[i].append(stability(J))
 print(eqstability)
 

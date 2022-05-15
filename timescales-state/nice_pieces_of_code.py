@@ -129,3 +129,8 @@ def symbolic_nullclines(_model, param):
     # simplify=True
     # "check=True (default) will run through the symbol tags to elimate unwanted solutions. If no assumptions are included, all possible solutions will be returned"
     # why didi I choose this? "manual=True (default is False). Do not use the polys/matrix method to solve a system of equations, solve them one at a time as you might “manually.”"
+
+
+# index-larifying for ranges, etc.
+# todo: from, to 👉, 👈
+# ✝︎ ⌶ ▶︎ ▶️⤵️ ℹ️ ❕ 📏 📎 💈 🎗 ☝️
