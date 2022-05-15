@@ -212,10 +212,19 @@ for i,param in enumerate(scenarios):
 
 ##############################################
 
+# todo: null-clines
 def plot_isocline(ax, a, b, tau, I, color='k', style='--', opacity=.5, vmin=-1,vmax=1):
     """Plot the null iscolines of the Fitzhugh nagumo system"""
     v = np.linspace(vmin,vmax,100)
+
+    import code
+    code.interact(local=locals())
+    exit()
+    # v - v**3  - w + I == 0
+    # w=...
     ax.plot(v, v - v**3 + I, style, color=color, alpha=opacity)
+    # (v - a - b * w)/tau == 0
+    # w=...
     ax.plot(v, (v - a)/b, style, color=color, alpha=opacity)
     # todo: adapt to the generatlised symbolic _model
 
