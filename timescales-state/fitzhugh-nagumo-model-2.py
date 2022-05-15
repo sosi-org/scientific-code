@@ -304,6 +304,7 @@ def symbolic_nullclines(_model, param):
     # v - v**3  - w + I == 0
     # w=...
 
+square_nc = False
 # todo: null-clines
 def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacity=.5, vmin=-1,vmax=1):
     """Plot the null iscolines of the Fitzhugh nagumo system"""
@@ -317,8 +318,8 @@ def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacit
       #c = v
       vw_tuple = ncl(c) # t
       #ax.plot(c, vw_tuple, style, color=color, alpha=opacity)
-      v_ = vw_tuple[0]
-      w_ = vw_tuple[1]+np.random.rand(1)*0.001
+      v_ = vw_tuple[0]+np.random.randn(1)*0.001
+      w_ = vw_tuple[1]+np.random.randn(1)*0.001
       # why float
       print('-----',v_.shape,v_.dtype,'  w',w_.shape, w_.dtype)
       wch_ =np.logical_and(np.isreal(v_),np.isreal(v_))
@@ -330,6 +331,10 @@ def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacit
     # w=...
     ax.plot(v, (v - a)/b, style, color=color, alpha=opacity)
     # todo: adapt to the generatlised symbolic _model
+    if (square_nc):
+        #ax.set_aspect('equal', adjustable='box')
+        # adjustable='datalim')
+        ax.set_aspect(param['tau'], adjustable='box')
 
 fig, ax = plt.subplots(1, 3, figsize=(18, 6))
 for i, sc in enumerate(scenarios):
@@ -358,9 +363,15 @@ def plot_vector_field(ax, param, xrange, yrange, steps=50):
     ax.streamplot(X,Y,dx, dy, color=(0,0,0,.1))
 
     ax.set(xlim=(xrange[0], xrange[1]), ylim=(yrange[0], yrange[1]))
+    if (square_nc):
+        #ax.set_aspect('equal', adjustable='box')
+        # adjustable='datalim')
+        ax.set_aspect(param['tau'], adjustable='box')
 
 fig, ax = plt.subplots(1, 3, figsize=(20, 6))
 for i, sc in enumerate(scenarios):
+    # todo: xrange with regards to square_nc
+    #xrange = (-1*5, 1*5)
     xrange = (-1, 1)
     yrange = [(1/sc['b'])*(x-sc['a']) for x in xrange]
     plot_vector_field(ax[i], sc, xrange, yrange)
