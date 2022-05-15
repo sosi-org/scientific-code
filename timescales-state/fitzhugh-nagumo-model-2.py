@@ -265,55 +265,53 @@ def symbolic_nullclines(_model, param):
     v = _model[M_VARS_I][_VAR_I_V]
 
     from sympy import Eq
+    from sympy import Matrix
+    from sympy import solve
+    c = sympy.symbols("c", real=REAL_ONLY)
 
-    if True:
-        from sympy import Matrix
-        from sympy import solve
-        c = sympy.symbols("c", real=REAL_ONLY)
+    # v - v**3  - w + I == 0
+    # w == c
 
-        # v - v**3  - w + I == 0
-        # w == c
+    nlc1 = dv  # dv=0
+    #nlc1 = dw # dw=0
 
-        nlc1 = dv  # dv=0
-        #nlc1 = dw # dw=0
+    # The "scan"ning line/shape (guiding shape)
+    #lin1 = v-c # single root solution
+    lin1 = w-c  # multiple roots
+    # lin1 = v-c+w
+    # lin1 = v*v-c+w*w
 
-        # The "scan"ning line/shape (guiding shape)
-        #lin1 = v-c # single root solution
-        lin1 = w-c  # multiple roots
-        # lin1 = v-c+w
-        # lin1 = v*v-c+w*w
+    print('nlc1', nlc1)
+    print('lin1', lin1)
 
-        print('nlc1', nlc1)
-        print('lin1', lin1)
+    eq3m = Matrix([nlc1, lin1])
+    zero0 =  Matrix([0,0])
+    # also: zero= c*0 ,  0 * dv , sympy.core.numbers.Zero
+    # unexplored option: `Eq(..., evaluate=False)`
+    eq3 = Eq(eq3m, zero0)
+    sympy.pprint(eq3, use_unicode=True)
+    print('Going to solve')
+    vars_list, _solution_set = \
+        solve(eq3, (v,w),force=True, set=True)
+    # Alternative: sympy.solve([eq1,eq2], (w,), force=True, manual=True, set=True)
+    # ([w], {(-v**3 + v,)})
+    # convert set to list
+    # vars_list: # (v,w)
+    # len = number of roots:
+    solution_sympy_list = list(_solution_set)
+    # each solution is a tuple, for (v,w). has 2=ndim elements
 
-        eq3m = Matrix([nlc1, lin1])
-        zero0 =  Matrix([0,0])
-        # also: zero= c*0 ,  0 * dv , sympy.core.numbers.Zero
-        # unexplored option: `Eq(..., evaluate=False)`
-        eq3 = Eq(eq3m, zero0)
-        sympy.pprint(eq3, use_unicode=True)
-        print('Going to solve')
-        vars_list, _solution_set = \
-            solve(eq3, (v,w),force=True, set=True)
-        # Alternative: sympy.solve([eq1,eq2], (w,), force=True, manual=True, set=True)
-        # ([w], {(-v**3 + v,)})
-        # convert set to list
-        # vars_list: # (v,w)
-        # len = number of roots:
-        solution_sympy_list = list(_solution_set)
-        # each solution is a tuple, for (v,w). has 2=ndim elements
+    # todo: c -> s
+    # todo: rename c to s
+    # c is the free parameter for the "curve". Since it's aa null-cline, we need (exactly) one free ariable for it
+    solution_lambda_list = [
+        # `modules=["scipy", "numpy"]`` is essential for the correct calculation of nullclines (generalised approach). Especiaally when there are multiple roots.
+        sympy.lambdify((c,), solt_vw, dummify=False, modules=["scipy", "numpy"] )
+            for solt_vw in solution_sympy_list ]
 
-        # todo: c -> s
-        # todo: rename c to s
-        # c is the free parameter for the "curve". Since it's aa null-cline, we need (exactly) one free ariable for it
-        solution_lambda_list = [
-            # `modules=["scipy", "numpy"]`` is essential for the correct calculation of nullclines (generalised approach). Especiaally when there are multiple roots.
-            sympy.lambdify((c,), solt_vw, dummify=False, modules=["scipy", "numpy"] )
-                for solt_vw in solution_sympy_list ]
+    # each is a function that returns a tuple of size `ndim``
 
-        # each is a function that returns a tuple of size `ndim``
-
-        return solution_sympy_list, solution_lambda_list
+    return solution_sympy_list, solution_lambda_list
 
 
 
