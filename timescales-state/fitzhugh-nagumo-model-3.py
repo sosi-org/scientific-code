@@ -19,23 +19,36 @@ sympy.init_printing()
 
 fitzhugh = True
 
+mi = 1
 
-if fitzhugh:
-
+if mi == 1:
+    # doulcier
     from models import fitzhugh_nagumo_1_doulcier
     model1 = fitzhugh_nagumo_1_doulcier.model1
     scenarios = fitzhugh_nagumo_1_doulcier.scenarios
     initial_values = fitzhugh_nagumo_1_doulcier.initial_values
     get_ranges = fitzhugh_nagumo_1_doulcier.get_ranges
+    get_wide_ranges = fitzhugh_nagumo_1_doulcier.get_wide_ranges
     pname = fitzhugh_nagumo_1_doulcier.pname
 
-else:
+elif mi == 2:
+    # sohale
+    from models import fitzhugh_nagumo_2
+    model1 = fitzhugh_nagumo_2.model1
+    scenarios = fitzhugh_nagumo_2.scenarios
+    initial_values = fitzhugh_nagumo_2.initial_values
+    get_ranges = fitzhugh_nagumo_2.get_ranges
+    get_wide_ranges = fitzhugh_nagumo_2.get_wide_ranges
+    pname = fitzhugh_nagumo_2.pname
 
+elif mi == 3:
+    # morris_lecar's variation by jonmarty
     from models import morris_lecar
     model1 = morris_lecar.model2
     scenarios = morris_lecar.scenarios
     initial_values = morris_lecar.initial_values
     get_ranges = morris_lecar.get_ranges
+    get_wide_ranges = morris_lecar.get_wide_ranges
     pname = morris_lecar.pname
 
     import yaml
@@ -185,8 +198,8 @@ check_model(_model, scenarios[0], initial_values[0])
 
 
 
-UPSAMPLEx = 15
-#UPSAMPLEx = 5
+#UPSAMPLEx = 15
+UPSAMPLEx = 5
 # UPSAMPLEx = 1
 
 SIMU_TIME=200
@@ -347,12 +360,15 @@ for i,param in enumerate(scenarios):
 
 
 # todo: why is v defined here?
-def symbolic_nullclines(_model, param):
+def symbolic_nullclines(whichi, _model, param):
     # symbolic (algebraic) null-clines:
     print()
     print(param)
-    dv = _model[ηM_DYN][_ηVAR_V].subs(param)
-    dw = _model[ηM_DYN][_ηVAR_W].subs(param)
+    # dv = _model[ηM_DYN][_ηVAR_V].subs(param)
+    # dw = _model[ηM_DYN][_ηVAR_W].subs(param)
+    ndim = len(_model[ηM_DYN])
+    # with substitution
+    dvdw_subs = [_model[ηM_DYN][i].subs(param) for i in range(ndim)]
     w  = _model[ηM_VARS][_ηVAR_W]
     v  = _model[ηM_VARS][_ηVAR_V]
 
@@ -366,11 +382,18 @@ def symbolic_nullclines(_model, param):
     # v - v**3  - w + I == 0
     # w == _s
 
-    nlc1 = dv  # dv=0
+    #nlc1 = dv  # dv=0
     #nlc1 = dw # dw=0
 
+    # without substitution
+    # nlc1 = _model[ηM_DYN][whichi]
+    # with substitution
+    nlc1 = dvdw_subs[whichi]
+
     # The "scan"ning line/shape (guiding shape)
-    #lin1 = v-_s # single root solution
+    # easy:
+    # lin1 = v-_s # single root solution
+    # difficult:
     lin1 = w-_s  # multiple roots
     # lin1 = v-_s+w
     # lin1 = v*v-_s+w*w
@@ -400,7 +423,7 @@ def symbolic_nullclines(_model, param):
     # each solution is a tuple, for (v,w). has 2=ndim elements
 
     solution_lambda_list = [
-        # `modules=["scipy", "numpy"]`` is essential for the correct calculation of nullclines (generalised approach). Especiaally when there are multiple roots.
+        # Lesson learned: `modules=["scipy", "numpy"]`` is essential for the correct calculation of nullclines (generalised approach). Especiaally when there are multiple roots.
         sympy.lambdify((_s,), solt_vw, dummify=False, modules=["scipy", "numpy"] )
             for solt_vw in solution_list_sympy ]
 
@@ -408,37 +431,74 @@ def symbolic_nullclines(_model, param):
 
     return solution_list_sympy, solution_lambda_list
 
-
+# todo:
+# def safe_evaluate():
+    pass
 
 # Nullclines
 
 square_nc = False
 
-def plot_isocline(_model, param, ax, sc2, color='k', style='--', opacity=.5, vmin=-1,vmax=1):
+def plot_isocline(whichi, _model, param, ax, sc2, color='k', style='--', opacity=.5, vmin=-1,vmax=1):
     """Plot the null iscolines of the Fitzhugh nagumo system"""
 
     # a, b, tau, I = sc2
-    nc_solution_list, nc_lambdas = symbolic_nullclines(_model, param)
+    nc_solution_list, nc_lambdas = symbolic_nullclines(whichi, _model, param)
 
+    print(nc_solution_list)
     ctr = 0
     for ncl in nc_lambdas:
+      print()
+      print('root number', ctr)
+      # symbolic: root number (s, -84.8528137423857*I)
+      print('symbolic:', nc_solution_list[ctr])
       s_np = np.linspace(-2,+2, 1000)
       _s = s_np
+      #print('_s', _s)
       vw_tuple = ncl(_s) # t
+      #print('vw_tuple', vw_tuple)
+      #print()
       #ax.plot(_s, vw_tuple, style, color=color, alpha=opacity)
-      print('@', vw_tuple[_ηVAR_V].shape)
-      σ = 0.01 / 10
-      v_ = vw_tuple[_ηVAR_V] + np.random.randn(*vw_tuple[_ηVAR_V].shape) * σ
-      w_ = vw_tuple[_ηVAR_W] + np.random.randn(*vw_tuple[_ηVAR_W].shape) * σ
+      print('shape@', vw_tuple[_ηVAR_V].shape)
+      #print('v@', vw_tuple[_ηVAR_V])
+      #print('w@', vw_tuple[_ηVAR_W])
+      print('ok')
+      v_ = vw_tuple[_ηVAR_V]
+      w_ = vw_tuple[_ηVAR_W]
+      # Sometimes v_ or w_ may be scalar:
+      v_ = v_ + 0.0 * _s
+      w_ = w_ + 0.0 * _s
+      # why is w_ sometimes a single number?!
+      assert v_.shape == w_.shape, 'mismatching shapes'
 
       print('-----',v_.shape,v_.dtype,'  w',w_.shape, w_.dtype) # why float
-      wch_ =np.logical_and(np.isreal(v_),np.isreal(v_))
+
+      def _isreal0(npa):
+          return np.isreal(v_)
+      def _report_small_imag(npa):
+          #np.set_printoptions(precision=7, suppress=True)
+          vv = np.imag(v_)
+          vv = vv[np.absolute(vv) < 0.001 ]
+          print(np.sort(vv))
+          # typical value: 2.00e-15 and smaller !
+          exit()
+
+      def _isreal(npa):
+          # _report_small_imag(v_)
+          ε = 0.00001
+          return np.absolute(np.imag(v_)) < ε
+      # important lesson: never use raw `np.isreal()`. Use ε and an extra `np.real()`
+      wch_ =np.logical_and(_isreal(v_),_isreal(w_))
       v_ = v_[wch_]
       w_ = w_[wch_]
       #v_ = np.abs(v_)
       #w_ = np.abs(w_)
-      #v_ = np.real(v_)
-      #w_ = np.real(w_)
+      v_ = np.real(v_)
+      w_ = np.real(w_)
+
+      σ = 0.01 / 10
+      v_ = v_ + np.random.randn(*v_.shape) * σ
+      w_ = w_ + np.random.randn(*w_.shape) * σ
 
       COLS = ['r','g','b', 'm' ]*5; ctr += 1
       ax.plot(v_, w_, '-', color=COLS[ctr], linewidth=5, alpha=0.3)
@@ -451,14 +511,18 @@ def plot_isocline(_model, param, ax, sc2, color='k', style='--', opacity=.5, vmi
         # w=...
         ax.plot(v_np, (v_np - a)/b, style, color=color, alpha=opacity)
 
-    if (square_nc):
-        #ax.set_aspect('equal', adjustable='box')
-        # adjustable='datalim')
-        ax.set_aspect(param['tau'], adjustable='box')
+
 
 fig, ax = plt.subplots(1, 3, figsize=(18, 6))
 for i, sc in enumerate(scenarios):
-    plot_isocline(_model, sc, ax[i], sc)
+    for whichj in range(2):
+        plot_isocline(whichj, _model, sc, ax[i], sc)
+
+    if (square_nc):
+        #ax.set_aspect('equal', adjustable='box')
+        # adjustable='datalim')
+        ax.set_aspect(sc['tau'], adjustable='box')
+
     ax[i].set(xlabel='v', ylabel='w',
               title='{}'.format(sc))
     (xrange, yrange) = get_ranges(sc)
@@ -466,7 +530,7 @@ for i, sc in enumerate(scenarios):
 
 ##############################################
 
-def plot_vector_field(ax, param, xrange, yrange, steps=50):
+def plot_vector_field(ax, param, xrange, yrange, steps=50*2):
     # Compute the vector field
     x = np.linspace(xrange[0], xrange[1], steps)
     y = np.linspace(yrange[0], yrange[1], steps)

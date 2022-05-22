@@ -114,5 +114,10 @@ def get_ranges(sc):
     yrange = (mins[1], maxs[1])
     return (xrange, yrange)
 
+def get_wide_ranges(sc):
+    xrange = (-500.0, 500.0)
+    yrange = (-500.0, 500.0)
+    return (xrange, yrange)
 
+# label for plot figure
 pname = 'ML:jonmarty'
