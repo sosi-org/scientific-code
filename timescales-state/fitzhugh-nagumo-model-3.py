@@ -70,7 +70,7 @@ elif mi == 3:
 ηM_PARAMS = 3
 ηM_EXOG_INPUTS = 4 # exogenous inputs. I_ext
 
-# The io format, for (return value of) `fitzhugh_nagumo_partial()`
+# The io format, for (return value of) `evaluate_model_dvdw_partial()`
 ηLAMB_NPARRAY = 0 #M_SYMBOLIC_.I
 ηLAMB_ASLIST = 1 # M_LAMBDA_.I
 
@@ -209,8 +209,10 @@ SIMU_STEPS2=1000*UPSAMPLEx
 time_span = np.linspace(0, SIMU_TIME, num=SIMU_STEPS1)
 
 
-def fitzhugh_nagumo_partial(_model, **model_params_and_inputs):
-
+def evaluate_model_dvdw_partial(_model, **model_params_and_inputs):
+    '''
+    substitute params, Lambdify, partial evaluate of dvdw(v,w)
+    '''
     (dyn_vars, t, dyn_derivs, model_params, model_inputs) = _model
     #(v,w), t, (dvdt,dwdt), (a, b, tau), (I,) = (dyn_vars, t, dyn_derivs, model_params, model_inputs)
     print((dyn_vars, t, dyn_derivs, model_params, model_inputs))
@@ -251,7 +253,7 @@ def fitzhugh_nagumo_partial(_model, **model_params_and_inputs):
 
 # ic: Array containing the value of y for each desired time in t, with the initial value y0 in the first row.
 
-def get_displacement(
+def simulate_perturbed(
         param, initial,
         dmax=0.5,
         time_span=np.linspace(0, SIMU_TIME, SIMU_STEPS2),
@@ -259,7 +261,7 @@ def get_displacement(
   ):
     # We start from the resting point...
     ic = scipy.integrate.odeint(
-          fitzhugh_nagumo_partial(_model, **param)[ηLAMB_NPARRAY],
+          evaluate_model_dvdw_partial(_model, **param)[ηLAMB_NPARRAY],
           y0=initial,
           #t= np.linspace(0,SIMU_STEPS2-1, SIMU_STEPS2)
           t= np.linspace(0,SIMU_TIME*UPSAMPLEx, SIMU_STEPS2)
@@ -270,13 +272,13 @@ def get_displacement(
     for displacement in np.linspace(0, dmax, number):
         traj.append(
           scipy.integrate.odeint(
-            fitzhugh_nagumo_partial(_model, **param)[ηLAMB_NPARRAY],
+            evaluate_model_dvdw_partial(_model, **param)[ηLAMB_NPARRAY],
             y0=ic+np.array([displacement,0]),
             #full_output=True, adds a second entry to output
             t=time_span
         ))
         solu = traj[-1]  # v, w = sol.T
-        vel_eval = fitzhugh_nagumo_partial(_model, **param)[ηLAMB_NPARRAY](solu.T, time_span)
+        vel_eval = evaluate_model_dvdw_partial(_model, **param)[ηLAMB_NPARRAY](solu.T, time_span)
 
         # vel_eval.shape: # (_ηNDIM_VW, 1500)
         veocities.append(vel_eval)
@@ -289,7 +291,7 @@ for i,param in enumerate(scenarios):
     initial_ = get_initial_array(_model[ηM_VARS], initial_values[i])
 
     trajectories[i], velo_s[i] \
-        = get_displacement(param, initial_, number=4, time_span=time_span, dmax=0.5)
+        = simulate_perturbed(param, initial_, number=4, time_span=time_span, dmax=0.5)
 
 
 # Draw the trajectories.
@@ -547,7 +549,7 @@ def plot_vector_field(ax, param, xrange, yrange, steps=50*2):
     y = np.linspace(yrange[0], yrange[1], steps)
     X,Y = np.meshgrid(x,y)  # each shape: (50,50)
 
-    dxdy = fitzhugh_nagumo_partial(_model, **param)[ηLAMB_ASLIST]([X,Y], 0.0)
+    dxdy = evaluate_model_dvdw_partial(_model, **param)[ηLAMB_ASLIST]([X,Y], 0.0)
 
     dx,dy = dxdy[:2]
 
