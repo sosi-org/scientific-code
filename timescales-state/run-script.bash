@@ -5,7 +5,7 @@
 set -xu
 
 mkdir temp
-curl -k \
+source ./temp/my-bash-utils.sh || curl -k \
     https://raw.githubusercontent.com/sohale/implisolid/revival-sohale/scripts/bash-utils.sh \
     >./temp/my-bash-utils.sh
 
