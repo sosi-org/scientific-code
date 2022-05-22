@@ -40,6 +40,8 @@ else:
      {"a":0.7, "b":0.8, "tau":12.5, "I":0.7},
   ]
 
+initial_values = [ {'v':  0.0, 'w':  0.0, } ] * len(scenarios)
+
 def model1():
     # Define variable as symbols for sympy
     v, w = sympy.symbols("v, w", real=REAL_ONLY)
@@ -59,6 +61,102 @@ def model1():
     (dyn_vars, t, dyn_derivs, model_params, model_inputs) = (v,w), t, (dvdt,dwdt), (a, b, tau), (I,)
     return dyn_vars, t, dyn_derivs, model_params, model_inputs
 
+import yaml
+
+def model2():
+    # Morris Lacar
+    # Based on https://github.com/jonmarty/Morris-Lecar/blob/master/MorrisLecar.ipynb
+
+    t = sympy.symbols("t", real=REAL_ONLY)
+    V, N, = sympy.symbols( "V, N", real=REAL_ONLY)
+
+    # '(\w+)':   $1,
+    #tanh = sympy.tanh
+    #cosh = sympy.cosh
+
+    #tanh = sympy.Function('tanh')
+    def tanh(x):
+        return x - (x**3)/3
+    def cosh(x):
+        return 1+(x**2)/2
+    #def tanh(x):
+    #    return x - (x**3)/3 + 2*(x**5)/15
+    #def cosh(x):
+    #    return 1+(x**2)/2+(x**4)/24
+
+    '''
+    C, # Capacitance of membrane
+    V_1, # Tuning parameters for steady state and time constant
+    phi, # reference frequency
+    V_L, # Equilibrum potentials for ion channels
+    g_Ca, # leak, conductances through membrane for each ion
+    V, # Membrane potential
+    N, # Recovery variance
+    '''
+    C, V_1, V_2, V_3, V_4, phi, V_L, V_Ca, V_K, g_Ca, g_K, g_L, I \
+        = sympy.symbols("""
+        C, V_1, V_2, V_3, V_4, phi, V_L, V_Ca, V_K, g_Ca, g_K, g_L, I
+      """)
+
+    # Define functions
+    M_ss = (1/2) * (1 + tanh((V - V_1) / V_2))
+    N_ss = (1/2) * (1 + tanh((V - V_3) / V_4))
+    T_N = 1 / (phi * cosh((V - V_3) / (2 * V_4)))
+
+    # Define differential equations
+    # dV(I)
+    dV = (I - g_L * (V - V_L) - g_Ca *
+                       M_ss * (V - V_Ca) - g_K * N * (V - V_K)) / C
+
+    dN = (N_ss - N) / T_N
+
+    # Equations for the input of each channel
+    L = - g_L * (V - V_L)
+    Ca = - g_Ca * M_ss * (V - V_Ca)
+    K = - g_K * N * (V - V_K)
+
+    # dynamics vars
+    dyn_vars = (V, N)
+    t = t
+    # dynamics
+    dyn_derivs =(dV, dN)
+    model_params =  (C, V_1, V_2, V_3, V_4, phi, V_L, V_Ca, V_K, g_Ca, g_K, g_L)
+    model_inputs =  (I,)
+
+    model = dyn_vars, t, dyn_derivs, model_params, model_inputs
+    return model
+
+scenarios = [ #params =
+  {
+    # (\w+) =        '$1':
+    'C':  6.69810502993, # Capacitance of membrane
+    'V_1':  30, # Tuning parameters for steady state and time constant
+    'V_2':  15,
+    'V_3':  0,
+    'V_4':  30,
+    'phi':  0.025, # reference frequency
+    'V_L':  -50, # Equilibrum potentials for ion channels
+    'V_Ca':  100,
+    'V_K':  -70,
+    'g_Ca':  1.1, # leak, conductances through membrane for each ion
+    'g_K':  2,
+    'g_L':  0.5,
+
+    'I': 0.0 + i * 0.4,
+
+    # does not work
+    #'initial': {
+    #    'V':  -52.14, # Membrane potential
+    #    'N':  0.02, # Recovery variance
+    #}
+  } for i in range(3)]
+
+initial_values = [
+    {
+        'V':  -52.14, # Membrane potential
+        'N':  0.02, # Recovery variance
+    }
+    ] * len(scenarios)
 
 # phase plane panel range
 # PPrange
@@ -66,11 +164,19 @@ def model1():
 def get_ranges(sc):
     # todo: xrange with regards to square_nc
     #xrange = (-1*5, 1*5)
-    xrange = (-1, 1)
-    yrange = [(1/sc['b'])*(x-sc['a']) for x in xrange]
-    return (xrange, yrange)
+    #xrange = (-1, 1)
+    #yrange = [(1/sc['b'])*(x-sc['a']) for x in xrange]
+    print('todo: ranges')
+    #return (xrange, yrange)
     # todo: rename v,w
     # todo: symbolic
+
+    mins = [-1,-100]
+    maxs = [1,100]
+    xrange = (mins[0], maxs[0])
+    yrange = (mins[1], maxs[1])
+    return (xrange, yrange)
+
 
 # Magical Indices (for readability)
 # Consts:  For magical numbers
@@ -109,9 +215,114 @@ _ηNDIM_VW = 2  # "across dims". try to avoid
 # (_ηNDIM_VW, 1500) is more readable than (2, 1500)
 
 
-_model = model1()
+_model = model2()
 
-UPSAMPLEx = 5
+def get_free_variables(_model, params):
+    #(dV,dN) = _model[ηM_DYN]; print(dV); print(dV.subs(params))
+    subtsed = [dX.subs(params) for dX in _model[ηM_DYN]]
+    free_variables = sympy.Tuple(*subtsed).free_symbols
+    return free_variables
+
+def show_model_info(_model, params):
+    print(_model[ηM_DYN])
+
+    free_variables = get_free_variables(_model, params)
+    print('free variables:', free_variables)
+    ndims1 = len(_model[ηM_VARS])
+    ndims2 = len(_model[ηM_DYN])
+    assert len(free_variables) == ndims1
+    assert len(free_variables) == ndims2
+    # The only free variables should be `_model[ηM_VARS]`, everything else must be concrete numbers
+
+show_model_info(_model, scenarios[0])
+
+def get_initial_array(vars_tuple, initial_values):
+    # [0,0]
+    # param['initial'] if 'initial' in param else [0,0]
+    #initial_ = sympy.Tuple(*_model[ηM_VARS]).subs(initial_values)
+    assert type(initial_values) is dict
+    st = sympy.Tuple(*vars_tuple)
+    print('st', st)
+    print(initial_values)
+    st_ = st.subs(initial_values)
+    print('st_', st_)
+    print('s1', vars_tuple[0].subs(initial_values))
+    print('s2', vars_tuple[1].subs(initial_values))
+    initial_ = list(st_)
+    print('initial_', initial_)
+
+    V, N, = sympy.symbols( "V, N", real=REAL_ONLY)
+    V, N, = sympy.symbols( "V, N")
+    print('?1',V.subs(initial_values))
+    print('?2',V.subs({'V':4}))
+
+
+    print('vars_tuple', vars_tuple, type(vars_tuple))
+    m = sympy.Matrix([*vars_tuple])
+    print('m', m)
+    m0 = sympy.Matrix([initial_values['V'],initial_values['N']])
+    print('m0', m0)
+    eq = sympy.Eq(m, m0)
+    print('eq', eq)
+
+    vars_list, _solution_set = \
+     sympy.solve(eq, vars_tuple, force=True, set=True)
+    print(_solution_set)
+
+    a = [initial_values[var.name] for var in vars_tuple]
+    print(a)
+    # import pdb
+    # #  #pdb.pm()
+    # pdb.set_trace(header='debug mode:')
+    # exit()
+    #return initial_
+    return a
+
+def testsp():
+    import sympy
+    X = sympy.symbols( "X")
+    print('i', (1*X).subs({'X': 1.01})) # works
+    X = sympy.symbols( "X", real=True) # causes problem
+    print('ii', (1*X).subs({'X': 2.02}))
+    X = sympy.symbols( "X", real=False) # even this
+    print('iii', (1*X).subs({'X': 3.03}))
+    print()
+    X = sympy.symbols( "X")
+    print('i', (1*X).subs({'X': 1.0}))
+    #X = sympy.symbols( "X", real=True)
+    print('ii', (1*X).subs({'X': 2.02}))
+    #X = sympy.symbols( "X")
+    print('iii', (1*X).subs('X', 3.03))
+    #import pdb
+    #pdb.set_trace(header='debug mode:')
+
+testsp()
+
+
+get_initial_array(_model[ηM_VARS], initial_values[0])
+
+def check_model(_model, params, initial_values):
+
+    ndims1 = len(_model[ηM_VARS])
+    ndims2 = len(_model[ηM_DYN])
+    assert ndims1 == ndims2
+
+    free_variables = get_free_variables(_model, params)
+    assert len(free_variables) == ndims1
+
+    va = get_initial_array(_model[ηM_VARS], initial_values)
+    print(va)
+    #for v in va:
+    #    print('>', v)
+    #    assert len(v.free_symbols) == 0
+
+
+check_model(_model, scenarios[0], initial_values[0])
+
+
+
+UPSAMPLEx = 15
+#UPSAMPLEx = 5
 # UPSAMPLEx = 1
 
 SIMU_TIME=200
@@ -164,14 +375,15 @@ def fitzhugh_nagumo_partial(_model, **model_params_and_inputs):
 # ic: Array containing the value of y for each desired time in t, with the initial value y0 in the first row.
 
 def get_displacement(
-        param, dmax=0.5,
+        param, initial,
+        dmax=0.5,
         time_span=np.linspace(0, SIMU_TIME, SIMU_STEPS2),
         number=20
   ):
     # We start from the resting point...
     ic = scipy.integrate.odeint(
           fitzhugh_nagumo_partial(_model, **param)[ηLAMB_NPARRAY],
-          y0=[0,0],
+          y0=initial,
           #t= np.linspace(0,SIMU_STEPS2-1, SIMU_STEPS2)
           t= np.linspace(0,SIMU_TIME*UPSAMPLEx, SIMU_STEPS2)
       )[-1]
@@ -197,8 +409,10 @@ def get_displacement(
 trajectories = {} # We store the trajectories in a dictionnary, it is easier to recover them.
 velo_s = {}
 for i,param in enumerate(scenarios):
+    initial_ = get_initial_array(_model[ηM_VARS], initial_values[i])
+
     trajectories[i], velo_s[i] \
-        = get_displacement(param, number=4, time_span=time_span, dmax=0.5)
+        = get_displacement(param, initial_, number=4, time_span=time_span, dmax=0.5)
 
 if doulcier:
   pname = 'doulcier'
@@ -315,6 +529,7 @@ def symbolic_nullclines(_model, param):
 
     vars_list, _solution_set = \
         solve(eq3, (v,w),force=True, set=True)
+        # sympy.nsolve
 
     ##################
     # Alternative: sympy.solve([eq1,eq2], (w,), force=True, manual=True, set=True)
@@ -339,9 +554,10 @@ def symbolic_nullclines(_model, param):
 
 square_nc = False
 
-def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacity=.5, vmin=-1,vmax=1):
+def plot_isocline(_model, param, ax, sc2, color='k', style='--', opacity=.5, vmin=-1,vmax=1):
     """Plot the null iscolines of the Fitzhugh nagumo system"""
 
+    # a, b, tau, I = sc2
     nc_solution_list, nc_lambdas = symbolic_nullclines(_model, param)
 
     ctr = 0
@@ -351,8 +567,9 @@ def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacit
       vw_tuple = ncl(_s) # t
       #ax.plot(_s, vw_tuple, style, color=color, alpha=opacity)
       print('@', vw_tuple[_ηVAR_V].shape)
-      v_ = vw_tuple[_ηVAR_V] + np.random.randn(*vw_tuple[_ηVAR_V].shape) * 0.01
-      w_ = vw_tuple[_ηVAR_W] + np.random.randn(*vw_tuple[_ηVAR_W].shape) * 0.01
+      σ = 0.01 / 10
+      v_ = vw_tuple[_ηVAR_V] + np.random.randn(*vw_tuple[_ηVAR_V].shape) * σ
+      w_ = vw_tuple[_ηVAR_W] + np.random.randn(*vw_tuple[_ηVAR_W].shape) * σ
 
       print('-----',v_.shape,v_.dtype,'  w',w_.shape, w_.dtype) # why float
       wch_ =np.logical_and(np.isreal(v_),np.isreal(v_))
@@ -363,15 +580,17 @@ def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacit
       #v_ = np.real(v_)
       #w_ = np.real(w_)
 
-      COLS = ['r','g','b', 'm']; ctr += 1
+      COLS = ['r','g','b', 'm' ]*5; ctr += 1
       ax.plot(v_, w_, '-', color=COLS[ctr], linewidth=5, alpha=0.3)
       # todo: indent
 
     v_np = np.linspace(vmin,vmax,100)
-    ax.plot(v_np, v_np - v_np**3 + I, style, color=color, alpha=opacity)
-    # (v - a - b * w)/tau == 0
-    # w=...
-    ax.plot(v_np, (v_np - a)/b, style, color=color, alpha=opacity)
+    if False:
+        ax.plot(v_np, v_np - v_np**3 + I, style, color=color, alpha=opacity)
+        # (v - a - b * w)/tau == 0
+        # w=...
+        ax.plot(v_np, (v_np - a)/b, style, color=color, alpha=opacity)
+
     if (square_nc):
         #ax.set_aspect('equal', adjustable='box')
         # adjustable='datalim')
@@ -379,7 +598,7 @@ def plot_isocline(_model, param, ax, a, b, tau, I, color='k', style='--', opacit
 
 fig, ax = plt.subplots(1, 3, figsize=(18, 6))
 for i, sc in enumerate(scenarios):
-    plot_isocline(_model, sc, ax[i], **sc)
+    plot_isocline(_model, sc, ax[i], sc)
     ax[i].set(xlabel='v', ylabel='w',
               title='{}'.format(sc))
     (xrange, yrange) = get_ranges(sc)
@@ -516,6 +735,7 @@ def find_roots(a,b,I, tau):
     # We store the position of the equilibrium.
     return [[r, r - r**3 + I] for r in roots]
 
+plt.show()
 eqnproot = {}
 for i, param in enumerate(scenarios):
     eqnproot[i] = find_roots(**param)
