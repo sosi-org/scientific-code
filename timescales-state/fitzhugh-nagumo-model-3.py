@@ -19,7 +19,7 @@ sympy.init_printing()
 
 fitzhugh = True
 
-mi = 3
+mi = 1
 
 if mi == 1:
     # doulcier
@@ -218,7 +218,7 @@ check_model(_model, scenarios[0], initial_values[0])
 UPSAMPLEx = 5
 # UPSAMPLEx = 1
 
-SIMU_TIME=200
+SIMU_TIME=1200
 SIMU_STEPS1=1500*UPSAMPLEx
 SIMU_STEPS2=1000*UPSAMPLEx
 
@@ -323,6 +323,14 @@ plt.tight_layout()
 
 
 def minmax(simulation):
+    z0 = np.zeros((simulation.shape[ηSIM_NDIM],1), dtype=simulation.dtype)
+    z1 = np.ones((simulation.shape[ηSIM_NDIM],1), dtype=simulation.dtype) * 0.0000001
+
+    simulation = np.concatenate((simulation, z0, z1), axis=ηSIM_BINS)
+    simulation = simulation[:, ~(np.isnan(simulation).any(axis=ηSIM_NDIM))]
+    simulation = simulation[:, (np.isfinite(simulation).any(axis=ηSIM_NDIM))]
+    assert simulation.shape[ηSIM_BINS] > 0
+
     mins = np.min(simulation, axis=ηSIM_BINS)
     maxs = np.max(simulation, axis=ηSIM_BINS)
     effective_ranges = np.array([mins, maxs ]).T
@@ -544,7 +552,7 @@ def plot_isocline(whichi, _model, param, ax, sc2, color='k', style='--', opacity
 
 
 
-fig, ax = plt.subplots(1, 3, figsize=(18, 6))
+fig, ax = plt.subplots(1, len(scenarios), figsize=(18, 6))
 for i, sc in enumerate(scenarios):
     for whichj in range(2):
         plot_isocline(whichj, _model, sc, ax[i], sc)
@@ -582,7 +590,7 @@ def plot_vector_field(ax, param, xrange, yrange, steps=50*2):
         # adjustable='datalim')
         ax.set_aspect(param['tau'], adjustable='box')
 
-fig, ax = plt.subplots(1, 3, figsize=(20, 6))
+fig, ax = plt.subplots(1, len(scenarios), figsize=(20, 6))
 for i, sc in enumerate(scenarios):
     (xrange, yrange) = get_ranges(sc)
     plot_vector_field(ax[i], sc, xrange, yrange)

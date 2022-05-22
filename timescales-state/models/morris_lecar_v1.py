@@ -89,19 +89,19 @@ scenarios = [ #params =
     'g_K':  2,
     'g_L':  0.5,
 
-    'I': 0.0 + i * 0.4,
+    'I': 0.0 + i * 0.4 /0.4*90/2,
 
     # does not work
     #'initial': {
     #    'V':  -52.14, # Membrane potential
     #    'N':  0.02, # Recovery variance
     #}
-  } for i in range(3)]
+  } for i in range(4)]
 
 initial_values = [
     {
-        'V':  -52.14, # Membrane potential
-        'N':  0.02, # Recovery variance
+        'V': 0,# -52.14, # Membrane potential
+        'N': 0,# 0.02, # Recovery variance
     }
     ] * len(scenarios)
 
@@ -117,6 +117,8 @@ def get_ranges(sc):
 
     mins = [-1,-100]
     maxs = [1,100]
+    #mins = [-100,-10]
+    #maxs = [100,10]
     xrange = (mins[0], maxs[0])
     yrange = (mins[1], maxs[1])
     return (xrange, yrange)
