@@ -19,7 +19,7 @@ sympy.init_printing()
 
 fitzhugh = True
 
-mi = 1
+mi = 3
 
 if mi == 1:
     # doulcier
@@ -513,8 +513,10 @@ def plot_isocline(whichi, _model, param, ax, sc2, color='k', style='--', opacity
       v_ = v_ + np.random.randn(*v_.shape) * σ
       w_ = w_ + np.random.randn(*w_.shape) * σ
 
-      COLS = ['r','g','b', 'm' ]*5; ctr += 1
-      ax.plot(v_, w_, '-', color=COLS[ctr], linewidth=5, alpha=0.3)
+      COLS = [['r', 'm',]*20, [ 'g','b', ]*20 ]
+
+      ctr += 1
+      ax.plot(v_, w_, '-', color=COLS[whichi][ctr], linewidth=5, alpha=0.3)
       # todo: indent
 
     v_np = np.linspace(vmin,vmax,100)
