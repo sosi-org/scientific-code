@@ -53,6 +53,22 @@ elif mi == 3:
 
     import yaml
 
+elif mi == 4:
+    # morris_lecar variation 2 (FAILED)
+    # solver not implemented
+    # FAILED
+    from models import morris_lecar_v2
+    model1 = morris_lecar_v2.model2
+    scenarios = morris_lecar_v2.scenarios
+    initial_values = morris_lecar_v2.initial_values
+    get_ranges = morris_lecar_v2.get_ranges
+    get_wide_ranges = morris_lecar_v2.get_wide_ranges
+    pname = morris_lecar_v2.pname
+
+    import yaml
+
+else:
+    raise Exception('model index wrong')
 
 # Magical Indices (for readability)
 # Consts:  For magical numbers

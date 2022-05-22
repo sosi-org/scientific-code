@@ -1,23 +1,22 @@
 import sympy
 sympy.init_printing()
 
-REAL_ONLY = False
-
-'''
-THIS FAILS
-'''
 def model2():
     # Morris Lacar
     # Based on https://github.com/jonmarty/Morris-Lecar/blob/master/MorrisLecar.ipynb
+    # variation 2
+    # https://en.wikipedia.org/wiki/Morris%E2%80%93Lecar_model
 
-    t = sympy.symbols("t", real=REAL_ONLY)
-    V, N, = sympy.symbols( "V, N", real=REAL_ONLY)
+    t = sympy.symbols("t")
+    V, N, = sympy.symbols( "V, N")
 
     # '(\w+)':   $1,
     #tanh = sympy.tanh
     #cosh = sympy.cosh
+    #exp = sympy.exp
+    #half12 = sympy.One()/2
+    half12 = sympy.core.numbers.One()/2
 
-    #tanh = sympy.Function('tanh')
     def tanh(x):
         return x - (x**3)/3
     def cosh(x):
@@ -25,7 +24,17 @@ def model2():
     #def tanh(x):
     #    return x - (x**3)/3 + 2*(x**5)/15
     #def cosh(x):
-    #    return 1+(x**2)/2+(x**4)/24
+    #    return 1+(x**2)/2 +(x**4)/24
+
+    def sm1(r):
+        return half12 * (1 + tanh(r))
+
+    def exp(x):
+        return 1 + x + (x**2)/2 # + (x**3)/6
+
+    def sm2(x):
+        return 1 / (1 + exp(-2*x))
+
 
     '''
     C, # Capacitance of membrane
@@ -41,13 +50,9 @@ def model2():
         C, V_1, V_2, V_3, V_4, phi, V_L, V_Ca, V_K, g_Ca, g_K, g_L, I
       """)
 
-    half12 = sympy.core.numbers.One()/2
-    def sm1(r):
-        return half12 * (1 + tanh(r))
-
     # Define functions
-    M_ss = sm1((V - V_1) / V_2)
-    N_ss = sm1((V - V_3) / V_4)
+    M_ss = sm2((V - V_1) / V_2)
+    N_ss = sm2((V - V_3) / V_4)
     T_N = 1 / (phi * cosh((V - V_3) / (2 * V_4)))
 
     # Define differential equations
