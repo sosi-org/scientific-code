@@ -4,14 +4,16 @@
 
 set -xu
 
-
+mkdir temp
 curl -k \
     https://raw.githubusercontent.com/sohale/implisolid/revival-sohale/scripts/bash-utils.sh \
-    >./my-bash-utils.sh
+    >./temp/my-bash-utils.sh
 
-source ./my-bash-utils.sh
+source ./temp/my-bash-utils.sh
 
 #source ~/cs/implisolid/scripts/bash-utils.sh
+
+set -e
 
 export PIPFLAGS="\
     --trusted-host pypi.python.org \
