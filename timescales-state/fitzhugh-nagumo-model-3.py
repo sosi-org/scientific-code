@@ -42,14 +42,14 @@ elif mi == 2:
     pname = fitzhugh_nagumo_2.pname
 
 elif mi == 3:
-    # morris_lecar's variation by jonmarty
-    from models import morris_lecar
-    model1 = morris_lecar.model2
-    scenarios = morris_lecar.scenarios
-    initial_values = morris_lecar.initial_values
-    get_ranges = morris_lecar.get_ranges
-    get_wide_ranges = morris_lecar.get_wide_ranges
-    pname = morris_lecar.pname
+    # Morris-Lecar's variation 1 by jonmarty
+    from models import morris_lecar_v1
+    model1 = morris_lecar_v1.model2
+    scenarios = morris_lecar_v1.scenarios
+    initial_values = morris_lecar_v1.initial_values
+    get_ranges = morris_lecar_v1.get_ranges
+    get_wide_ranges = morris_lecar_v1.get_wide_ranges
+    pname = morris_lecar_v1.pname
 
     import yaml
 
