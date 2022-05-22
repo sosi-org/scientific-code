@@ -359,6 +359,54 @@ for i,param in enumerate(scenarios):
 ##############################################
 
 
+def safe_evaluate(ncl, _s):
+    # ncl is a lambdified (using numpy)
+    #print('_s', _s)
+    vw_tuple = ncl(_s) # t
+    assert len(vw_tuple) == 2, 'only implemented for 2 dimentions'
+    #print('vw_tuple', vw_tuple)
+    #print()
+    #ax.plot(_s, vw_tuple, style, color=color, alpha=opacity)
+    print('shape@', vw_tuple[_ηVAR_V].shape)
+    #print('v@', vw_tuple[_ηVAR_V])
+    #print('w@', vw_tuple[_ηVAR_W])
+    print('ok')
+    v_ = vw_tuple[_ηVAR_V]
+    w_ = vw_tuple[_ηVAR_W]
+    # Sometimes v_ or w_ may be scalar:
+    v_ = v_ + 0.0 * _s
+    w_ = w_ + 0.0 * _s
+    # why is w_ sometimes a single number?!
+    assert v_.shape == w_.shape, 'mismatching shapes'
+
+    print('-----',v_.shape,v_.dtype,'  w',w_.shape, w_.dtype) # why float
+
+    def _isreal0(npa):
+        return np.isreal(v_)
+    def _report_small_imag(npa):
+        #np.set_printoptions(precision=7, suppress=True)
+        vv = np.imag(v_)
+        vv = vv[np.absolute(vv) < 0.001 ]
+        print(np.sort(vv))
+        # typical value: 2.00e-15 and smaller !
+        exit()
+
+    def _isreal(npa):
+        # _report_small_imag(v_)
+        ε = 0.00001
+        return np.absolute(np.imag(v_)) < ε
+    # important lesson: never use raw `np.isreal()`. Use ε and an extra `np.real()`
+    wch_ =np.logical_and(_isreal(v_),_isreal(w_))
+    v_ = v_[wch_]
+    w_ = w_[wch_]
+    #v_ = np.abs(v_)
+    #w_ = np.abs(w_)
+    v_ = np.real(v_)
+    w_ = np.real(w_)
+
+    return (v_, w_)
+
+
 # todo: why is v defined here?
 def symbolic_nullclines(whichi, _model, param):
     # symbolic (algebraic) null-clines:
@@ -427,56 +475,15 @@ def symbolic_nullclines(whichi, _model, param):
         sympy.lambdify((_s,), solt_vw, dummify=False, modules=["scipy", "numpy"] )
             for solt_vw in solution_list_sympy ]
 
+    safe_eval_lambda_list = [
+        # Lesson: Double lambda trick to simulate closures, by @max-shawabkeh
+        (lambda ncl:(lambda s: safe_evaluate(ncl, s)))(ncl)
+            for ncl in solution_lambda_list
+    ]
+
     # each is a function that returns a tuple of size `ndim`
 
-    return solution_list_sympy, solution_lambda_list
-
-# todo:
-def safe_evaluate(ncl, _s):
-    # ncl is a lambdified (using numpy)
-    #print('_s', _s)
-    vw_tuple = ncl(_s) # t
-    #print('vw_tuple', vw_tuple)
-    #print()
-    #ax.plot(_s, vw_tuple, style, color=color, alpha=opacity)
-    print('shape@', vw_tuple[_ηVAR_V].shape)
-    #print('v@', vw_tuple[_ηVAR_V])
-    #print('w@', vw_tuple[_ηVAR_W])
-    print('ok')
-    v_ = vw_tuple[_ηVAR_V]
-    w_ = vw_tuple[_ηVAR_W]
-    # Sometimes v_ or w_ may be scalar:
-    v_ = v_ + 0.0 * _s
-    w_ = w_ + 0.0 * _s
-    # why is w_ sometimes a single number?!
-    assert v_.shape == w_.shape, 'mismatching shapes'
-
-    print('-----',v_.shape,v_.dtype,'  w',w_.shape, w_.dtype) # why float
-
-    def _isreal0(npa):
-        return np.isreal(v_)
-    def _report_small_imag(npa):
-        #np.set_printoptions(precision=7, suppress=True)
-        vv = np.imag(v_)
-        vv = vv[np.absolute(vv) < 0.001 ]
-        print(np.sort(vv))
-        # typical value: 2.00e-15 and smaller !
-        exit()
-
-    def _isreal(npa):
-        # _report_small_imag(v_)
-        ε = 0.00001
-        return np.absolute(np.imag(v_)) < ε
-    # important lesson: never use raw `np.isreal()`. Use ε and an extra `np.real()`
-    wch_ =np.logical_and(_isreal(v_),_isreal(w_))
-    v_ = v_[wch_]
-    w_ = w_[wch_]
-    #v_ = np.abs(v_)
-    #w_ = np.abs(w_)
-    v_ = np.real(v_)
-    w_ = np.real(w_)
-
-    return (v_, w_)
+    return solution_list_sympy, solution_lambda_list, safe_eval_lambda_list
 
 # Nullclines
 
@@ -486,18 +493,20 @@ def plot_isocline(whichi, _model, param, ax, sc2, color='k', style='--', opacity
     """Plot the null iscolines of the Fitzhugh nagumo system"""
 
     # a, b, tau, I = sc2
-    nc_solution_list, nc_lambdas = symbolic_nullclines(whichi, _model, param)
+    nc_solution_list, nc_lambdas, safe_eval_lambdas = symbolic_nullclines(whichi, _model, param)
 
     print(nc_solution_list)
     ctr = 0
-    for ncl in nc_lambdas:
+    #for ncl in nc_lambdas:
+    for safeeval_lam in safe_eval_lambdas:
       print()
       print('root number', ctr)
       # symbolic: root number (s, -84.8528137423857*I)
       print('symbolic:', nc_solution_list[ctr])
       s_np = np.linspace(-2,+2, 1000)
       _s = s_np
-      (v_, w_) = safe_evaluate(ncl, _s)
+      #(v_, w_) = safe_evaluate(ncl, _s)
+      (v_, w_) =  safeeval_lam(_s)
       σ = 0.01 / 10
       v_ = v_ + np.random.randn(*v_.shape) * σ
       w_ = w_ + np.random.randn(*w_.shape) * σ
