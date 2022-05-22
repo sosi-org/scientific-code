@@ -91,6 +91,14 @@ MAKE_HAPPEN "./p3-for-me/lib/python3.9/site-packages/scipy/LICENSE.txt" || {
 MAKE_HAPPEN "./p3-for-me/lib/python3.9/site-packages/sympy/__init__.py" || {
   pip install $PIPFLAGS sympy
 }
+MAKE_HAPPEN "./p3-for-me/lib/python3.9/site-packages/yaml/__init__.py" || {
+  pip install $PIPFLAGS PyYAML
+}
+#MAKE_HAPPEN "./p3-for-me/lib/python3.9/site-packages/pdb/__init__.py" || {
+#  pip install $PIPFLAGS pdb
+#}
+
+# python -m pip install -U autopep8
 
 MAKE_HAPPEN "./p3-for-me/lib/python3.9/site-packages/graphviz/__init__.py" || {
   pip install $PIPFLAGS graphviz
@@ -102,4 +110,10 @@ python --version
 
 
 # python fitzhugh-nagumo-model-1.py
-python fitzhugh-nagumo-model-2.py
+# python fitzhugh-nagumo-model-2.py
+python fitzhugh-nagumo-model-3.py
+
+<<< '
+source ./p3-for-me/bin/activate
+python fitzhugh-nagumo-model-3.py
+'
