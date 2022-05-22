@@ -17,79 +17,29 @@ import matplotlib.patches as mpatches #used to write custom legends
 import sympy
 sympy.init_printing()
 
-doulcier = False
-# todo: move to model
-REAL_ONLY = False # whether try to remove complex roots at the symbolic calculations
-
-# doulcier's glossary:
-# displacement:  perturbation
-# autonomous system:  When `t` (float): Time is Not used => autonomous system
-# Membrane potential:  v
-# Recovery variable:  w
+fitzhugh = True
 
 
-if doulcier:
-  scenarios = [
-     {"a":-.3, "b":1.4, "tau":20, "I":0},
-     {"a":-.3, "b":1.4, "tau":20, "I":0.23},
-     {"a":-.3, "b":1.4, "tau":20, "I":0.5}
-  ]
+if fitzhugh:
+
+    from models import fitzhugh_nagumo_1_doulcier
+    model1 = fitzhugh_nagumo_1_doulcier.model1
+    scenarios = fitzhugh_nagumo_1_doulcier.scenarios
+    initial_values = fitzhugh_nagumo_1_doulcier.initial_values
+    get_ranges = fitzhugh_nagumo_1_doulcier.get_ranges
+    pname = fitzhugh_nagumo_1_doulcier.pname
+
 else:
-  scenarios = [
-     {"a":0.7, "b":0.8, "tau":12.5, "I":0.23},
-     {"a":0.7, "b":0.8, "tau":12.5, "I":0.5},
-     {"a":0.7, "b":0.8, "tau":12.5, "I":0.7},
-  ]
 
-initial_values = [ {'v':  0.0, 'w':  0.0, } ] * len(scenarios)
+    from models import morris_lecar
+    model1 = morris_lecar.model2
+    scenarios = morris_lecar.scenarios
+    initial_values = morris_lecar.initial_values
+    get_ranges = morris_lecar.get_ranges
+    pname = morris_lecar.pname
 
-def model1():
-    # Define variable as symbols for sympy
-    v, w = sympy.symbols("v, w", real=REAL_ONLY)
-    t = sympy.symbols("t", real=REAL_ONLY)
-    a, b, tau, I = sympy.symbols("a, b, tau, I")
+    import yaml
 
-    # Symbolic expression of the system
-    if doulcier:
-        dvdt = v - v**3  - w + I
-        dwdt = (v - a - b * w)/tau
-    else:
-        # sohail
-        dvdt = v - v**3 /3.0 - w + I
-        dwdt = (v + a - b * w)/tau
-
-    # dynamics vars, dynamics
-    (dyn_vars, t, dyn_derivs, model_params, model_inputs) = (v,w), t, (dvdt,dwdt), (a, b, tau), (I,)
-    return dyn_vars, t, dyn_derivs, model_params, model_inputs
-
-import yaml
-
-
-# phase plane panel range
-# PPrange
-# phpp = {'xrange': , 'yrange':,}
-def get_ranges(sc):
-    # todo: xrange with regards to square_nc
-    #xrange = (-1*5, 1*5)
-    #xrange = (-1, 1)
-    #yrange = [(1/sc['b'])*(x-sc['a']) for x in xrange]
-    print('todo: ranges')
-    #return (xrange, yrange)
-    # todo: rename v,w
-    # todo: symbolic
-
-    mins = [-1,-100]
-    maxs = [1,100]
-    xrange = (mins[0], maxs[0])
-    yrange = (mins[1], maxs[1])
-    return (xrange, yrange)
-
-from models import morris_lecar
-
-model2 = morris_lecar.model2
-scenarios = morris_lecar.scenarios
-initial_values = morris_lecar.initial_values
-get_ranges = morris_lecar.get_ranges
 
 # Magical Indices (for readability)
 # Consts:  For magical numbers
@@ -128,7 +78,7 @@ _ηNDIM_VW = 2  # "across dims". try to avoid
 # (_ηNDIM_VW, 1500) is more readable than (2, 1500)
 
 
-_model = model2()
+_model = model1()
 
 def get_free_variables(_model, params):
     #(dV,dN) = _model[ηM_DYN]; print(dV); print(dV.subs(params))
@@ -164,16 +114,17 @@ def get_initial_array(vars_tuple, initial_values):
     initial_ = list(st_)
     print('initial_', initial_)
 
-    V, N, = sympy.symbols( "V, N", real=REAL_ONLY)
-    V, N, = sympy.symbols( "V, N")
-    print('?1',V.subs(initial_values))
-    print('?2',V.subs({'V':4}))
+    if False:
+        V, N, = sympy.symbols( "V, N", real=REAL_ONLY)
+        V, N, = sympy.symbols( "V, N")
+        print('?1',V.subs(initial_values))
+        print('?2',V.subs({'V':4}))
 
 
     print('vars_tuple', vars_tuple, type(vars_tuple))
     m = sympy.Matrix([*vars_tuple])
     print('m', m)
-    m0 = sympy.Matrix([initial_values['V'],initial_values['N']])
+    m0 = sympy.Matrix([initial_values[vars_tuple[i].name] for i in range(len(vars_tuple))])
     print('m0', m0)
     eq = sympy.Eq(m, m0)
     print('eq', eq)
@@ -327,10 +278,6 @@ for i,param in enumerate(scenarios):
     trajectories[i], velo_s[i] \
         = get_displacement(param, initial_, number=4, time_span=time_span, dmax=0.5)
 
-if doulcier:
-  pname = 'doulcier'
-else:
-  pname = '@sohale'
 
 # Draw the trajectories.
 fig, ax = plt.subplots(1, len(scenarios), figsize=(5*len(scenarios),5))
@@ -414,7 +361,7 @@ def symbolic_nullclines(_model, param):
     from sympy import solve
 
     # _s is the free parameter for the "curve". Since it's aa null-cline, we need (exactly) one free ariable for it
-    _s = sympy.symbols("s", real=REAL_ONLY)
+    _s = sympy.symbols("s", real=False)
 
     # v - v**3  - w + I == 0
     # w == _s

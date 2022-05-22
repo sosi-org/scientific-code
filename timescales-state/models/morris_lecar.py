@@ -1,7 +1,7 @@
 import sympy
 sympy.init_printing()
 
-REAL_ONLY = False 
+REAL_ONLY = False
 
 def model2():
     # Morris Lacar
@@ -113,3 +113,6 @@ def get_ranges(sc):
     xrange = (mins[0], maxs[0])
     yrange = (mins[1], maxs[1])
     return (xrange, yrange)
+
+
+pname = 'ML:jonmarty'
