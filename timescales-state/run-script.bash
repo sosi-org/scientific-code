@@ -4,7 +4,14 @@
 
 set -xu
 
-source ~/cs/implisolid/scripts/bash-utils.sh
+
+curl -k \
+    https://raw.githubusercontent.com/sohale/implisolid/revival-sohale/scripts/bash-utils.sh \
+    >./my-bash-utils.sh
+
+source ./my-bash-utils.sh
+
+#source ~/cs/implisolid/scripts/bash-utils.sh
 
 export PIPFLAGS="\
     --trusted-host pypi.python.org \
