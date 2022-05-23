@@ -37,6 +37,7 @@ def model1():
     dwdt = (v + a - b * w)/tau
 
     # dynamics vars, dynamics
+    #todo
     (dyn_vars, t, dyn_derivs, model_params, model_inputs) = (v,w), t, (dvdt,dwdt), (a, b, tau), (I,)
     return dyn_vars, t, dyn_derivs, model_params, model_inputs
 

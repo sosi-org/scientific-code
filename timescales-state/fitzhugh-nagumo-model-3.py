@@ -19,7 +19,7 @@ sympy.init_printing()
 
 fitzhugh = True
 
-mi = 1
+mi = 5
 
 if mi == 1:
     # doulcier
@@ -65,8 +65,15 @@ elif mi == 4:
     get_wide_ranges = morris_lecar_v2.get_wide_ranges
     pname = morris_lecar_v2.pname
 
-    import yaml
-
+elif mi == 5:
+    # uc
+    from models import rotate_unit_1
+    model1 = rotate_unit_1.model1
+    scenarios = rotate_unit_1.scenarios
+    initial_values = rotate_unit_1.initial_values
+    get_ranges = rotate_unit_1.get_ranges
+    get_wide_ranges = rotate_unit_1.get_wide_ranges
+    pname = rotate_unit_1.pname
 else:
     raise Exception('model index wrong')
 
@@ -626,6 +633,9 @@ def symb_jacobian(_model):
     var = sympy.Matrix(dyn_vars)
     jac = sys.jacobian(var)
 
+    print(dyn_vars)
+    print(model_params)
+    print(model_inputs)
     # You can convert jac to a function:
     jacobian_fitznagumo_symbolic = sympy.lambdify((*dyn_vars, *model_params, *model_inputs), jac, dummify=False)
 
