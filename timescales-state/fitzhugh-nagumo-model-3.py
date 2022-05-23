@@ -214,8 +214,8 @@ check_model(_model, scenarios[0], initial_values[0])
 
 
 
-#UPSAMPLEx = 15
-UPSAMPLEx = 5
+UPSAMPLEx = 15
+#UPSAMPLEx = 5
 # UPSAMPLEx = 1
 
 SIMU_TIME=1200
@@ -506,6 +506,9 @@ def symbolic_nullclines(whichi, _model, param):
         (lambda ncl:(lambda s: safe_evaluate(ncl, s)))(ncl)
             for ncl in solution_lambda_list
     ]
+
+    # checksol()
+    # check_assumptions()
 
     # each is a function that returns a tuple of size `ndim`
 
