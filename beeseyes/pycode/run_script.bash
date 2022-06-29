@@ -307,6 +307,7 @@ python xyz.py
 
 
 """
+Forked from: https://github.com/sohale/scientific-code-private/blob/main/dependence-paritial-order/run_script.bash
 
 Forked from ~/cs/implisolid/sandbox/sympy-experiment/run_script.bash
 Forked from: point-process-simple-example/run_script.bash: https://github.com/sohale/point-process-simple-example/blob/82a62d013d909f365a391aa254dc598d62a0c2d4/run_script.bash
