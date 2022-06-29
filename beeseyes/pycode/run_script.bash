@@ -4,6 +4,8 @@ set -xu
 
 #!/usr/bin/env bash
 
+export ORIG_FOLDER=$(pwd)
+
 # Can be executed from anywhere:
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 REPO_ROOT=$(git rev-parse --show-toplevel)
@@ -110,12 +112,8 @@ MAKE_HAPPEN "$VENV_PACKAGES/scipy/LICENSE.txt" || {
 # MAKE_HAPPEN "$VENV_PACKAGES/scikit_image-*" || { ... }
 #MAKE_HAPPEN "$VENV_PACKAGES/scikit_image-0.19.3.dist-info/LICENSE.txt" || {
 MAKE_HAPPEN "$VENV_PACKAGES/scikit_image-*/LICENSE.txt" || {
-    echo 11
   pip install scikit-image
 }
-
-
-exit
 
 MAKE_HAPPEN "$VENV_PACKAGES/sympy/__init__.py" || {
   pip install $PIPFLAGS sympy
@@ -302,11 +300,10 @@ echo "Main script"
 
 
 source $REPO_ROOT/temp/$VENV_NAME/bin/activate
-
 python --version
 
 echo "
-    cd $REPO_ROOT
+    cd $ORIG_FOLDER
     source $REPO_ROOT/temp/$VENV_NAME/bin/activate
     export ETS_TOOLKIT=
     export QT_API=pyqt5
@@ -315,7 +312,7 @@ echo "
     python xyz.py
 "
 
-cd $REPO_ROOT
+cd $ORIG_FOLDER
 python xyz.py
 
 
