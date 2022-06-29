@@ -44,15 +44,10 @@ UNIT_LEN_MM = image_loader.UNIT_LEN_MM
 _PIXELS = 'PIXELS'
 _CM = 'CM'
 
-# https://en.wikipedia.org/wiki/Blue_flower#/media/File:Bachelor's_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpg
-# https://en.wikipedia.org/wiki/Blue_flower
-#BLUE_FLOWER = "../art/256px-Bachelor's_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpeg"
 BLUE_FLOWER = my_folders.get_art_path("256px-Bachelor's_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpeg")
 BLUE_FLOWER_DPI_INFO = {_PIXELS: 200, _CM: 10.0}
 
-#FLOWER_XY = '/Users/a9858770/Documents/xx/3bebe3b139b7e0e01573faabb4c92934.jpeg'
-#BEE_CARTOON = '/Users/a9858770/Documents/bee-walt-Spike_art.PNG.png'
-#NEW_FLOWER = '/Users/a9858770/cs/scientific-code/beeseyes/Setup/flower-sept.png'
+
 NEW_FLOWER = my_folders.get_setup_path('flower-sept.png')
 
 
@@ -60,21 +55,17 @@ NEW_FLOWER = my_folders.get_setup_path('flower-sept.png')
 NEW_FLOWER_DPI_INFO = {_PIXELS: 1268, _CM: 3.5}
 
 
-#CURRENT_PATH = '/Users/a9858770/cs/scientific-code/beeseyes'
 # 4 x 2 stimuli on a pink background
-#EIGHT_PANEL = CURRENT_PATH + '/Setup/IMG_2872.MOV.BkCorrectedPerspCroppedColourContrast.png'
 EIGHT_PANEL = my_folders.get_setup_path('IMG_2872.MOV.BkCorrectedPerspCroppedColourContrast.png')
-# https://www.dropbox.com/s/qrn79rfqhwizbdr/IMG_2872.MOV.BkCorrectedPerspCroppedColourContrast.png?dl=0
 
 # pink texture
-# PINK_WALLPAPER = CURRENT_PATH + '/Setup/pinkRandomDots.png'
 PINK_WALLPAPER = my_folders.get_setup_path('pinkRandomDots.png')
+# choose:
 TEXTURES_FILES = [EIGHT_PANEL, PINK_WALLPAPER]
 TEXTURES_FILES = [NEW_FLOWER, NEW_FLOWER]
 TEXTURE_DPI_INFO = NEW_FLOWER_DPI_INFO
 
 
-#POSITIONS_XLS = CURRENT_PATH + '/Setup/beepath.xlsx'
 POSITIONS_XLS = my_folders.get_setup_path('beepath.xlsx')
 
 
