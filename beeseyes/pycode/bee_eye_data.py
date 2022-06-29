@@ -3,7 +3,13 @@ import matplotlib.pyplot as plt
 import scipy.io
 from time import sleep
 
-BEES_DATA_FILE = '../hadi/doi_10.5061_dryad.23rj4pm__v1/DataForPlots.mat'
+# see https://www.dropbox.com/home/lbg-macbook/cs/scientific-code/beeseyes/hadi
+# doi_10.5061_dryad.23rj4pm__v1.zip
+# beeseyes/data/doi_10.5061_dryad.23rj4pm__v1.zip
+# BEES_DATA_FILE = '../hadi/doi_10.5061_dryad.23rj4pm__v1/DataForPlots.mat'
+
+import my_folders
+BEES_DATA_FILE = my_folders.get_data_path('doi_10.5061_dryad.23rj4pm__v1/DataForPlots.mat')
 
 def explore_data():
 

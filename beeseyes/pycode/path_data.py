@@ -101,7 +101,7 @@ def load_trajectory_cached(filename):
 
 
 if __name__ == "__main__":
-    CURRENT_PATH = '/Users/a9858770/cs/scientific-code/beeseyes'
-    POSITIONS_XLS = CURRENT_PATH + '/Setup/beepath.xlsx'
+    import my_folders
+    POSITIONS_XLS = my_folders.get_setup_path('beepath.xlsx')
 
     load_trajectory_data(POSITIONS_XLS)

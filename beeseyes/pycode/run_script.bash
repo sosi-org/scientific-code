@@ -326,7 +326,8 @@ echo "
 cd $ORIG_FOLDER
 python pydemo.py
 
-
+echo 'fine'
+exit
 """
 Forked from: https://github.com/sohale/scientific-code-private/blob/main/dependence-paritial-order/run_script.bash
 
