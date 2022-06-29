@@ -288,7 +288,18 @@ MAKE_HAPPEN "$VENV_PACKAGES/simplejson/__init__.py" || {
   pip install simplejson
 }
 
-pip install typeguard
+MAKE_HAPPEN "$VENV_PACKAGES/typeguard/__init__.py" || {
+  pip install typeguard
+}
+
+MAKE_HAPPEN "$VENV_PACKAGES/openpyxl/__init__.py" || {
+  pip install openpyxl
+}
+
+
+MAKE_HAPPEN "$VENV_PACKAGES/shapely/__init__.py" || {
+  pip install shapely
+}
 
 echo "venv is at $REPO_ROOT/$VENV_NAME/bin/activate"
 
@@ -311,8 +322,9 @@ echo "
     python xyz.py
 "
 
+# todo: fetch this script from my repo, make it public, and push via a separate repo
 cd $ORIG_FOLDER
-python xyz.py
+python pydemo.py
 
 
 """
