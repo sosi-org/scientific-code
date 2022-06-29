@@ -303,12 +303,11 @@ source $REPO_ROOT/temp/$VENV_NAME/bin/activate
 python --version
 
 echo "
-    cd $ORIG_FOLDER
     source $REPO_ROOT/temp/$VENV_NAME/bin/activate
-    export ETS_TOOLKIT=
-    export QT_API=pyqt5
+    # export ETS_TOOLKIT=
+    # export QT_API=pyqt5
 
-    cd dependence-paritial-order
+    cd $ORIG_FOLDER
     python xyz.py
 "
 
