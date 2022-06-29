@@ -12,11 +12,11 @@ cd $REPO_ROOT
 export VENV_NAME="p3-for-me"
 
 mkdir -p temp
-source ./temp/my-bash-utils.sh || curl -k \
+source $REPO_ROOT/temp/my-bash-utils.sh || curl -k \
   https://raw.githubusercontent.com/sohale/implisolid/revival-sohale/scripts/bash-utils.sh \
-  >./temp/my-bash-utils.sh
+  >$REPO_ROOT/temp/my-bash-utils.sh
 
-source ./temp/my-bash-utils.sh
+source $REPO_ROOT/temp/my-bash-utils.sh
 
 # todo: flags, states
 # define flags for states:
@@ -44,23 +44,25 @@ export PIPFLAGS=""
 
 echo "PIPFLAGS>>>> $PIPFLAGS"
 
+# does a `cd`
 function chk_venv() {
   # a solution based on `venv` as opposed to `virutalenv`
 
   #set -ex
-  if [[ -d ./$VENV_NAME ]]; then
+  if [[ -d $REPO_ROOT/temp/$VENV_NAME ]]; then
     echo "venv exists"
     return 0
   fi
 
   echo "INSTALLING THEM: cleanup"
   # never parametrize/tokenie/env-ize an `rm -rf`` command
-  rm -rf p3-for-me || :
+  rm -rf $REPO_ROOT/temp/p3-for-me || :
 
+  cd $REPO_ROOT/temp
   # venv is shipped with python3
   #python3 -m venv -v --python=python3 $VENV_NAME
   python3 -m venv $VENV_NAME
-  source "./$VENV_NAME/bin/activate"
+  source "$REPO_ROOT/temp/$VENV_NAME/bin/activate"
 
   python --version
   # Python 3.9.12
@@ -72,18 +74,23 @@ function chk_venv() {
     $PIPFLAGS \
     --upgrade pip
 
+  cd $REPO_ROOT
 }
 
-# to refresh: `rm -rf ./p3-for-me`
-MAKE_HAPPEN "./$VENV_NAME/bin/activate" || {
+# to refresh: `rm -rf $REPO_ROOT/temp/p3-for-me`
+MAKE_HAPPEN "$REPO_ROOT/temp/$VENV_NAME/bin/activate" || {
+
   chk_venv
 }
 
-source ./$VENV_NAME/bin/activate
-# export PYTHON_VER="python3.9"
-export PYTHON_VER="$(ls -1t ./$VENV_NAME/lib/ | grep -i "python" | head -n 1)"
+# cd $REPO_ROOT/temp
 
-export VENV_PACKAGES="./$VENV_NAME/lib/$PYTHON_VER/site-packages"
+source $REPO_ROOT/temp/$VENV_NAME/bin/activate
+# export PYTHON_VER="python3.9"
+export PYTHON_VER="$(ls -1t $REPO_ROOT/temp/$VENV_NAME/lib/ | grep -i "python" | head -n 1)"
+
+export VENV_PACKAGES="$REPO_ROOT/temp/$VENV_NAME/lib/$PYTHON_VER/site-packages"
+echo VENV_PACKAGES=$VENV_PACKAGES
 
 MAKE_HAPPEN "$VENV_PACKAGES/numpy/LICENSE.txt" || {
   pip install \
@@ -99,10 +106,16 @@ MAKE_HAPPEN "$VENV_PACKAGES/scipy/LICENSE.txt" || {
   pip install $PIPFLAGS scipy
 }
 
-echo "Warning: MAKE_HAPPEN not tested with *"; exit
-MAKE_HAPPEN "$VENV_PACKAGES/scikit_image-*" || {
+# echo "Warning: MAKE_HAPPEN not tested with *" # ; exit
+# MAKE_HAPPEN "$VENV_PACKAGES/scikit_image-*" || { ... }
+#MAKE_HAPPEN "$VENV_PACKAGES/scikit_image-0.19.3.dist-info/LICENSE.txt" || {
+MAKE_HAPPEN "$VENV_PACKAGES/scikit_image-*/LICENSE.txt" || {
+    echo 11
   pip install scikit-image
 }
+
+
+exit
 
 MAKE_HAPPEN "$VENV_PACKAGES/sympy/__init__.py" || {
   pip install $PIPFLAGS sympy
@@ -287,14 +300,14 @@ echo "venv is at $REPO_ROOT/$VENV_NAME/bin/activate"
 
 echo "Main script"
 
-cd $REPO_ROOT
-source ./$VENV_NAME/bin/activate
+
+source $REPO_ROOT/temp/$VENV_NAME/bin/activate
 
 python --version
 
 echo "
     cd $REPO_ROOT
-    source ./$VENV_NAME/bin/activate
+    source $REPO_ROOT/temp/$VENV_NAME/bin/activate
     export ETS_TOOLKIT=
     export QT_API=pyqt5
 
@@ -302,7 +315,7 @@ echo "
     python xyz.py
 "
 
-
+cd $REPO_ROOT
 python xyz.py
 
 
