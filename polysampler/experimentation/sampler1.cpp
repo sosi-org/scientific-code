@@ -20,12 +20,17 @@ struct point_t
     double x;
     double y;
 
-    public:
-    std::string tostr() const {
-        return "(" +std::to_string(this->x) + "," + std::to_string(this->y) + ")";
+public:
+    std::string tostr() const
+    {
+        return "(" + std::to_string(this->x) + "," + std::to_string(this->y) + ")";
     }
-} ; // point_t;
+}; // point_t;
 
+struct side_meta_data_t
+{
+    double a;
+};
 // typedef struct {struct{int point_idx} main; struct {double a;} cache;} side_point;
 typedef int side_point_t; // FROM, and TO is the next one.
 typedef std::vector<std::vector<side_point_t>> triaglation_t;
@@ -42,25 +47,35 @@ triaglation_t trigulation = {{1, 2, 3, 4, 5}, {1, 2, 6}};
 
 #include <iostream>
 
-
 // almost like an accumulator, or rec_stat channel.
 struct patch_t
 {
     const points_t &points_ref;
+    std::vector<side_meta_data_t> side_meta_data; // for output
 
-    patch_t(std::vector<int>::size_type sides, const points_t &points) : points_ref(points)
+    patch_t(std::vector<int>::size_type nsides, const points_t &points)
+        : points_ref(points), side_meta_data(nsides)
     {
-        std::cout << sides << ": ";
+        std::cout << nsides << ": ";
     }
-    void do_side(const int &from_idx, const int &to_idx)
+    void do_side(const int &from_idx, const int &to_idx /*, int idx*/)
     {
-        std::cout <<
-            from_idx <<":" << (this->points_ref[from_idx].tostr()) << "-" <<
-            to_idx <<":" << (this->points_ref[to_idx].tostr()) << ".";
+        const auto &p1 = this->points_ref[from_idx];
+        const auto &p2 = this->points_ref[to_idx];
+        std::cout << from_idx << ":" << (p1.tostr()) << "-" << to_idx << ":" << (p2.tostr()) << ".";
+        // index?
+        side_meta_data[0].a = p2.x - p1.x;
+
+        // todo: clip away from the area/shape
     }
+    // const std::vector<side_meta_data_t>& finish()
     void finish()
     {
         std::cout << std::endl;
+        // return side_meta_data; // move?
+
+        // todo: store the value?
+        // or maybe do something: area -> save in ...
     }
 };
 
@@ -81,6 +96,7 @@ void traverse(const triaglation_t &trigulation, const points_t &points)
         patch.do_side(*(polyg_i.end() - 1), *(polyg_i.begin()));
 
         patch.finish();
+        // std::vector<side_meta_data_t> q = patch.finish();
     }
 }
 /*
