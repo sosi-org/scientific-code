@@ -35,27 +35,40 @@ triaglation_t trigulation = {{1, 2, 3, 4, 5}, {1, 2, 6}};
 #include <iostream>
 #include <string>
 
-void do_side(const int &from_idx, const int &to_idx)
+// almost like an accumulator, or rec_stat channel.
+struct patch_t
 {
-    std::cout << from_idx << "-" << to_idx << ". ";
-}
+    patch_t(std::vector<int>::size_type sides)
+    {
+        std::cout << sides << ": ";
+    }
+    void do_side(const int &from_idx, const int &to_idx)
+    {
+        std::cout << from_idx << "-" << to_idx << ". ";
+    }
+    void finish()
+    {
+        std::cout << std::endl;
+    }
+};
 
 void traverse(const triaglation_t trigulation, const points_t points)
 {
     for (auto plg = trigulation.begin(); plg < trigulation.end(); ++plg)
     {
         const auto &polyg_i = *plg;
-        std::cout << polyg_i.size() << ": ";
+
+        patch_t patch{polyg_i.size()};
 
         for (auto vert = polyg_i.begin(); vert < polyg_i.end() - 1; ++vert)
         {
             const auto &from_i = *vert;
             const auto &to_i = *(vert + 1);
-            do_side(from_i, to_i);
+            patch.do_side(from_i, to_i);
         }
-        do_side(*(polyg_i.end() - 1), *(polyg_i.begin()));
+        patch.do_side(*(polyg_i.end() - 1), *(polyg_i.begin()));
 
-        std::cout << std::endl;
+        patch.finish();
     }
 }
 /*
