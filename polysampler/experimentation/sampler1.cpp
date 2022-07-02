@@ -12,12 +12,20 @@ typedef model::d2::point_xy point;
 
 #include <vector>
 
+#include <string>
+
 // todo: int type
-typedef struct
+struct point_t
 {
     double x;
     double y;
-} point_t;
+
+    public:
+    std::string tostr() const {
+        return "(" +std::to_string(this->x) + "," + std::to_string(this->y) + ")";
+    }
+} ; // point_t;
+
 // typedef struct {struct{int point_idx} main; struct {double a;} cache;} side_point;
 typedef int side_point_t; // FROM, and TO is the next one.
 typedef std::vector<std::vector<side_point_t>> triaglation_t;
@@ -33,18 +41,22 @@ triaglation_t trigulation = {{1, 2, 3, 4, 5}, {1, 2, 6}};
 // https://github.com/sosi-org/scientific-code/blob/main/beeseyes/pycode/polygon_sampler.py
 
 #include <iostream>
-#include <string>
+
 
 // almost like an accumulator, or rec_stat channel.
 struct patch_t
 {
-    patch_t(std::vector<int>::size_type sides)
+    const points_t &points_ref;
+
+    patch_t(std::vector<int>::size_type sides, const points_t &points) : points_ref(points)
     {
         std::cout << sides << ": ";
     }
     void do_side(const int &from_idx, const int &to_idx)
     {
-        std::cout << from_idx << "-" << to_idx << ". ";
+        std::cout <<
+            from_idx <<":" << (this->points_ref[from_idx].tostr()) << "-" <<
+            to_idx <<":" << (this->points_ref[to_idx].tostr()) << ".";
     }
     void finish()
     {
@@ -52,13 +64,13 @@ struct patch_t
     }
 };
 
-void traverse(const triaglation_t trigulation, const points_t points)
+void traverse(const triaglation_t &trigulation, const points_t &points)
 {
     for (auto plg = trigulation.begin(); plg < trigulation.end(); ++plg)
     {
         const auto &polyg_i = *plg;
 
-        patch_t patch{polyg_i.size()};
+        patch_t patch{polyg_i.size(), points};
 
         for (auto vert = polyg_i.begin(); vert < polyg_i.end() - 1; ++vert)
         {
