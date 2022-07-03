@@ -23,7 +23,7 @@ typedef model::d2::point_xy point;
 // import point_t;
 
 /*
-(triaglation_t, points_t)
+(tesselation_t, points_t)
 ->
 side_meta_data_t
 array<side_meta_data_t> // has the circular thing
@@ -33,7 +33,8 @@ vector< array<side_meta_data_t> > // uneven size?
 
 #include "../sampler1/tesselation_t.hpp"
 
-void poly_poly_intersection(const triaglation_t &triaglation, const points_t &points)
+// convex
+void poly_poly_intersection(const tesselation_t &tesselation, const points_t &points)
 {
     ;
 }
@@ -41,7 +42,7 @@ void poly_poly_intersection(const triaglation_t &triaglation, const points_t &po
 points_t points = // {{1,2}, {3,4}};
     {point_t{0, 1}, {0.4, 0.8}, {0.8, 0.5}, {1, 0.3}, {0, -1}, {-1, 0}, {-0.3, 0.3}};
 
-triaglation_t trigulation = {{1, 2, 3, 4, 5}, {1, 2, 6}};
+tesselation_t trigulation = {{1, 2, 3, 4, 5}, {1, 2, 6}};
 
 // https://github.com/sosi-org/scientific-code/blob/main/beeseyes/pycode/polygon_sampler.py
 
@@ -97,7 +98,7 @@ struct patch_t
     }
 };
 
-void traverse(const triaglation_t &trigulation, const points_t &points)
+void traverse(const tesselation_t &trigulation, const points_t &points)
 {
     for (auto plg = trigulation.begin(); plg < trigulation.end(); ++plg)
     {
