@@ -19,11 +19,21 @@ typedef model::d2::point_xy point;
 
 #include <string>
 
+struct point_t
+{
+    double x;
+    double y;
+
+public:
+    std::string tostr() const;
+};
+
 /*
-triaglation_t,points_t
+(triaglation_t, points_t)
 ->
 side_meta_data_t
-array<side_meta_data_t>
+array<side_meta_data_t> // has the circular thing
+vector< array<side_meta_data_t> > // uneven size?
 */
 struct side_meta_data_t
 {
@@ -101,7 +111,10 @@ struct patch_t
         const auto &p2 = this->points_ref[to_idx];
         std::cout << from_idx << ":" << (p1.tostr()) << "-" << to_idx << ":" << (p2.tostr()) << ".";
         // index?
+        /*
         side_meta_data[0].a = p2.x - p1.x;
+        */
+        side_meta_data[0] = side_meta_data_t(p1, p2);
 
         // todo: clip away from the area/shape
     }
