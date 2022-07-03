@@ -12,3 +12,9 @@ typedef std::vector<std::vector<side_point_t>> tesselation_t; // old name: triag
 
 typedef std::vector<point_t> points_t;
 // Delaunay triangulation
+
+
+/*
+todo: rename `points_t`. Too similar to `point_t`
+
+*/

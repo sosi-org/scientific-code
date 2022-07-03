@@ -34,9 +34,12 @@ vector< array<side_meta_data_t> > // uneven size?
 #include "../sampler1/tesselation_t.hpp"
 
 // convex
-void poly_poly_intersection(const tesselation_t &tesselation, const points_t &points)
+const tesselation_t &poly_poly_intersection(
+    const tesselation_t &tesselation1,
+    const tesselation_t &tesselation2,
+    const points_t &points)
 {
-    ;
+    return tesselation1;
 }
 
 points_t points = // {{1,2}, {3,4}};
@@ -69,9 +72,10 @@ struct patch_t
 
     patch_t(std::vector<int>::size_type nsides, const points_t &points)
         : points_ref(points) //, side_meta_data(nsides)
-        , side_meta_data()
+          ,
+          side_meta_data()
     {
-        //this->side_meta_data = side_meta_data_t(); //(0); // (nsides)
+        // this->side_meta_data = side_meta_data_t(); //(0); // (nsides)
         std::cout << nsides << ": ";
     }
     void do_side(const int &from_idx, const int &to_idx /*, int idx*/)

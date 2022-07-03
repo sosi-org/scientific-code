@@ -1,5 +1,9 @@
 #pragma once
 
+#include <array>
+
+#include "tesselation_t.hpp" // for points_t only
+
 struct side_meta_data_t
 {
     double x0, y0;
@@ -13,3 +17,12 @@ struct side_meta_data_t
         this->dy = p1.y - p0.y;
     }
 };
+
+// std::array<side_meta_data_t>
+std::vector<side_meta_data_t> convert(const tesselation_t &tesselation,
+                                      const points_t &points)
+{
+    // return std::array<side_meta_data_t, 3>
+    //return std::vector<side_meta_data_t>(tesselation.begin(), tesselation.end());
+    return std::vector<side_meta_data_t>();
+}
