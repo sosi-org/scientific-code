@@ -14,6 +14,13 @@ typedef model::d2::point_xy point;
 
 #include <string>
 
+
+
+void poly_poly_intersection(const triaglation_t &triaglation, const points_t &points)
+{
+    ;
+}
+
 // todo: int type
 struct point_t
 {
@@ -29,8 +36,18 @@ public:
 
 struct side_meta_data_t
 {
-    double a;
+    double x0, y0;
+    double dx, dy; // x1-x0, y1-y0
+
+    side_meta_data_t(const point_t &p0, const point_t &p1)
+    {
+        this->x0 = p0.x;
+        this->y0 = p0.y;
+        this->dx = p1.x - p0.x;
+        this->dy = p1.y - p0.y;
+    }
 };
+
 // typedef struct {struct{int point_idx} main; struct {double a;} cache;} side_point;
 typedef int side_point_t; // FROM, and TO is the next one.
 typedef std::vector<std::vector<side_point_t>> triaglation_t;
@@ -45,16 +62,15 @@ triaglation_t trigulation = {{1, 2, 3, 4, 5}, {1, 2, 6}};
 
 // https://github.com/sosi-org/scientific-code/blob/main/beeseyes/pycode/polygon_sampler.py
 
-
 // draft only:
 // unordered_map
-class vector_map {
+class vector_map
+{
     // maps realtively sparse set of indices to another array of thinker data.
     /*
     .[row*M + col] -> int
     int -> vector[int]<my_struct>
     */
-
 };
 
 #include <iostream>
