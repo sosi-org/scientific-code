@@ -19,7 +19,7 @@ typedef model::d2::point_xy point;
 
 #include <string>
 
-#include "../sampler1/point_t.cpp"
+#include "../sampler1/point_t.hpp"
 // import point_t;
 
 /*
@@ -67,8 +67,10 @@ struct patch_t
     std::vector<side_meta_data_t> side_meta_data; // for output
 
     patch_t(std::vector<int>::size_type nsides, const points_t &points)
-        : points_ref(points), side_meta_data(nsides)
+        : points_ref(points) //, side_meta_data(nsides)
+        , side_meta_data()
     {
+        //this->side_meta_data = side_meta_data_t(); //(0); // (nsides)
         std::cout << nsides << ": ";
     }
     void do_side(const int &from_idx, const int &to_idx /*, int idx*/)
