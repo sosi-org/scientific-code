@@ -1,8 +1,10 @@
-export module point_t;
+// #export module point_t;
+#pragma once
 
 // #pragma once
 // todo: int type
-export struct point_t
+//export 
+struct point_t
 {
     double x;
     double y;

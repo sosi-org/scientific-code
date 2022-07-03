@@ -19,8 +19,8 @@ typedef model::d2::point_xy point;
 
 #include <string>
 
-// #include "sampler1/point_t.hpp"
-import point_t;
+#include "../sampler1/point_t.cpp"
+// import point_t;
 
 /*
 (triaglation_t, points_t)
@@ -31,16 +31,15 @@ vector< array<side_meta_data_t> > // uneven size?
 */
 #include "../sampler1/side_meta_data_t.hpp"
 
+#include "../sampler1/tesselation_t.hpp"
+
 void poly_poly_intersection(const triaglation_t &triaglation, const points_t &points)
 {
     ;
 }
 
 
-#include "sampler1/tesselation_t.hpp"
 
-typedef std::vector<point_t> points_t;
-// Delaunay triangulation
 
 points_t points = // {{1,2}, {3,4}};
     {point_t{0, 1}, {0.4, 0.8}, {0.8, 0.5}, {1, 0.3}, {0, -1}, {-1, 0}, {-0.3, 0.3}};
