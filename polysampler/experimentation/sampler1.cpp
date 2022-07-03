@@ -1,4 +1,9 @@
 
+/*
+    not a well organised code,
+    just code blocks that work.
+    and to get an idea about the states, data transformations, caching states, etc.
+*/
 
 /*
 #include <algorithm> // for reverse, unique
@@ -14,7 +19,25 @@ typedef model::d2::point_xy point;
 
 #include <string>
 
+/*
+triaglation_t,points_t
+->
+side_meta_data_t
+array<side_meta_data_t>
+*/
+struct side_meta_data_t
+{
+    double x0, y0;
+    double dx, dy; // x1-x0, y1-y0
 
+    side_meta_data_t(const point_t &p0, const point_t &p1)
+    {
+        this->x0 = p0.x;
+        this->y0 = p0.y;
+        this->dx = p1.x - p0.x;
+        this->dy = p1.y - p0.y;
+    }
+};
 
 void poly_poly_intersection(const triaglation_t &triaglation, const points_t &points)
 {
@@ -33,20 +56,6 @@ public:
         return "(" + std::to_string(this->x) + "," + std::to_string(this->y) + ")";
     }
 }; // point_t;
-
-struct side_meta_data_t
-{
-    double x0, y0;
-    double dx, dy; // x1-x0, y1-y0
-
-    side_meta_data_t(const point_t &p0, const point_t &p1)
-    {
-        this->x0 = p0.x;
-        this->y0 = p0.y;
-        this->dx = p1.x - p0.x;
-        this->dy = p1.y - p0.y;
-    }
-};
 
 // typedef struct {struct{int point_idx} main; struct {double a;} cache;} side_point;
 typedef int side_point_t; // FROM, and TO is the next one.
