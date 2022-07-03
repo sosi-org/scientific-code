@@ -29,7 +29,7 @@ side_meta_data_t
 array<side_meta_data_t> // has the circular thing
 vector< array<side_meta_data_t> > // uneven size?
 */
-#include "sampler1/side_meta_data_t.hpp"
+#include "../sampler1/side_meta_data_t.hpp"
 
 void poly_poly_intersection(const triaglation_t &triaglation, const points_t &points)
 {
