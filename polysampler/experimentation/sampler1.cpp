@@ -45,6 +45,18 @@ triaglation_t trigulation = {{1, 2, 3, 4, 5}, {1, 2, 6}};
 
 // https://github.com/sosi-org/scientific-code/blob/main/beeseyes/pycode/polygon_sampler.py
 
+
+// draft only:
+// unordered_map
+class vector_map {
+    // maps realtively sparse set of indices to another array of thinker data.
+    /*
+    .[row*M + col] -> int
+    int -> vector[int]<my_struct>
+    */
+
+};
+
 #include <iostream>
 
 // almost like an accumulator, or rec_stat channel.
