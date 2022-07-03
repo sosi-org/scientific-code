@@ -38,9 +38,6 @@ void poly_poly_intersection(const triaglation_t &triaglation, const points_t &po
     ;
 }
 
-
-
-
 points_t points = // {{1,2}, {3,4}};
     {point_t{0, 1}, {0.4, 0.8}, {0.8, 0.5}, {1, 0.3}, {0, -1}, {-1, 0}, {-0.3, 0.3}};
 
@@ -61,7 +58,7 @@ class vector_map
 
 #include <iostream>
 
-# include "side_meta_data_t.hpp"
+#include "side_meta_data_t.hpp"
 
 // almost like an accumulator, or rec_stat channel.
 struct patch_t

@@ -3,7 +3,7 @@
 
 // #pragma once
 // todo: int type
-//export 
+// export
 struct point_t
 {
     double x;
