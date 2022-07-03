@@ -19,7 +19,8 @@ typedef model::d2::point_xy point;
 
 #include <string>
 
-#include "sampler1/point_t.hpp"
+// #include "sampler1/point_t.hpp"
+import point_t;
 
 /*
 (triaglation_t, points_t)
