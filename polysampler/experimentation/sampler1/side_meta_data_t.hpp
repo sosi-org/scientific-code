@@ -1,3 +1,5 @@
+#pragma once
+
 struct side_meta_data_t
 {
     double x0, y0;

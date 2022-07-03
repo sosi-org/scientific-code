@@ -61,6 +61,8 @@ class vector_map
 
 #include <iostream>
 
+# include "side_meta_data_t.hpp"
+
 // almost like an accumulator, or rec_stat channel.
 struct patch_t
 {

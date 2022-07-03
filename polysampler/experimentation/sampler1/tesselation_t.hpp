@@ -1,3 +1,5 @@
+#pragma once
+
 // typedef struct {struct{int point_idx} main; struct {double a;} cache;} side_point;
 typedef int side_point_t; // FROM, and TO is the next one.
 
