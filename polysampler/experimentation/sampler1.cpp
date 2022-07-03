@@ -19,14 +19,7 @@ typedef model::d2::point_xy point;
 
 #include <string>
 
-struct point_t
-{
-    double x;
-    double y;
-
-public:
-    std::string tostr() const;
-};
+#include "sampler1/point_t.hpp"
 
 /*
 (triaglation_t, points_t)
@@ -35,42 +28,16 @@ side_meta_data_t
 array<side_meta_data_t> // has the circular thing
 vector< array<side_meta_data_t> > // uneven size?
 */
-struct side_meta_data_t
-{
-    double x0, y0;
-    double dx, dy; // x1-x0, y1-y0
-
-    side_meta_data_t(const point_t &p0, const point_t &p1)
-    {
-        this->x0 = p0.x;
-        this->y0 = p0.y;
-        this->dx = p1.x - p0.x;
-        this->dy = p1.y - p0.y;
-    }
-};
+#include "sampler1/side_meta_data_t.hpp"
 
 void poly_poly_intersection(const triaglation_t &triaglation, const points_t &points)
 {
     ;
 }
 
-// todo: int type
-struct point_t
-{
-    double x;
-    double y;
 
-public:
-    std::string tostr() const
-    {
-        return "(" + std::to_string(this->x) + "," + std::to_string(this->y) + ")";
-    }
-}; // point_t;
+#include "sampler1/tesselation_t.hpp"
 
-// typedef struct {struct{int point_idx} main; struct {double a;} cache;} side_point;
-typedef int side_point_t; // FROM, and TO is the next one.
-typedef std::vector<std::vector<side_point_t>> triaglation_t;
-// Also add meta-data to each item.
 typedef std::vector<point_t> points_t;
 // Delaunay triangulation
 
