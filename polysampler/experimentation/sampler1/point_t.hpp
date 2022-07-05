@@ -1,9 +1,15 @@
+export module point_t;
+//export module point_t.hpp;
+// export module point_t;
+#include <iostream>
+
 // #export module point_t;
-#pragma once
+// #pragma once
 
 // #pragma once
 // todo: int type
 // export
+export
 struct point_t
 {
     double x;
