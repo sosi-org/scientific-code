@@ -15,7 +15,12 @@ clang++ $FLAGS -fprebuilt-module-path=. -fmodule-file=point_t=point_t.module.pre
 
 ```
 
-Based on:
+PS.
+```bash
+FLAGS="-std=c++20 -stdlib=libc++ -fmodules -fbuiltin-module-map"
+```
+
+### Based on
 * https://blog.ecosta.dev/en/tech/cpp-modules-with-clang
 * https://itnext.io/c-20-modules-complete-guide-ae741ddbae3d
 * mentionable: [1](https://www.modernescpp.com/index.php/c-20-module-interface-unit-and-module-implementation-unit)
