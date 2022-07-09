@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # Linux/amd64 bash only. Will not work on Arm-based m1 MacBook
 
@@ -15,6 +15,6 @@ cd $REPO_ROOT
 # realpath ..
 export DOCKER_FOLDER="$REPO_ROOT/polysampler/experimentation"
 
+DEFAULT_COMMAND="bash /sosi/sampler1/build-20-all.bash"
 docker run -it --rm -v "$DOCKER_FOLDER":/sosi conanio/clang14-ubuntu16.04:latest  \
-    bash /sosi/sampler1/build-20-all.bash
-
+    ${@:-$DEFAULT_COMMAND}
