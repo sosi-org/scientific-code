@@ -216,7 +216,7 @@ void circular_for(IT _begin, IT _end, auto callback_pair) {
 // std::function<void (const patch_t&, const side_it&, const side_it&)> augment_side
 
 template <typename func>
-void traverse(const tesselation_t &trigulation, const points_t &points, func process_polyg_callback
+void traverse_tesselation(const tesselation_t &trigulation, const points_t &points, func process_polyg_callback
     /*, auto augment_side*/ )
 {
     for (auto plg_it = trigulation.begin(); plg_it < trigulation.end(); ++plg_it)
@@ -234,8 +234,8 @@ void traverse(const tesselation_t &trigulation, const points_t &points, func pro
     clang++ sampler1.cpp -std=c++2b
 */
 
-void traverse2(const tesselation_t &trigulation, const points_t &points) {
-    traverse(trigulation, points, [&points](const auto &polyg){
+void augment_tesselation_polygons(const tesselation_t &trigulation, const points_t &points) {
+    traverse_tesselation(trigulation, points, [&points](const auto &polyg){
 
         patch_t patch{points, polyg.size()};
 
@@ -290,7 +290,7 @@ int main()
 
     //std::cout << "ok" << std::endl;
 
-    traverse2(trigulation, points/*, callback*/);
+    augment_tesselation_polygons(trigulation, points/*, callback*/);
 
     return 0;
 }
