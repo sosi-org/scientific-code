@@ -21,6 +21,7 @@ typedef model::d2::point_xy point;
 
 #include <format>
 #include <regex>
+#include <cassert>
 using std::string;
 // using std::format;
 
@@ -77,6 +78,8 @@ typedef std::vector<side_point_t>  vertiex_indices_t; // vertices; // without co
 //const std::vector<side_point_t> &points_indices_ref;  = vertices
 // const vertiex_indices_t &vertiex_indices,
 
+typedef std::unique_ptr<side_meta_data_t[]> fixedsize_side_metadata_t;
+
 /*
 
     augmented sides.
@@ -92,23 +95,29 @@ typedef std::vector<side_point_t>  vertiex_indices_t; // vertices; // without co
 // almost like an accumulator, or rec_stat channel.
 struct patch_t
 {
-    const points_t &points_ref; // rename -> points_coords_ref
+    const points_t &coords_ref; // points_ref, rename -> points_coords_ref, coords_ref
     // const std::vector<side_point_t> &points_indices_ref;
 
     std::vector<side_meta_data_t> side_meta_data; // for output
+
+    /* accumulated sides: while being built */
+    std::vector<int>::size_type side_counter;
 
     /*
         Allocates placeholder. For speed.
     */
     //rename: points -> points_coords
     patch_t(std::vector<int>::size_type nsides, const points_t &points)
-        : points_ref(points) //, side_meta_data(nsides)
+        : coords_ref(points) //, side_meta_data(nsides)
           ,
-          side_meta_data()
+          side_meta_data(),
+          side_counter(0)
     {
         side_meta_data.reserve(nsides);
         // this->side_meta_data = side_meta_data_t(); //(0); // (nsides)
         std::cout << "polyg[" << nsides << "]: ";
+        /* accumulated sides */
+        //this->side_counter = 0;
     }
 
     /*
@@ -118,27 +127,42 @@ struct patch_t
     //void augment_side(const int &from_idx, const int &to_idx /*, int idx*/)
     void augment_side(const int &from_idx, const int &to_idx /*, int idx*/)
     {
-        const auto &p1 = this->points_ref[from_idx];
-        const auto &p2 = this->points_ref[to_idx];
+        const auto &p1 = this->coords_ref[from_idx];
+        const auto &p2 = this->coords_ref[to_idx];
         std::cout << from_idx << ":" << (p1.tostr()) << "-" << to_idx << ":" << (p2.tostr()) << ". ";
         // index?
         /*
         side_meta_data[0].a = p2.x - p1.x;
         */
-        auto x = side_meta_data_t{p1, p2};
-        side_meta_data[0] = x;
+
+        assert(this->side_counter <= side_meta_data.capacity()); // for performance only
+
+        side_meta_data.push_back(side_meta_data_t{p1, p2});
+        // side_meta_data[ this->side_counter ] = side_meta_data_t{p1, p2};
+
+        this->side_counter++;
 
         // todo: clip away from the area/shape
     }
 
     // const std::vector<side_meta_data_t>& finish()
-    void finish()
+
+    fixedsize_side_metadata_t finish()
     {
         std::cout << std::endl;
         // return side_meta_data; // move?
 
         // todo: store the value?
         // or maybe do something: area -> save in ...
+
+        // compile-time size? I want const size, not compile-time size.
+        // return std::array<side_meta_data_t,>(this->side_meta_data);
+
+        //typedef std::unique_ptr<side_meta_data_t[]> fixedsize_side_metadata_t;
+
+        // make_unique_for_overwrite
+        //return std::make_unique<side_meta_data_t []> ( this->side_counter );
+        return fixedsize_side_metadata_t(0);
     }
 };
 

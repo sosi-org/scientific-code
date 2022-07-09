@@ -6,6 +6,9 @@ import point_t;
 import tesselation_t;
 // #include "tesselation_t.hpp" // for points_t only
 
+/*
+    Datastructure fot storing cacehed augmented data about a side of a polygon
+*/
 class side_meta_data_t
 {
     double x0, y0;
