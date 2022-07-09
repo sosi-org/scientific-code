@@ -91,6 +91,12 @@ typedef std::unique_ptr<side_meta_data_t[]> fixedsize_side_metadata_t;
     no, it is a storage for all of them.
 
     Takes care of allocation, as well as, circular-loop
+
+    Lifecycle:
+        * empty but with allocated capacity
+        * accumulating vector<>
+        * fixedsize_side_metadata_t
+
 */
 // almost like an accumulator, or rec_stat channel.
 struct patch_t
@@ -101,7 +107,8 @@ struct patch_t
     std::vector<side_meta_data_t> side_meta_data; // for output
 
     /* accumulated sides: while being built */
-    std::vector<int>::size_type side_counter;
+    // std::vector<int>::size_type side_counter;
+    // use side_meta_data.size() instead.
 
     /*
         Allocates placeholder. For speed.
@@ -110,8 +117,8 @@ struct patch_t
     patch_t(std::vector<int>::size_type nsides, const points_t &points)
         : coords_ref(points) //, side_meta_data(nsides)
           ,
-          side_meta_data(),
-          side_counter(0)
+          side_meta_data()
+          //, side_counter(0)
     {
         side_meta_data.reserve(nsides);
         // this->side_meta_data = side_meta_data_t(); //(0); // (nsides)
@@ -135,12 +142,10 @@ struct patch_t
         side_meta_data[0].a = p2.x - p1.x;
         */
 
-        assert(this->side_counter <= side_meta_data.capacity()); // for performance only
+        // assert(this->side_counter <= side_meta_data.capacity()); // for performance only
 
         side_meta_data.push_back(side_meta_data_t{p1, p2});
         // side_meta_data[ this->side_counter ] = side_meta_data_t{p1, p2};
-
-        this->side_counter++;
 
         // todo: clip away from the area/shape
     }
