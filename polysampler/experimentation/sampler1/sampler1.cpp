@@ -142,24 +142,15 @@ struct patch_t
     Goes through iterator range and applies the given lambda on consecutive pairs, circularly.
 */
 void circular_for(auto _begin, auto _end, auto callback_pair) {
-
-    auto first = _begin;
     auto last_to = _begin;
     for (auto it = _begin; it < _end - 1; ++it)
     {
-        const auto &from_i = *it;
-        const auto &to_i = *(std::next(it)); // next
-        // patch.do_side(from_i, to_i);
-        callback_pair(&from_i, &to_i);
-        // do_side(patch, from_i, to_i);
-        // last = it; // rename: it -> vert_p
-        // last_to = to_i;
-        last_to = std::next(it);
+        // from=it
+        const auto &next_it = std::next(it); // to
+        callback_pair(it, next_it);
+        last_to = next_it;
     }
-    //patch.do_side(*(polyg_i.end() - 1), *(polyg_i.begin()));
-    // patch.do_side(*last_to, *first);
-    // do_side(patch, last_to, first);
-    callback_pair(last_to, first);
+    callback_pair(last_to, _begin);
 }
 
 // std::function<void (const patch_t&, const side_it&, const side_it&)> do_side
@@ -175,7 +166,7 @@ void traverse(const tesselation_t &trigulation, const points_t &points /*, auto 
         // lambda capture list:  [patch_t&patch]  -> [&patch]
         auto callback_pair = [&patch]<typename IT>(const IT &from_it, const IT &to_it) {
             patch.do_side(*from_it, *to_it);
-            // cout << *from_i << ',' << *to_i <<' ';
+            // cout << *from_i << ',' << *next_it <<' ';
         };
         // circular_for_pairs
         circular_for(polyg_i.begin(), polyg_i.end(), callback_pair);
