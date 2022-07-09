@@ -34,7 +34,8 @@ side_meta_data_t
 array<side_meta_data_t> // has the circular thing
 vector< array<side_meta_data_t> > // uneven size?
 */
-#include "../sampler1/side_meta_data_t.hpp"
+//#include "../sampler1/side_meta_data_t.hpp"
+#include "side_meta_data_t.hpp"
 
 // #include "../sampler1/tesselation_t.hpp"
 import tesselation_t;
@@ -67,23 +68,46 @@ class vector_map
 };
 
 #include <iostream>
+#include <functional>
 
 #include "side_meta_data_t.hpp"
 
+typedef std::vector<side_point_t>  vertiex_indices_t; // vertices; // without coords, just int, refering to the coords index
+
+//const std::vector<side_point_t> &points_indices_ref;  = vertices
+// const vertiex_indices_t &vertiex_indices,
+
+/*
+    Keeps areference to coordinates,
+    adds some metadata (augments) for each side.
+    Each instance of this struct is for one instance of one side?
+
+    no, it is a storage for all of them.
+*/
 // almost like an accumulator, or rec_stat channel.
 struct patch_t
 {
-    const points_t &points_ref;
+    const points_t &points_ref; // rename -> points_coords_ref
+    // const std::vector<side_point_t> &points_indices_ref;
+
     std::vector<side_meta_data_t> side_meta_data; // for output
 
+    /*
+        Allocates placeholder. For speed.
+    */
+    //rename: points -> points_coords
     patch_t(std::vector<int>::size_type nsides, const points_t &points)
         : points_ref(points) //, side_meta_data(nsides)
           ,
           side_meta_data()
     {
+        side_meta_data.reserve(nsides);
         // this->side_meta_data = side_meta_data_t(); //(0); // (nsides)
         std::cout << nsides << ": ";
     }
+
+    // rename -> augment this with info from now that (another new side)
+    //void do_side(const int &from_idx, const int &to_idx /*, int idx*/)
     void do_side(const int &from_idx, const int &to_idx /*, int idx*/)
     {
         const auto &p1 = this->points_ref[from_idx];
@@ -93,10 +117,12 @@ struct patch_t
         /*
         side_meta_data[0].a = p2.x - p1.x;
         */
-        side_meta_data[0] = side_meta_data_t(p1, p2);
+        auto x = side_meta_data_t{p1, p2};
+        side_meta_data[0] = x;
 
         // todo: clip away from the area/shape
     }
+
     // const std::vector<side_meta_data_t>& finish()
     void finish()
     {
@@ -108,7 +134,17 @@ struct patch_t
     }
 };
 
-void traverse(const tesselation_t &trigulation, const points_t &points)
+// tesselation_t::iterator x;
+
+// tesselation_t::iterator
+
+// this const is cricial!
+// didnt work:
+//typedef std::vector<const side_point_t>::iterator side_it;
+
+// std::function<void (const patch_t&, const side_it&, const side_it&)> do_side
+
+void traverse(const tesselation_t &trigulation, const points_t &points /*, auto do_side*/)
 {
     for (auto plg = trigulation.begin(); plg < trigulation.end(); ++plg)
     {
@@ -116,13 +152,30 @@ void traverse(const tesselation_t &trigulation, const points_t &points)
 
         patch_t patch{polyg_i.size(), points};
 
+        // //tesselation_t::iterator &last_to;
+        //tesselation_t::iterator first = polyg_i.begin();
+        //tesselation_t::iterator last_to;
+        //side_it first = polyg_i.begin();
+        //side_it last_to;
+        //side_it first = polyg_i.begin();
+        //side_it last_to;
+
+        // circular_for
+        auto first = polyg_i.begin();
+        auto last_to = first;
         for (auto vert = polyg_i.begin(); vert < polyg_i.end() - 1; ++vert)
         {
             const auto &from_i = *vert;
-            const auto &to_i = *(vert + 1);
+            const auto &to_i = *(vert + 1); // next
             patch.do_side(from_i, to_i);
+            // do_side(patch, from_i, to_i);
+            // last = vert; // rename: vert -> vert_p
+            // last_to = to_i;
+            last_to = vert + 1;
         }
-        patch.do_side(*(polyg_i.end() - 1), *(polyg_i.begin()));
+        //patch.do_side(*(polyg_i.end() - 1), *(polyg_i.begin()));
+        patch.do_side(*last_to, *first);
+        // do_side(patch, last_to, first);
 
         patch.finish();
         // std::vector<side_meta_data_t> q = patch.finish();
@@ -170,7 +223,14 @@ int main()
 
     //std::cout << "ok" << std::endl;
 
-    traverse(trigulation, points);
+    /*
+    // auto callback = [](const patch_t& patch, tesselation_t::iterator from_i, tesselation_t::iterator to_i) {patch.do_side(from_i, to_i)));
+    auto callback = []<typename IT>(patch_t& patch, IT from_i, IT to_i) {
+        patch.do_side(from_i, to_i);
+        // cout << *from_i << ',' << *to_i <<' ';
+        };
+    */
+    traverse(trigulation, points/*, callback*/);
 
     return 0;
 }
