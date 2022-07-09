@@ -19,8 +19,8 @@ typedef model::d2::point_xy point;
 
 #include <string>
 
-#include "../sampler1/point_t.hpp"
-// import point_t;
+// #include "../sampler1/point_t.hpp"
+import point_t;
 
 /*
 (tesselation_t, points_t)
@@ -31,7 +31,8 @@ vector< array<side_meta_data_t> > // uneven size?
 */
 #include "../sampler1/side_meta_data_t.hpp"
 
-#include "../sampler1/tesselation_t.hpp"
+// #include "../sampler1/tesselation_t.hpp"
+import tesselation_t;
 
 // convex
 const tesselation_t &poly_poly_intersection(

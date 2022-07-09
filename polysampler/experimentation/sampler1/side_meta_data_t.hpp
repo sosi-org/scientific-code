@@ -2,7 +2,9 @@
 
 #include <array>
 
-#include "tesselation_t.hpp" // for points_t only
+import point_t;
+import tesselation_t;
+// #include "tesselation_t.hpp" // for points_t only
 
 struct side_meta_data_t
 {
