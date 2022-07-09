@@ -135,13 +135,13 @@ void traverse(const tesselation_t &trigulation, const points_t &points)
 
 
 
-string export_svg3(double xi[8]) {
+string export_svg3(double xi[4][2]) {
 
 
    string point_seq{};
-   for(int i = 0; i < 8; ++i ) {
+   for(int i = 0; i < 4; ++i ) {
        // point_seq = point_seq + std::format("{} ", (int) (xi[i]));
-       point_seq = point_seq + " " + std::to_string(xi[i]);
+       point_seq = point_seq + " " + std::to_string(xi[i][0]) + "," + std::to_string(xi[i][1]);
    }
    string s{};
    s += R"XYZ(
@@ -165,7 +165,7 @@ int main()
 {
     // std::cout << "hi" << std::endl;
 
-    double xi[8] = {220,0, 300,50, 170,70, 0,100};
+    double xi[4][2] = {{220,0}, {300,50}, {170,70}, {0,100}};
     std::cout << export_svg3(xi) << std::endl;
 
     //std::cout << "ok" << std::endl;
