@@ -19,6 +19,11 @@ typedef model::d2::point_xy point;
 
 #include <string>
 
+#include <format>
+#include <regex>
+using std::string;
+// using std::format;
+
 // #include "../sampler1/point_t.hpp"
 import point_t;
 
@@ -127,11 +132,46 @@ void traverse(const tesselation_t &trigulation, const points_t &points)
     clang++ sampler1.cpp -std=c++2b
 */
 
+
+
+
+string export_svg3(double xi[8]) {
+
+
+   string point_seq{};
+   for(int i = 0; i < 8; ++i ) {
+       // point_seq = point_seq + std::format("{} ", (int) (xi[i]));
+       point_seq = point_seq + " " + std::to_string(xi[i]);
+   }
+   string s{};
+   s += R"XYZ(
+
+    <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+
+    <svg height="250" width="500"
+    xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
+    >
+    <polygon points="$$POINTS$$" style="fill:white;stroke:blue;stroke-width:2" />
+    Sorry, your browser does not support inline SVG.
+    </svg>
+
+   )XYZ";
+
+   // std::string::replace
+   s = std::regex_replace(s, std::regex("\\$\\$POINTS\\$\\$"), point_seq);
+   return s;
+}
 int main()
 {
-    std::cout << "hi" << std::endl;
+    // std::cout << "hi" << std::endl;
+
+    double xi[8] = {220,0, 300,50, 170,70, 0,100};
+    std::cout << export_svg3(xi) << std::endl;
+
+    //std::cout << "ok" << std::endl;
 
     traverse(trigulation, points);
+
     return 0;
 }
 // ExecutionPolicy

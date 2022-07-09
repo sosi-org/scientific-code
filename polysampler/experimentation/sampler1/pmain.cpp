@@ -2,6 +2,7 @@
 // import point_t.hpp.gch;
 import point_t;
 
+
 #include <iostream>
 int main() {
    point_t p;
@@ -10,4 +11,3 @@ int main() {
    std::cout << p.tostr() << std::endl;
    return 0;
 }
-

@@ -25,18 +25,21 @@ clang++ $FLAGS \
 
 clang++ $FLAGS \
     -fprebuilt-module-path=./target -fmodule-file=point_t=./target/point_t.module.precompiled \
+    -c -Xclang -emit-module-interface  \
     tesselation_t.hpp \
     -o ./target/tesselation_t.module.o
 # .module .mo
 
 clang++ $FLAGS \
-    -fprebuilt-module-path=./target -fmodule-file=point_t=./target/point_t.module.precompiled \
+    -fprebuilt-module-path=./target \
+    -fmodule-file=point_t=./target/point_t.module.precompiled \
     -Xclang -emit-module-interface  \
+    -c \
     export_svg.hpp \
     -o ./target/export_svg.module.o
 # necesary ^ : -Xclang -emit-module-interface  \
 
-
+echo 'skip' || \
 clang++ $FLAGS \
     -v \
     -fprebuilt-module-path=./target \
@@ -46,7 +49,10 @@ clang++ $FLAGS \
 #         -fmodule-file=point_t=./target/point_t.module.precompiled \
 
 clang++ $FLAGS \
-    -fprebuilt-module-path=./target -fmodule-file=point_t=./target/point_t.module.precompiled \
+    -fprebuilt-module-path=./target \
+    -fmodule-file=point_t=./target/point_t.module.precompiled \
+    -fmodule-file=tesselation_t=./target/tesselation_t.module.o \
+    -v \
     sampler1.cpp \
     -o ./target/sampler1.out
 

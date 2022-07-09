@@ -1,12 +1,16 @@
 export module export_svg_module;
 
-import point_t;
+// import point_t;
 
 #include <iostream>
 
 using std::string;
 
-export void export_svg() {
+export void export_svg1();
+
+void export_svg1() {
+}
+void export_svg2() {
 
    string s;
    s += R"XYZ(
@@ -25,4 +29,10 @@ export void export_svg() {
    // See: https://en.cppreference.com/w/cpp/language/string_literal
 
    std::cout << s << std::endl;
+}
+
+
+int main (){
+   export_svg1();
+   return 0;
 }
