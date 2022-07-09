@@ -138,29 +138,23 @@ struct patch_t
 
 //typedef std::vector<const side_point_t>::iterator side_it;
 
-        // circular_for
-void circular_foreach(auto _begin, auto _end, auto callback) {
-
-    // //tesselation_t::iterator &last_to;
-    //tesselation_t::iterator first = polyg_i.begin();
-    //tesselation_t::iterator last_to;
-    //side_it first = polyg_i.begin();
-    //side_it last_to;
-    //side_it first = polyg_i.begin();
-    //side_it last_to;
+/*
+    Goes through iterator range and applies the given lambda on consecutive pairs, circularly.
+*/
+void circular_for(auto _begin, auto _end, auto callback) {
 
     auto first = _begin;
-    auto last_to = first;
-    for (auto vert = _begin; vert < _end - 1; ++vert)
+    auto last_to = _begin;
+    for (auto it = _begin; it < _end - 1; ++it)
     {
-        const auto &from_i = *vert;
-        const auto &to_i = *(vert + 1); // next
+        const auto &from_i = *it;
+        const auto &to_i = *(it + 1); // next
         // patch.do_side(from_i, to_i);
         callback(&from_i, &to_i);
         // do_side(patch, from_i, to_i);
-        // last = vert; // rename: vert -> vert_p
+        // last = it; // rename: it -> vert_p
         // last_to = to_i;
-        last_to = vert + 1;
+        last_to = it + 1;
     }
     //patch.do_side(*(polyg_i.end() - 1), *(polyg_i.begin()));
     // patch.do_side(*last_to, *first);
@@ -183,8 +177,8 @@ void traverse(const tesselation_t &trigulation, const points_t &points /*, auto 
             patch.do_side(*from_it, *to_it);
             // cout << *from_i << ',' << *to_i <<' ';
         };
-        // circular_for
-        circular_foreach(polyg_i.begin(), polyg_i.end(), callback);
+        // circular_for_pairs
+        circular_for(polyg_i.begin(), polyg_i.end(), callback);
 
         std::cout << std::endl;
 
