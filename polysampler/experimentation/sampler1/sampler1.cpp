@@ -117,7 +117,7 @@ struct patch_t
         Allocates placeholder. For speed.
     */
     //rename: points -> points_coords
-    patch_t(std::vector<int>::size_type nsides, const points_t &points)
+    patch_t(const points_t &points, std::vector<int>::size_type nsides)
         : coords_ref(points) //, side_meta_data(nsides)
           ,
           side_meta_data()
@@ -215,14 +215,29 @@ void circular_for(IT _begin, IT _end, auto callback_pair) {
 
 // std::function<void (const patch_t&, const side_it&, const side_it&)> augment_side
 
-void traverse(const tesselation_t &trigulation, const points_t &points /*, auto augment_side*/)
+template <typename func>
+void traverse(const tesselation_t &trigulation, const points_t &points, func process_polyg_callback
+    /*, auto augment_side*/ )
 {
     for (auto plg_it = trigulation.begin(); plg_it < trigulation.end(); ++plg_it)
     {
         // Take each polygon from the tesselation
         const auto &polyg = *plg_it;
 
-        patch_t patch{polyg.size(), points};
+
+        fixedsize_side_metadata_t r = process_polyg_callback(polyg);
+        // if you want to keep them:
+        // std::vector<side_meta_data_t> q = patch.finish();
+    }
+}
+/*
+    clang++ sampler1.cpp -std=c++2b
+*/
+
+void traverse2(const tesselation_t &trigulation, const points_t &points) {
+    traverse(trigulation, points, [&points](const auto &polyg){
+
+        patch_t patch{points, polyg.size()};
 
         // lambda capture list:  [patch_t&patch]  -> [&patch]
         auto callback_pair = [&patch]<typename IT>(const IT &from_it, const IT &to_it) {
@@ -234,15 +249,9 @@ void traverse(const tesselation_t &trigulation, const points_t &points /*, auto 
 
         std::cout << std::endl;
 
-        patch.finish();
-        // if you want to keep them:
-        // std::vector<side_meta_data_t> q = patch.finish();
-    }
+        return patch.finish();
+    });
 }
-/*
-    clang++ sampler1.cpp -std=c++2b
-*/
-
 
 
 
@@ -281,7 +290,7 @@ int main()
 
     //std::cout << "ok" << std::endl;
 
-    traverse(trigulation, points/*, callback*/);
+    traverse2(trigulation, points/*, callback*/);
 
     return 0;
 }
