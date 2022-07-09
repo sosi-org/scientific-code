@@ -141,12 +141,13 @@ struct patch_t
 /*
     Goes through iterator range and applies the given lambda on consecutive pairs, circularly.
 */
-void circular_for(auto _begin, auto _end, auto callback_pair) {
-    auto last_to = _begin;
-    for (auto it = _begin; it < _end - 1; ++it)
+template <typename IT>
+void circular_for(IT _begin, IT _end, auto callback_pair) {
+    IT last_to;
+    for (IT it = _begin; it < _end - 1; ++it)
     {
         // from=it
-        const auto &next_it = std::next(it); // to
+        const IT &next_it = std::next(it); // to
         callback_pair(it, next_it);
         last_to = next_it;
     }
