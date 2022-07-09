@@ -16,6 +16,7 @@ clang++ $FLAGS \
     point_t.hpp \
     -o ./target/point_t.module.precompiled
 
+echo 'skip2' || \
 ls -1 ./target/pmain.out || \
 clang++ $FLAGS \
     -fprebuilt-module-path=./target -fmodule-file=point_t=./target/point_t.module.precompiled \
