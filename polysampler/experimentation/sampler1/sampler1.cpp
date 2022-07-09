@@ -83,6 +83,8 @@ typedef std::vector<side_point_t>  vertiex_indices_t; // vertices; // without co
     Each instance of this struct is for one instance of one side?
 
     no, it is a storage for all of them.
+
+    Takes care of allocation, as well as, circular-loop
 */
 // almost like an accumulator, or rec_stat channel.
 struct patch_t
@@ -134,13 +136,37 @@ struct patch_t
     }
 };
 
-// tesselation_t::iterator x;
-
-// tesselation_t::iterator
-
-// this const is cricial!
-// didnt work:
 //typedef std::vector<const side_point_t>::iterator side_it;
+
+        // circular_for
+void circular_foreach(auto _begin, auto _end, auto callback) {
+
+    // //tesselation_t::iterator &last_to;
+    //tesselation_t::iterator first = polyg_i.begin();
+    //tesselation_t::iterator last_to;
+    //side_it first = polyg_i.begin();
+    //side_it last_to;
+    //side_it first = polyg_i.begin();
+    //side_it last_to;
+
+    auto first = _begin;
+    auto last_to = first;
+    for (auto vert = _begin; vert < _end - 1; ++vert)
+    {
+        const auto &from_i = *vert;
+        const auto &to_i = *(vert + 1); // next
+        // patch.do_side(from_i, to_i);
+        callback(&from_i, &to_i);
+        // do_side(patch, from_i, to_i);
+        // last = vert; // rename: vert -> vert_p
+        // last_to = to_i;
+        last_to = vert + 1;
+    }
+    //patch.do_side(*(polyg_i.end() - 1), *(polyg_i.begin()));
+    // patch.do_side(*last_to, *first);
+    // do_side(patch, last_to, first);
+    callback(last_to, first);
+}
 
 // std::function<void (const patch_t&, const side_it&, const side_it&)> do_side
 
@@ -152,30 +178,15 @@ void traverse(const tesselation_t &trigulation, const points_t &points /*, auto 
 
         patch_t patch{polyg_i.size(), points};
 
-        // //tesselation_t::iterator &last_to;
-        //tesselation_t::iterator first = polyg_i.begin();
-        //tesselation_t::iterator last_to;
-        //side_it first = polyg_i.begin();
-        //side_it last_to;
-        //side_it first = polyg_i.begin();
-        //side_it last_to;
-
+        // lambda capture list:  [patch_t&patch]  -> [&patch]
+        auto callback = [&patch]<typename IT>(const IT &from_it, const IT &to_it) {
+            patch.do_side(*from_it, *to_it);
+            // cout << *from_i << ',' << *to_i <<' ';
+        };
         // circular_for
-        auto first = polyg_i.begin();
-        auto last_to = first;
-        for (auto vert = polyg_i.begin(); vert < polyg_i.end() - 1; ++vert)
-        {
-            const auto &from_i = *vert;
-            const auto &to_i = *(vert + 1); // next
-            patch.do_side(from_i, to_i);
-            // do_side(patch, from_i, to_i);
-            // last = vert; // rename: vert -> vert_p
-            // last_to = to_i;
-            last_to = vert + 1;
-        }
-        //patch.do_side(*(polyg_i.end() - 1), *(polyg_i.begin()));
-        patch.do_side(*last_to, *first);
-        // do_side(patch, last_to, first);
+        circular_foreach(polyg_i.begin(), polyg_i.end(), callback);
+
+        std::cout << std::endl;
 
         patch.finish();
         // std::vector<side_meta_data_t> q = patch.finish();
