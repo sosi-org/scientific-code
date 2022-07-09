@@ -78,6 +78,9 @@ typedef std::vector<side_point_t>  vertiex_indices_t; // vertices; // without co
 // const vertiex_indices_t &vertiex_indices,
 
 /*
+
+    augmented sides.
+
     Keeps areference to coordinates,
     adds some metadata (augments) for each side.
     Each instance of this struct is for one instance of one side?
@@ -105,12 +108,15 @@ struct patch_t
     {
         side_meta_data.reserve(nsides);
         // this->side_meta_data = side_meta_data_t(); //(0); // (nsides)
-        std::cout << nsides << ": ";
+        std::cout << "polyg[" << nsides << "]: ";
     }
 
+    /*
+        augment and accumulate
+    */
     // rename -> augment this with info from now that (another new side)
-    //void do_side(const int &from_idx, const int &to_idx /*, int idx*/)
-    void do_side(const int &from_idx, const int &to_idx /*, int idx*/)
+    //void augment_side(const int &from_idx, const int &to_idx /*, int idx*/)
+    void augment_side(const int &from_idx, const int &to_idx /*, int idx*/)
     {
         const auto &p1 = this->points_ref[from_idx];
         const auto &p2 = this->points_ref[to_idx];
@@ -146,35 +152,36 @@ void circular_for(IT _begin, IT _end, auto callback_pair) {
     IT last_to;
     for (IT it = _begin; it < _end - 1; ++it)
     {
-        // from=it
-        const IT &next_it = std::next(it); // to
-        callback_pair(it, next_it);
+        const IT &next_it = std::next(it);
+        callback_pair(it, next_it); // (from, to)
         last_to = next_it;
     }
     callback_pair(last_to, _begin);
 }
 
-// std::function<void (const patch_t&, const side_it&, const side_it&)> do_side
+// std::function<void (const patch_t&, const side_it&, const side_it&)> augment_side
 
-void traverse(const tesselation_t &trigulation, const points_t &points /*, auto do_side*/)
+void traverse(const tesselation_t &trigulation, const points_t &points /*, auto augment_side*/)
 {
-    for (auto plg = trigulation.begin(); plg < trigulation.end(); ++plg)
+    for (auto plg_it = trigulation.begin(); plg_it < trigulation.end(); ++plg_it)
     {
-        const auto &polyg_i = *plg;
+        // Take each polygon from the tesselation
+        const auto &polyg = *plg_it;
 
-        patch_t patch{polyg_i.size(), points};
+        patch_t patch{polyg.size(), points};
 
         // lambda capture list:  [patch_t&patch]  -> [&patch]
         auto callback_pair = [&patch]<typename IT>(const IT &from_it, const IT &to_it) {
-            patch.do_side(*from_it, *to_it);
+            patch.augment_side(*from_it, *to_it);
             // cout << *from_i << ',' << *next_it <<' ';
         };
         // circular_for_pairs
-        circular_for(polyg_i.begin(), polyg_i.end(), callback_pair);
+        circular_for(polyg.begin(), polyg.end(), callback_pair);
 
         std::cout << std::endl;
 
         patch.finish();
+        // if you want to keep them:
         // std::vector<side_meta_data_t> q = patch.finish();
     }
 }

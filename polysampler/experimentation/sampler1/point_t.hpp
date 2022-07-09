@@ -3,6 +3,9 @@ export module point_t;
 // export module point_t;
 #include <iostream>
 
+#include <sstream>
+#include <iomanip>
+
 // #export module point_t;
 // #pragma once
 
@@ -18,6 +21,13 @@ struct point_t
 public:
     std::string tostr() const
     {
-        return "(" + std::to_string(this->x) + "," + std::to_string(this->y) + ")";
+        std::ostringstream oss;
+        oss << "(";
+        oss << std::setprecision(8) << std::noshowpoint << this->x;
+        oss << ",";
+        oss << std::setprecision(8) << std::noshowpoint << this->y;
+        oss << ")";
+        return oss.str();
+        //return "(" + std::to_string(this->x) + "," + std::to_string(this->y) + ")";
     }
 }; // point_t;
