@@ -16,5 +16,5 @@ cd $REPO_ROOT
 export DOCKER_FOLDER="$REPO_ROOT/polysampler/experimentation"
 
 DEFAULT_COMMAND="bash /sosi/sampler1/build-20-all.bash"
-docker run -it --rm -v "$DOCKER_FOLDER":/sosi conanio/clang14-ubuntu16.04:latest  \
+docker run -it --rm -v "$DOCKER_FOLDER":/sosi -w="/sosi" conanio/clang14-ubuntu16.04:latest  \
     ${@:-$DEFAULT_COMMAND}
