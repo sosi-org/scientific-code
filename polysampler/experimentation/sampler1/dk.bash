@@ -16,5 +16,5 @@ cd $REPO_ROOT
 export DOCKER_FOLDER="$REPO_ROOT/polysampler/experimentation"
 
 docker run -it --rm -v "$DOCKER_FOLDER":/sosi conanio/clang14-ubuntu16.04:latest  \
-    bash #/sosi/sampler1/build-20-all.bash
+    bash /sosi/sampler1/build-20-all.bash
 
