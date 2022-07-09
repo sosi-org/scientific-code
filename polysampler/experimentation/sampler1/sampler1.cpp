@@ -215,27 +215,42 @@ void circular_for(IT _begin, IT _end, auto callback_pair) {
 
 // std::function<void (const patch_t&, const side_it&, const side_it&)> augment_side
 
+//template <typename func, typename resultt>
 template <typename func>
-void traverse_tesselation(const tesselation_t &trigulation, const points_t &points, func process_polyg_callback
+//template <typename resultt>
+//std::vector<decltype( process_polyg_callback() )>
+//std::vector<resultt>
+void
+traverse_tesselation(const tesselation_t &trigulation, const points_t &points, func process_polyg_callback
+    //resultt*
     /*, auto augment_side*/ )
 {
+    // std::vector<resultt> accum{0};
+
     for (auto plg_it = trigulation.begin(); plg_it < trigulation.end(); ++plg_it)
     {
         // Take each polygon from the tesselation
         const auto &polyg = *plg_it;
 
 
-        fixedsize_side_metadata_t r = process_polyg_callback(polyg);
+        //fixedsize_side_metadata_t r;
+        //resultt r = process_polyg_callback(polyg);
+        process_polyg_callback(polyg);
         // if you want to keep them:
         // std::vector<side_meta_data_t> q = patch.finish();
+        //accum.push_back(r);
     }
+    //return accum;
 }
 /*
     clang++ sampler1.cpp -std=c++2b
 */
 
 void augment_tesselation_polygons(const tesselation_t &trigulation, const points_t &points) {
-    traverse_tesselation(trigulation, points, [&points](const auto &polyg){
+    //fixedsize_side_metadata_t *x0;
+    //std::vector<fixedsize_side_metadata_t> r =
+     /* -> fixedsize_side_metadata_t*/
+    traverse_tesselation(trigulation, points, [&points](const auto &polyg) {
 
         patch_t patch{points, polyg.size()};
 
@@ -249,20 +264,45 @@ void augment_tesselation_polygons(const tesselation_t &trigulation, const points
 
         std::cout << std::endl;
 
-        return patch.finish();
+        patch.finish();
+        // return patch.finish();
     });
 }
 
 
+string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coords) {
 
-string export_svg3(double xi[4][2]) {
+    string *x0;
 
+    // todo: const vertex_coords
 
-   string point_seq{};
-   for(int i = 0; i < 4; ++i ) {
-       // point_seq = point_seq + std::format("{} ", (int) (xi[i]));
-       point_seq = point_seq + " " + std::to_string(xi[i][0]) + "," + std::to_string(xi[i][1]);
-   }
+    string total_point_seq;
+    //std::vector<string> total_point_seq;
+    //std::vector<string> total_point_seq =
+    // /* -> string */
+    traverse_tesselation(trigulation, vertex_coords, [vertex_coords,&total_point_seq](const auto &polyg)  {
+        // per face
+
+        string point_seq{};
+        circular_for(polyg.begin(), polyg.end(), [&point_seq, vertex_coords]<typename IT>(const IT &from_vert, const IT &to_vert) {
+            // per edge
+            // point_seq = point_seq + std::format("{} ", (int) (xi[i]));
+            // point_seq = point_seq + " " + std::to_string(xi[i][0]) + "," + std::to_string(xi[i][1]);
+            //std::cout << from_vert;
+            const point_t & point = vertex_coords[*from_vert];
+            double x = point.x;
+            double y = point.y;
+            point_seq = point_seq + " " + std::to_string(x) + "," + std::to_string(y);
+            std::cout << " " + std::to_string(x) + "," + std::to_string(y);
+        });
+
+        std::cout << std::endl;
+
+        total_point_seq = point_seq;
+
+        //return point_seq;
+    });
+
    string s{};
    s += R"XYZ(
 
@@ -278,15 +318,17 @@ string export_svg3(double xi[4][2]) {
    )XYZ";
 
    // std::string::replace
-   s = std::regex_replace(s, std::regex("\\$\\$POINTS\\$\\$"), point_seq);
+   s = std::regex_replace(s, std::regex("\\$\\$POINTS\\$\\$"), total_point_seq);
    return s;
 }
+
 int main()
 {
     // std::cout << "hi" << std::endl;
 
-    double xi[4][2] = {{220,0}, {300,50}, {170,70}, {0,100}};
-    std::cout << export_svg3(xi) << std::endl;
+    //double xi[4][2] = {{220,0}, {300,50}, {170,70}, {0,100}};
+    //std::cout << export_svg3(xi) << std::endl;
+    std::cout << export_svg3(trigulation, points) << std::endl;
 
     //std::cout << "ok" << std::endl;
 
