@@ -114,7 +114,7 @@ struct patch_t
     {
         const auto &p1 = this->points_ref[from_idx];
         const auto &p2 = this->points_ref[to_idx];
-        std::cout << from_idx << ":" << (p1.tostr()) << "-" << to_idx << ":" << (p2.tostr()) << ".";
+        std::cout << from_idx << ":" << (p1.tostr()) << "-" << to_idx << ":" << (p2.tostr()) << ". ";
         // index?
         /*
         side_meta_data[0].a = p2.x - p1.x;
@@ -141,25 +141,25 @@ struct patch_t
 /*
     Goes through iterator range and applies the given lambda on consecutive pairs, circularly.
 */
-void circular_for(auto _begin, auto _end, auto callback) {
+void circular_for(auto _begin, auto _end, auto callback_pair) {
 
     auto first = _begin;
     auto last_to = _begin;
     for (auto it = _begin; it < _end - 1; ++it)
     {
         const auto &from_i = *it;
-        const auto &to_i = *(it + 1); // next
+        const auto &to_i = *(std::next(it)); // next
         // patch.do_side(from_i, to_i);
-        callback(&from_i, &to_i);
+        callback_pair(&from_i, &to_i);
         // do_side(patch, from_i, to_i);
         // last = it; // rename: it -> vert_p
         // last_to = to_i;
-        last_to = it + 1;
+        last_to = std::next(it);
     }
     //patch.do_side(*(polyg_i.end() - 1), *(polyg_i.begin()));
     // patch.do_side(*last_to, *first);
     // do_side(patch, last_to, first);
-    callback(last_to, first);
+    callback_pair(last_to, first);
 }
 
 // std::function<void (const patch_t&, const side_it&, const side_it&)> do_side
@@ -173,12 +173,12 @@ void traverse(const tesselation_t &trigulation, const points_t &points /*, auto 
         patch_t patch{polyg_i.size(), points};
 
         // lambda capture list:  [patch_t&patch]  -> [&patch]
-        auto callback = [&patch]<typename IT>(const IT &from_it, const IT &to_it) {
+        auto callback_pair = [&patch]<typename IT>(const IT &from_it, const IT &to_it) {
             patch.do_side(*from_it, *to_it);
             // cout << *from_i << ',' << *to_i <<' ';
         };
         // circular_for_pairs
-        circular_for(polyg_i.begin(), polyg_i.end(), callback);
+        circular_for(polyg_i.begin(), polyg_i.end(), callback_pair);
 
         std::cout << std::endl;
 
@@ -228,13 +228,6 @@ int main()
 
     //std::cout << "ok" << std::endl;
 
-    /*
-    // auto callback = [](const patch_t& patch, tesselation_t::iterator from_i, tesselation_t::iterator to_i) {patch.do_side(from_i, to_i)));
-    auto callback = []<typename IT>(patch_t& patch, IT from_i, IT to_i) {
-        patch.do_side(from_i, to_i);
-        // cout << *from_i << ',' << *to_i <<' ';
-        };
-    */
     traverse(trigulation, points/*, callback*/);
 
     return 0;
