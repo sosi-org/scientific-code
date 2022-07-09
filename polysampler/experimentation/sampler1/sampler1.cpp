@@ -22,6 +22,9 @@ typedef model::d2::point_xy point;
 #include <format>
 #include <regex>
 #include <cassert>
+
+// #include <array>
+
 using std::string;
 // using std::format;
 
@@ -167,7 +170,29 @@ struct patch_t
 
         // make_unique_for_overwrite
         //return std::make_unique<side_meta_data_t []> ( this->side_counter );
-        return fixedsize_side_metadata_t(0);
+
+        // problem: how to copy?
+        //return fixedsize_side_metadata_t(0);
+        //return fixedsize_side_metadata_t(this->side_meta_data.begin(), this->side_meta_data.end());
+        //return fixedsize_side_metadata_t(side_meta_data.size());
+
+        // std::unique_ptr<side_meta_data_t []>
+        // fixedsize_side_metadata_t fixedsize(side_meta_data.size());
+        //std::unique_ptr<side_meta_data_t> fixedsize [side_meta_data.size()];
+        /*
+        std::generate(
+            fixedsize.begin(), //std::begin(fixedsize),
+            fixedsize.begin() + side_meta_data.size(), //std::end(fixedsize),
+            []() { return std::make_unique<side_meta_data_t>(1); }
+        );
+        */
+       /*
+        fixedsize_side_metadata_t fixedsize(side_meta_data.size());
+        std::copy(side_meta_data.begin(), side_meta_data.end(), fixedsize.get());
+        return fixedsize;
+        */
+       return fixedsize_side_metadata_t(0);
+
     }
 };
 
