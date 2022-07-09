@@ -81,7 +81,8 @@ typedef std::vector<side_point_t>  vertiex_indices_t; // vertices; // without co
 //const std::vector<side_point_t> &points_indices_ref;  = vertices
 // const vertiex_indices_t &vertiex_indices,
 
-typedef std::unique_ptr<side_meta_data_t[]> fixedsize_side_metadata_t;
+// typedef std::unique_ptr<side_meta_data_t[]> fixedsize_side_metadata_t;
+typedef std::vector<side_meta_data_t> fixedsize_side_metadata_t;
 
 /*
 
@@ -191,7 +192,8 @@ struct patch_t
         std::copy(side_meta_data.begin(), side_meta_data.end(), fixedsize.get());
         return fixedsize;
         */
-       return fixedsize_side_metadata_t(0);
+       //return fixedsize_side_metadata_t(0);
+       return side_meta_data;
 
     }
 };
@@ -215,17 +217,19 @@ void circular_for(IT _begin, IT _end, auto callback_pair) {
 
 // std::function<void (const patch_t&, const side_it&, const side_it&)> augment_side
 
-//template <typename func, typename resultt>
-template <typename func>
+template <typename func, typename resultt>
+//template <typename func>
 //template <typename resultt>
 //std::vector<decltype( process_polyg_callback() )>
 //std::vector<resultt>
 void
 traverse_tesselation(const tesselation_t &trigulation, const points_t &points, func process_polyg_callback
     //resultt*
+    ,
+    std::vector<resultt>&accum
     /*, auto augment_side*/ )
 {
-    // std::vector<resultt> accum{0};
+    //std::vector<resultt> accum{0};
 
     for (auto plg_it = trigulation.begin(); plg_it < trigulation.end(); ++plg_it)
     {
@@ -234,11 +238,11 @@ traverse_tesselation(const tesselation_t &trigulation, const points_t &points, f
 
 
         //fixedsize_side_metadata_t r;
-        //resultt r = process_polyg_callback(polyg);
-        process_polyg_callback(polyg);
+        resultt r = process_polyg_callback(polyg);
+        //process_polyg_callback(polyg);
         // if you want to keep them:
         // std::vector<side_meta_data_t> q = patch.finish();
-        //accum.push_back(r);
+        accum.push_back(r);
     }
     //return accum;
 }
@@ -248,7 +252,7 @@ traverse_tesselation(const tesselation_t &trigulation, const points_t &points, f
 
 void augment_tesselation_polygons(const tesselation_t &trigulation, const points_t &points) {
     //fixedsize_side_metadata_t *x0;
-    //std::vector<fixedsize_side_metadata_t> r =
+    std::vector<fixedsize_side_metadata_t> r;
      /* -> fixedsize_side_metadata_t*/
     traverse_tesselation(trigulation, points, [&points](const auto &polyg) {
 
@@ -264,9 +268,9 @@ void augment_tesselation_polygons(const tesselation_t &trigulation, const points
 
         std::cout << std::endl;
 
-        patch.finish();
-        // return patch.finish();
-    });
+        //patch.finish();
+        return patch.finish();
+    }, r);
 }
 
 
@@ -276,39 +280,40 @@ string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coor
 
     // todo: const vertex_coords
 
-    string total_point_seq;
+    //string total_point_seq;
     //std::vector<string> total_point_seq;
-    //std::vector<string> total_point_seq =
+    std::vector<string> total_point_seq;
     // /* -> string */
     traverse_tesselation(trigulation, vertex_coords, [vertex_coords,&total_point_seq](const auto &polyg)  {
         // per face
 
         string point_seq{};
-        circular_for(polyg.begin(), polyg.end(), [&point_seq, vertex_coords]<typename IT>(const IT &from_vert, const IT &to_vert) {
+
+        circular_for(polyg.begin(), polyg.end(), [&point_seq, vertex_coords]<typename IT>(const IT &from_vert, const IT &to_vert)  {
             // per edge
             // point_seq = point_seq + std::format("{} ", (int) (xi[i]));
             // point_seq = point_seq + " " + std::to_string(xi[i][0]) + "," + std::to_string(xi[i][1]);
             //std::cout << from_vert;
             const point_t & point = vertex_coords[*from_vert];
-            double x = point.x;
-            double y = point.y;
+            double x = point.x * 150 + 200;
+            double y = point.y * 150 + 200;
             point_seq = point_seq + " " + std::to_string(x) + "," + std::to_string(y);
             std::cout << " " + std::to_string(x) + "," + std::to_string(y);
         });
 
         std::cout << std::endl;
 
-        total_point_seq = point_seq;
+        //total_point_seq = point_seq;
 
-        //return point_seq;
-    });
+        return point_seq;
+    }, total_point_seq);
 
    string s{};
    s += R"XYZ(
 
     <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 
-    <svg height="250" width="500"
+    <svg height="400" width="500"
     xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
     >
     <polygon points="$$POINTS$$" style="fill:white;stroke:blue;stroke-width:2" />
@@ -318,7 +323,7 @@ string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coor
    )XYZ";
 
    // std::string::replace
-   s = std::regex_replace(s, std::regex("\\$\\$POINTS\\$\\$"), total_point_seq);
+   s = std::regex_replace(s, std::regex("\\$\\$POINTS\\$\\$"), total_point_seq[0]);
    return s;
 }
 
