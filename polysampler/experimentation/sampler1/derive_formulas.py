@@ -13,6 +13,7 @@ import sympy
 #from __future__ import division
 import sympy
 from sympy import *
+from sympy import Eq as Equation
 
 sympy.init_printing()
 
@@ -43,6 +44,52 @@ t12, t34 = symbols('u v', real=true)
 ray12 = t12 * X1 + (1-t12) * X2
 ray34 = t34 * X3 + (1-t34) * X4
 
+# t in terms of x
+def solve_param(ray12_X,t12):
+    print('========')
+    eq = Equation(ray12_X, ray12_X*0)
+    sympy.pprint(eq)
+
+    solutions = solve(eq, (t12), force=True, manual=True,
+        set=False,
+        check=False,
+        numerical=False,
+        warn=True,
+        )
+
+    print(solutions)
+    sympy.pprint(solutions)
+    assert len(solutions) == 1
+    assert len(solutions[0]) == 1
+    sol1 = solutions[0][0]
+    sympy.pprint(sol1)
+    print('========')
+    return sol1
+
+sol_u = solve_param(ray12-X,t12)
+print(sol_u)
+sympy.pprint(sol_u)
+
+# t in terms of x (i.e. eliminating t)
+ray12_x = ray12.subs(t12, sol_u)
+sympy.pprint(ray12_x)
+
+
+sol_v = solve_param(ray34 - X,t34)
+print(sol_v)
+sympy.pprint(sol_v)
+# t' in terms of x (i.e. eliminating t)
+ray34_x = ray34.subs(t34, sol_v)
+sympy.pprint(ray34_x)
+
+print('\n\n')
+sympy.pprint(ray12_x-X)
+sympy.pprint(ray34_x-X)
+
+# no u,v,t: all in terms of x,y (why no y??)
+eq_all = Equation(Matrix([ray12_x-X, ray34_x-X]), Matrix([0,0]))
+sympy.pprint(eq_all)
+exit()
 
 eq12 = ray12 - X
 eq34 = ray34 - X
@@ -51,8 +98,7 @@ sympy.pprint(eq12)
 sympy.pprint(eq34)
 
 
-# Equation
-from sympy import Eq as Equation
+
 
 O0 =  Matrix([0,0])
 #eq = Equation(Matrix([eq12, eq34]), Matrix([O0,O0]))
