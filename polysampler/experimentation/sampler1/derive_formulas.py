@@ -112,18 +112,76 @@ sympy.pprint(sol_u)
 sympy.pprint(sol_v)
 # The GCD trick in sympy
 
+
+# or euqally, rayB. Because rayB=rayA
+sol_xy = rayA.subs(u, sol_u).subs(v,sol_v)
+print("=============")
+xy = [sol_xy[0].simplify(), sol_xy[1].simplify()]
+print(xy[0])
+print(xy[1])
+
+d = gcd(xy[0], xy[1])
+denom = 1/d   # has non-fraction form
+print('gcd = ', denom)
+numerator_x = sol_u * denom
+numerator_y = sol_v * denom
+
+# polynomials:
+sympy.pprint(numerator_x)
+sympy.pprint(numerator_y)
+sympy.pprint(denom)
+
+
+from sympy.utilities.codegen import codegen
+
+from sympy.abc import x, y, d
+
+eqlist = [
+    ("intersect",
+        [
+            Equation(x, numerator_x),
+            Equation(y, numerator_y),
+            Equation(d, denom),
+        ]
+    )
+]
+
+[(c_name, c_code), (h_name, c_header)] = codegen( \
+      eqlist, \
+      "C", header=False, empty=False)
+
+print(c_name)
+print(c_code)
+
+"""
+output:
+intersect.c
+#include "intersect.h"
+#include <math.h>
+void intersect(double x1, double x2, double x3, double x4, double y1, double y2, double y3, double y4, double *d, double *x, double *y) {
+   (*d) = x1*y3 - x1*y4 - x2*y3 + x2*y4 - x3*y1 + x3*y2 + x4*y1 - x4*y2;
+   (*x) = -x2*y3 + x2*y4 + x3*y2 - x3*y4 - x4*y2 + x4*y3;
+   (*y) = x1*y2 - x1*y4 - x2*y1 + x2*y4 + x4*y1 - x4*y2;
+}
+"""
+
+############################################################
+
+print('\n')
+print('---We dont need the following:----')
+# Had we wanted u,v only:
 d = gcd(sol_u, sol_v)
 denom = 1/d  # has non-fraction form
 print('gcd = ', denom)
 numerator_u = sol_u * denom
 numerator_v = sol_v * denom
 
-# polygons:
+# polynomials:
 sympy.pprint(numerator_u)
 sympy.pprint(numerator_v)
 sympy.pprint(denom)
 
-
+print('----free_symbols----')
 print(numerator_v.free_symbols)
 
 # https://afalaize.github.io/posts/170614_ulr_python/
