@@ -53,10 +53,24 @@ const tesselation_t &poly_poly_intersection(
     return tesselation1;
 }
 
+/*
 points_t points = // {{1,2}, {3,4}};
     {point_t{0, 1}, {0.4, 0.8}, {0.8, 0.5}, {1, 0.3}, {0, -1}, {-1, 0}, {-0.3, 0.3}};
 
 tesselation_t trigulation = {{1, 2, 3, 4, 5}, {1, 2, 6}};
+*/
+
+points_t points =
+    {point_t{-0.2,0.8}, {0.4, 0.8}, {0.9, 0.5}, {1, 0.0}, {0, -1}, {-1, 0}, {-0.1, -0.2}};
+
+tesselation_t trigulation = {{1, 2, 3, 4, 5}, {1, 2, 6},
+//{0,1,2,6,5},
+{0,1,6,5},
+{2,3,4,6},
+{4,6,5},
+
+
+};
 
 // https://github.com/sosi-org/scientific-code/blob/main/beeseyes/pycode/polygon_sampler.py
 
@@ -356,8 +370,10 @@ string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coor
     /* svg parameters */
     const struct
     {
-        double scale = 150, offsetx = 200, offsety = 200;
-        string width = "500", height = "400";
+        double scale = 1.0, offsetx = 0.0, offsety = 0.0;
+        string width = "5cm", height = "5cm";
+        string view_box = "-1 -1 2 2";
+        string stroke_width = "0.04";
     } svgctx;
 
     // todo: const vertex_coords
@@ -393,7 +409,7 @@ string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coor
         total_point_seq);
 
     string polygon_template = R"XYZ(
-        <polygon points="$$POINTS$$" style="fill:yellow;stroke:blue;stroke-width:4" />
+        <polygon points="$$POINTS$$" style="fill:yellow;stroke:blue;stroke-width:$STROKE_WIDTH" />
     )XYZ";
     string polyss{};
     for (const auto &point_seq_str : total_point_seq)
@@ -405,6 +421,7 @@ string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coor
     <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
     <svg height="$HEIGHT" width="$WIDTH"
         xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
+        viewBox="$VIEWBOX"
         >
 
         $$POLYG$$
@@ -418,11 +435,14 @@ string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coor
     ts = std::regex_replace(svg_template, std::regex("\\$\\$POLYG\\$\\$"), polyss);
     ts = std::regex_replace(ts, std::regex("\\$WIDTH"), svgctx.width);
     ts = std::regex_replace(ts, std::regex("\\$HEIGHT"), svgctx.height);
+    ts = std::regex_replace(ts, std::regex("\\$VIEWBOX"), svgctx.view_box);
+    ts = std::regex_replace(ts, std::regex("\\$STROKE_WIDTH"), svgctx.stroke_width);
     return ts;
 }
 
-int main()
+int main(int argc, char**argv)
 {
+    bool svg_only = (argc > 0);
     // std::cout << "hi" << std::endl;
 
     std::cout << std::endl
@@ -433,6 +453,7 @@ int main()
     std::cout << std::endl
               << std::endl;
 
+    if (svg_only) return 0;
     // std::cout << "ok" << std::endl;
 
     augment_tesselation_polygons(trigulation, points /*, callback*/);
