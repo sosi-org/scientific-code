@@ -61,14 +61,15 @@ tesselation_t trigulation = {{1, 2, 3, 4, 5}, {1, 2, 6}};
 */
 
 points_t points =
-    {point_t{-0.2,0.8}, {0.4, 0.8}, {0.9, 0.5}, {1, 0.0}, {0, -1}, {-1, 0}, {-0.1, -0.2}};
+    {point_t{-0.2, 0.8}, {0.4, 0.8}, {0.9, 0.5}, {1, 0.0}, {0, -1}, {-1, 0}, {-0.1, -0.2}};
 
-tesselation_t trigulation = {{1, 2, 3, 4, 5}, {1, 2, 6},
-//{0,1,2,6,5},
-{0,1,6,5},
-{2,3,4,6},
-{4,6,5},
-
+tesselation_t trigulation = {
+    {1, 2, 3, 4, 5},
+    {1, 2, 6},
+    //{0,1,2,6,5},
+    {0, 1, 6, 5},
+    {2, 3, 4, 6},
+    {4, 6, 5},
 
 };
 
@@ -440,7 +441,7 @@ string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coor
     return ts;
 }
 
-int main(int argc, char**argv)
+int main(int argc, char **argv)
 {
     bool svg_only = (argc > 0);
     // std::cout << "hi" << std::endl;
@@ -453,7 +454,8 @@ int main(int argc, char**argv)
     std::cout << std::endl
               << std::endl;
 
-    if (svg_only) return 0;
+    if (svg_only)
+        return 0;
     // std::cout << "ok" << std::endl;
 
     augment_tesselation_polygons(trigulation, points /*, callback*/);
