@@ -296,7 +296,6 @@ void augment_tesselation_polygons(const tesselation_t &trigulation, const points
 
 // todo: move to side_meta_data_t.hpp
 
-
 void intersect_polys(fixedsize_side_metadata_t poly1, fixedsize_side_metadata_t poly2)
 {
     for (const side_meta_data_t &side_ : poly1)

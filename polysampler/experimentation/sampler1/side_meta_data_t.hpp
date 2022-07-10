@@ -15,7 +15,8 @@ class side_meta_data_t
 public: // not good
     double x0, y0;
     double dx, dy; // x1-x0, y1-y0
-    double x1,y1;
+    double x1, y1;
+
 public:
     side_meta_data_t(const point_t &p0, const point_t &p1)
     {

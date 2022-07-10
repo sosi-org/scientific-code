@@ -4,7 +4,6 @@
 Line-segment intersection
 */
 
-
 #include "./side_meta_data_t.hpp"
 
 template <typename real>
@@ -15,7 +14,6 @@ struct side_side_intersection_solution_t
     real x;
     real y;
 };
-
 
 template <typename real>
 inline side_side_intersection_solution_t<real> intersect_lines(const side_meta_data_t &side1, const side_meta_data_t &side2)
