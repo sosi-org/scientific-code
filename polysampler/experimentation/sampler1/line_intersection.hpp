@@ -9,6 +9,9 @@ Line-segment intersection
 template <typename real>
 struct side_side_intersection_solution_t
 {
+
+    // todo: rename: intersects
+    // how stringly
     bool intersect;
     // real condition_number; // ie do not intersect in case of parallel. or too far.
     real x;

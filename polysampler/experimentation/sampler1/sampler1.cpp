@@ -281,6 +281,7 @@ void augment_tesselation_polygons(const tesselation_t &trigulation, const points
         // double-circular_for !
         circular_for(polysides.begin(), polysides.end(), [](auto side1, auto side2)
                      {
+                        // todo: remove explicit concrete type double
             auto ip = intersect_lines_segment<double>(*side1, *side2);
             std::cout << "(" << ip.x << "," << ip.y << ") "; });
         std::cout << std::endl;
@@ -331,6 +332,8 @@ public:
         traverse_tesselation(
             trigulation, vertex_coords, [vertex_coords, &total_point_seq, svgctx](const auto &polyg)
             {
+
+                //todo: indent
         // per face
 
         string point_seq{};
@@ -368,7 +371,7 @@ public:
     static std::string helper_dot(real x, real y)
     {
         const string helperdot_template = R"XYZ(
-            circle cx="$X" cy="$Y" r="0.05" fill="red" />
+            <circle cx="$X" cy="$Y" r="0.05" fill="red" />
         )XYZ";
 
         string s = helperdot_template;
@@ -377,12 +380,18 @@ public:
         return s;
     }
 
-    static string generate_svg(const tesselation_t &trigulation, const points_t &vertex_coords)
+    static string generate_svg(const tesselation_t &trigulation, const points_t &vertex_coords, const std::vector<point_t> extra_points)
     {
 
         const svg_utils::svgctx_t svgctx;
 
-        string polyss = tessellation(svgctx, trigulation, vertex_coords);
+        const string polyss = tessellation(svgctx, trigulation, vertex_coords);
+
+        string helper_points = "";
+        for (point_t p : extra_points)
+        {
+            helper_points += helper_dot(p.x, p.y);
+        }
 
         const string svg_template = R"XYZ(
         <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
@@ -392,14 +401,20 @@ public:
                 >
 
                 $$POLYG$$
+
+                $$HELPER_DOTS$$
+
                 Sorry, your browser does not support inline SVG.
             </svg>
         )XYZ";
 
         // rename: total
-        string ts{};
+        string ts = svg_template;
         // std::string::replace
-        ts = std::regex_replace(svg_template, std::regex("\\$\\$POLYG\\$\\$"), polyss);
+
+        ts = std::regex_replace(ts, std::regex("\\$\\$POLYG\\$\\$"), polyss);
+        ts = std::regex_replace(ts, std::regex("\\$\\$HELPER_DOTS\\$\\$"), helper_points);
+
         ts = std::regex_replace(ts, std::regex("\\$WIDTH"), svgctx.width);
         ts = std::regex_replace(ts, std::regex("\\$HEIGHT"), svgctx.height);
         ts = std::regex_replace(ts, std::regex("\\$VIEWBOX"), svgctx.view_box);
@@ -408,13 +423,69 @@ public:
     }
 };
 
-void save_svg_file(const string &file_name, const auto &trigulation, const auto &points)
+template <typename real>
+std::vector<point_t> generate_helper_points(const tesselation_t &trigulation, const points_t &vertex_coords)
+{
+
+    std::vector<point_t> helper_points{};
+    std::vector<std::vector<point_t>> helper_points1{};
+    std::vector<std::vector<point_t>> helper_points2d{};
+
+    point_t p1{0.5, 0.5}, p2{2, 2};
+
+    side_meta_data_t s0md = side_meta_data_t{p1, p2};
+
+    traverse_tesselation(
+        trigulation, vertex_coords, [vertex_coords, &helper_points,s0md](const auto &polyg)
+        {
+            // per face
+
+            string point_seq{};
+
+            auto callback =  [&helper_points, vertex_coords,s0md](auto from_vert_it, auto to_vert_it)
+            //-> std::vector<point_t>
+            {
+
+                const point_t & point1 = vertex_coords[*from_vert_it];
+                const point_t & point2 = vertex_coords[*to_vert_it];
+
+                side_meta_data_t md = side_meta_data_t{point1, point2};
+
+
+                auto ip = intersect_lines_segment<real>(s0md, md);
+                std::cout << "(" << ip.x << "," << ip.y << ") ";
+                if (ip.intersect) {
+                    helper_points.push_back(point_t{ip.x,ip.y});
+                }
+                //return std::vector<point_t>{};
+            };
+
+            circular_for(polyg.begin(), polyg.end(),callback);
+            return std::vector<point_t>{};
+        }, helper_points2d);
+
+/*
+    return helper_points;
+},
+        helper_points2d
+    );
+    */
+/*
+//intersect_lines_segment(s0, const side_meta_data_t &side2);
+
+return helper_points;
+}
+*/
+return helper_points;
+}
+
+void save_svg_file(const string &file_name, const auto &trigulation, const auto &points, const std::vector<point_t> helper_points)
 {
     std::wofstream file;
     file.open(file_name.c_str());
 
     // will it be efficient?
-    string contents = svg_utils<double>::generate_svg(trigulation, points);
+    string contents = svg_utils<double>::generate_svg(trigulation, points, helper_points);
     std::cout << contents << std::endl;
 
     file << contents.c_str();
@@ -426,9 +497,11 @@ int main()
 {
     // bool svg_only = (argc > 0);
 
-    save_svg_file("./output.svg", trigulation, points);
-
     augment_tesselation_polygons(trigulation, points);
+
+    std::vector<point_t> helper_points = generate_helper_points<double>(trigulation, points); // for debugging
+
+    save_svg_file("./output.svg", trigulation, points, helper_points);
 
     return 0;
 }
