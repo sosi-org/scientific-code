@@ -379,8 +379,21 @@ public:
         s = std::regex_replace(s, std::regex("\\$Y"), std::to_string(y));
         return s;
     }
+    static std::string helper_line(side_meta_data_t line_seg)
+    {
+        const string helperline_template = R"XYZ(
+            <polyline points=" $X1,$Y1 $X2,$Y2" style="stroke:grey;stroke-width:0.01" />
+        )XYZ";
 
-    static string generate_svg(const tesselation_t &trigulation, const points_t &vertex_coords, const std::vector<point_t> extra_points)
+        string s = helperline_template;
+        s = std::regex_replace(s, std::regex("\\$X1"), std::to_string(line_seg.x0));
+        s = std::regex_replace(s, std::regex("\\$Y1"), std::to_string(line_seg.y0));
+        s = std::regex_replace(s, std::regex("\\$X2"), std::to_string(line_seg.x1));
+        s = std::regex_replace(s, std::regex("\\$Y2"), std::to_string(line_seg.y1));
+        return s;
+    }
+
+    static string generate_svg(const tesselation_t &trigulation, const points_t &vertex_coords, const std::vector<point_t> extra_points, const std::vector<side_meta_data_t> &helper_lines)
     {
 
         const svg_utils::svgctx_t svgctx;
@@ -391,6 +404,12 @@ public:
         for (point_t p : extra_points)
         {
             helper_points += helper_dot(p.x, p.y);
+        }
+
+        string helper_lines_s = "";
+        for (auto hl : helper_lines)
+        {
+            helper_lines_s += helper_line(hl);
         }
 
         const string svg_template = R"XYZ(
@@ -413,7 +432,7 @@ public:
         // std::string::replace
 
         ts = std::regex_replace(ts, std::regex("\\$\\$POLYG\\$\\$"), polyss);
-        ts = std::regex_replace(ts, std::regex("\\$\\$HELPER_DOTS\\$\\$"), helper_points);
+        ts = std::regex_replace(ts, std::regex("\\$\\$HELPER_DOTS\\$\\$"), helper_points +"\n"+ helper_lines_s);
 
         ts = std::regex_replace(ts, std::regex("\\$WIDTH"), svgctx.width);
         ts = std::regex_replace(ts, std::regex("\\$HEIGHT"), svgctx.height);
@@ -431,26 +450,28 @@ std::uniform_real_distribution<double> dist(-1, 2); // distribution in range [-1
 // https://stackoverflow.com/a/19666713/4374258
 
 
+// const int SAMPLING_FACTOR = 16;
+const int SAMPLING_FACTOR = 4;
 
 template <typename real>
-std::vector<point_t> generate_helper_points(const tesselation_t &trigulation, const points_t &vertex_coords)
+//std::vector<point_t>
+auto generate_helper_points(const tesselation_t &trigulation, const points_t &vertex_coords)
 {
 
     std::vector<point_t> helper_points{};
     std::vector<std::vector<point_t>> helper_points1{};
     std::vector<std::vector<point_t>> helper_points2d{};
 
-
-    
+    std::vector<side_meta_data_t> helper_lines{};
 
     traverse_tesselation(
-        trigulation, vertex_coords, [vertex_coords, &helper_points](const auto &polyg)
+        trigulation, vertex_coords, [vertex_coords, &helper_points, &helper_lines](const auto &polyg)
         {
             // per face
 
             string point_seq{};
 
-            auto callback =  [&helper_points, vertex_coords](auto from_vert_it, auto to_vert_it)
+            auto callback =  [vertex_coords, &helper_points, &helper_lines](auto from_vert_it, auto to_vert_it)
             //-> std::vector<point_t>
             {
 
@@ -458,7 +479,7 @@ std::vector<point_t> generate_helper_points(const tesselation_t &trigulation, co
                 const point_t & point2 = vertex_coords[*to_vert_it];
                 side_meta_data_t md = side_meta_data_t{point1, point2};
 
-                for(int i = 0; i < 16; ++i) {
+                for(int i = 0; i < SAMPLING_FACTOR; ++i) {
                 //point_t p1{0.5, 0.5}, p2{2, 2};
                 point_t p1{dist(rngmt), dist(rngmt)},
                         p2{dist(rngmt), dist(rngmt)};
@@ -468,6 +489,7 @@ std::vector<point_t> generate_helper_points(const tesselation_t &trigulation, co
                 std::cout << "(" << ip.x << "," << ip.y << ") ";
                 if (ip.intersect) {
                     helper_points.push_back(point_t{ip.x,ip.y});
+                    helper_lines.push_back(s0md);
                 }
                 }
                 //return std::vector<point_t>{};
@@ -489,16 +511,19 @@ std::vector<point_t> generate_helper_points(const tesselation_t &trigulation, co
     return helper_points;
     }
     */
-    return helper_points;
+    return std::make_pair(helper_points, helper_lines);
 }
 
-void save_svg_file(const string &file_name, const auto &trigulation, const auto &points, const std::vector<point_t> helper_points)
+void save_svg_file(const string &file_name, const auto &trigulation, const auto &points,
+    const std::vector<point_t> &helper_points,
+    const std::vector<side_meta_data_t> &helper_lines
+    )
 {
     std::wofstream file;
     file.open(file_name.c_str());
 
     // will it be efficient?
-    string contents = svg_utils<double>::generate_svg(trigulation, points, helper_points);
+    string contents = svg_utils<double>::generate_svg(trigulation, points, helper_points, helper_lines);
     std::cout << contents << std::endl;
 
     file << contents.c_str();
@@ -512,9 +537,12 @@ int main()
 
     augment_tesselation_polygons(trigulation, points);
 
-    std::vector<point_t> helper_points = generate_helper_points<double>(trigulation, points); // for debugging
+    //std::vector<point_t> helper_points
+    //std::pair<std::vector<point_t> , std::vector<intersect_lines_segment<real> > > =
+    auto [hpoints, hlines] =
+       generate_helper_points<double>(trigulation, points); // for debugging
 
-    save_svg_file("./output.svg", trigulation, points, helper_points);
+    save_svg_file("./output.svg", trigulation, points, hpoints, hlines);
 
     return 0;
 }
