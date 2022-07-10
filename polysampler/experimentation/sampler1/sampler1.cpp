@@ -423,6 +423,15 @@ public:
     }
 };
 
+#include <random>
+std::random_device rdev;
+std::mt19937 rngmt(rdev());
+std::uniform_real_distribution<double> dist(-1, 2); // distribution in range [-1.0, 2.0]
+// from https://stackoverflow.com/a/13445752/4374258
+// https://stackoverflow.com/a/19666713/4374258
+
+
+
 template <typename real>
 std::vector<point_t> generate_helper_points(const tesselation_t &trigulation, const points_t &vertex_coords)
 {
@@ -431,31 +440,35 @@ std::vector<point_t> generate_helper_points(const tesselation_t &trigulation, co
     std::vector<std::vector<point_t>> helper_points1{};
     std::vector<std::vector<point_t>> helper_points2d{};
 
-    point_t p1{0.5, 0.5}, p2{2, 2};
 
-    side_meta_data_t s0md = side_meta_data_t{p1, p2};
+    
 
     traverse_tesselation(
-        trigulation, vertex_coords, [vertex_coords, &helper_points, s0md](const auto &polyg)
+        trigulation, vertex_coords, [vertex_coords, &helper_points](const auto &polyg)
         {
             // per face
 
             string point_seq{};
 
-            auto callback =  [&helper_points, vertex_coords,s0md](auto from_vert_it, auto to_vert_it)
+            auto callback =  [&helper_points, vertex_coords](auto from_vert_it, auto to_vert_it)
             //-> std::vector<point_t>
             {
 
                 const point_t & point1 = vertex_coords[*from_vert_it];
                 const point_t & point2 = vertex_coords[*to_vert_it];
-
                 side_meta_data_t md = side_meta_data_t{point1, point2};
 
+                for(int i = 0; i < 16; ++i) {
+                //point_t p1{0.5, 0.5}, p2{2, 2};
+                point_t p1{dist(rngmt), dist(rngmt)},
+                        p2{dist(rngmt), dist(rngmt)};
+                side_meta_data_t s0md = side_meta_data_t{p1, p2};
 
                 auto ip = intersect_lines_segment<real>(s0md, md);
                 std::cout << "(" << ip.x << "," << ip.y << ") ";
                 if (ip.intersect) {
                     helper_points.push_back(point_t{ip.x,ip.y});
+                }
                 }
                 //return std::vector<point_t>{};
             };
