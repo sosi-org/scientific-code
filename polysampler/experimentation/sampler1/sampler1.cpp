@@ -62,11 +62,18 @@ points_t points = // {{1,2}, {3,4}};
 tesselation_t trigulation = {{1, 2, 3, 4, 5}, {1, 2, 6}};
 */
 
-points_t points =
-    {point_t{-0.2, 0.8}, {0.4, 0.8}, {0.9, 0.5}, {1, 0.0}, {0, -1}, {-1, 0}, {-0.1, -0.2}};
+points_t points = {
+    point_t{-0.2, 0.8}, // 0
+    {0.4, 0.8},         // 1
+    {0.9, 0.5},         // 2
+    {1, 0.0},           // 3
+    {0, -1},            // 4
+    {-1, 0},            // 5
+    {-0.1, -0.2},       // 6
+};
 
 tesselation_t trigulation = {
-    {1, 2, 3, 4, 5},
+    //{1, 2, 3, 4, 5},
     {1, 2, 6},
     //{0,1,2,6,5},
     {0, 1, 6, 5},
@@ -358,7 +365,7 @@ public:
             total_point_seq);
 
         const string polygon_template = R"XYZ(
-            <polygon points="$$POINTS$$" style="fill:yellow;stroke:blue;stroke-width:$STROKE_WIDTH" opacity="0.03" />
+            <polygon points="$$POINTS$$" style="fill:yellow;stroke:blue;stroke-width:$STROKE_WIDTH" opacity="1" />
         )XYZ";
         string polyss{};
         for (const auto &point_seq_str : total_point_seq)
