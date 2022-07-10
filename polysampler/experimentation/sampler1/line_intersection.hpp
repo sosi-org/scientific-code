@@ -142,14 +142,7 @@ inline side_side_intersection_solution_t<real> intersect_lines_segment(const sid
     {
         return null_intersection;
     }
-    if (max_of_mins_x > xy.x + ε2)
-    {
-        return null_intersection;
-    }
-    if (max_of_mins_y > xy.y + ε2)
-    {
-        return null_intersection;
-    }
+
     if (max_of_mins_y > xy.y + ε2)
     {
         return null_intersection;
@@ -159,14 +152,7 @@ inline side_side_intersection_solution_t<real> intersect_lines_segment(const sid
     {
         return null_intersection;
     }
-    if (min_of_maxs_x + ε2  < xy.x)
-    {
-        return null_intersection;
-    }
-    if (min_of_maxs_y + ε2  < xy.y)
-    {
-        return null_intersection;
-    }
+
     if (min_of_maxs_y + ε2  < xy.y)
     {
         return null_intersection;
