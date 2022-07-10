@@ -215,11 +215,9 @@ void circular_for(IT _begin, IT _end, auto callback_pair)
     callback_pair(last_to, _begin);
 }
 
-
 /*
     clang++ sampler1.cpp -std=c++2b
 */
-
 
 template <typename real>
 void intersect_lines(const side_meta_data_t &side1, const side_meta_data_t &side2);
@@ -252,11 +250,13 @@ void augment_tesselation_polygons(const tesselation_t &trigulation, const points
         r);
     // now r contains the augmented data structure:
     // debug print:
-    for(const auto& poly : r) {
-        //fixedsize_side_metadata_t poly;
-        for (const side_meta_data_t& side_ : poly) {
+    for (const auto &poly : r)
+    {
+        // fixedsize_side_metadata_t poly;
+        for (const side_meta_data_t &side_ : poly)
+        {
             // const side_meta_data_t  & side_ = side;
-            std::cout << "( o:" << side_.x0 << ","<< side_.y0 << "d:" <<  side_.dx <<","<< side_.dy << ") ";
+            std::cout << "( o:" << side_.x0 << "," << side_.y0 << "d:" << side_.dx << "," << side_.dy << ") ";
         }
         intersect_lines<double>(poly[0], poly[1]);
     }
