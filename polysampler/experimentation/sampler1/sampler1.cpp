@@ -215,38 +215,13 @@ void circular_for(IT _begin, IT _end, auto callback_pair)
     callback_pair(last_to, _begin);
 }
 
-// std::function<void (const patch_t&, const side_it&, const side_it&)> augment_side
 
-template <typename func, typename resultt>
-// template <typename func>
-// template <typename resultt>
-// std::vector<decltype( process_polyg_callback() )>
-// std::vector<resultt>
-void traverse_tesselation(const tesselation_t &trigulation, const points_t &points, func process_polyg_callback
-                          // resultt*
-                          ,
-                          std::vector<resultt> &accum
-                          /*, auto augment_side*/)
-{
-    // std::vector<resultt> accum{0};
-
-    for (auto plg_it = trigulation.begin(); plg_it < trigulation.end(); ++plg_it)
-    {
-        // Take each polygon from the tesselation
-        const auto &polyg = *plg_it;
-
-        // fixedsize_side_metadata_t r;
-        resultt r = process_polyg_callback(polyg);
-        // process_polyg_callback(polyg);
-        //  if you want to keep them:
-        //  std::vector<side_meta_data_t> q = patch.finish();
-        accum.push_back(r);
-    }
-    // return accum;
-}
 /*
     clang++ sampler1.cpp -std=c++2b
 */
+
+
+// std::function<void (const patch_t&, const side_it&, const side_it&)> augment_side
 
 void augment_tesselation_polygons(const tesselation_t &trigulation, const points_t &points)
 {
