@@ -366,6 +366,7 @@ void intersect_polys(fixedsize_side_metadata_t poly1, fixedsize_side_metadata_t 
     }
 }
 
+// rename: generate_svg
 string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coords)
 {
     /* svg parameters */
@@ -441,10 +442,8 @@ string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coor
     return ts;
 }
 
-int main(int argc, char **argv)
+void save_svg_file(const auto &trigulation, const auto &points)
 {
-    bool svg_only = (argc > 0);
-    // std::cout << "hi" << std::endl;
 
     std::cout << std::endl
               << std::endl;
@@ -453,6 +452,14 @@ int main(int argc, char **argv)
     std::cout << export_svg3(trigulation, points) << std::endl;
     std::cout << std::endl
               << std::endl;
+}
+
+int main(int argc, char **argv)
+{
+    bool svg_only = (argc > 0);
+    // std::cout << "hi" << std::endl;
+
+    save_svg_file(trigulation, points);
 
     if (svg_only)
         return 0;
