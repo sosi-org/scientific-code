@@ -22,6 +22,7 @@ typedef model::d2::point_xy point;
 #include <format>
 #include <regex>
 #include <cassert>
+#include <fstream>
 
 // #include <array>
 
@@ -442,14 +443,24 @@ string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coor
     return ts;
 }
 
-void save_svg_file(const auto &trigulation, const auto &points)
+void save_svg_file(const string &file_name, const auto &trigulation, const auto &points)
 {
+
+    std::wofstream file;
+    file.open(file_name.c_str());
 
     std::cout << std::endl
               << std::endl;
     // double xi[4][2] = {{220,0}, {300,50}, {170,70}, {0,100}};
     // std::cout << export_svg3(xi) << std::endl;
-    std::cout << export_svg3(trigulation, points) << std::endl;
+
+    // will it be efficient?
+    string contents = export_svg3(trigulation, points);
+    std::cout << contents << std::endl;
+
+    file << contents.c_str();
+
+    file.close();
     std::cout << std::endl
               << std::endl;
 }
@@ -459,7 +470,7 @@ int main(int argc, char **argv)
     bool svg_only = (argc > 0);
     // std::cout << "hi" << std::endl;
 
-    save_svg_file(trigulation, points);
+    save_svg_file("./output.svg", trigulation, points);
 
     if (svg_only)
         return 0;
