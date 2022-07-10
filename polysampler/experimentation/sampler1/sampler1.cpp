@@ -244,7 +244,6 @@ struct side_side_intersection_solution_t
     real y;
 };
 
-
 template <typename real>
 side_side_intersection_solution_t<real>
 intersect_lines(const side_meta_data_t &side1, const side_meta_data_t &side2);
@@ -279,20 +278,27 @@ void augment_tesselation_polygons(const tesselation_t &trigulation, const points
     // debug print:
     for (const auto &polysides : r)
     {
-        // fixedsize_side_metadata_t polysides;
-        for (const side_meta_data_t &side_ : polysides)
+        for (const side_meta_data_t &side : polysides)
         {
-            std::cout << "( o:" << side_.x0 << "," << side_.y0 << "d:" << side_.dx << "," << side_.dy << ") ";
+            std::cout << "( o:" << side.x0 << "," << side.y0 << "; d:" << side.dx << "," << side.dy << ") ";
         }
-
+        std::cout << std::endl;
+        std::cout << "intersections: ";
+        // double-circular_for !
+        circular_for(polysides.begin(), polysides.end(), [](auto side1, auto side2)
+                     {
+            auto ip = intersect_lines<double>(*side1, *side2);
+            std::cout << "(" << ip.x << "," << ip.y << ") "; });
+        std::cout << std::endl;
+        /*
         auto ip = intersect_lines<double>(polysides[0], polysides[1]);
         std::cout << "\nintersection: " << ip.x << "," << ip.y << std::endl;
+        */
     }
 }
 
 // Good test scenario:
 // (x1,y1), (x2,y2) , (x3,y3) -> should give x2,y2
-
 
 // todo: move to side_meta_data_t.hpp
 template <typename real>
@@ -312,6 +318,8 @@ inline side_side_intersection_solution_t<real> intersect_lines(const side_meta_d
     real numerator_x = x1 * y3 - x1 * y4 - x2 * y3 + x2 * y4 - x3 * y1 + x3 * y2 + x4 * y1 - x4 * y2;
     real numerator_y = -x2 * y3 + x2 * y4 + x3 * y2 - x3 * y4 - x4 * y2 + x4 * y3;
     real denom = x1 * y2 - x1 * y4 - x2 * y1 + x2 * y4 + x4 * y1 - x4 * y2;
+
+    // typical extents of the values: -0.65 , 2.77556e-17 , -0.65
 
     std::cout << "numerator_x:" << numerator_x << std::endl;
     std::cout << "numerator_y:" << numerator_y << std::endl;
