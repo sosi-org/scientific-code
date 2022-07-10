@@ -1,6 +1,6 @@
 export module point_t;
-//export module point_t.hpp;
-// export module point_t;
+// export module point_t.hpp;
+//  export module point_t;
 #include <iostream>
 
 #include <sstream>
@@ -12,8 +12,7 @@ export module point_t;
 // #pragma once
 // todo: int type
 // export
-export
-struct point_t
+export struct point_t
 {
     double x;
     double y;
@@ -28,6 +27,6 @@ public:
         oss << std::setprecision(8) << std::noshowpoint << this->y;
         oss << ")";
         return oss.str();
-        //return "(" + std::to_string(this->x) + "," + std::to_string(this->y) + ")";
+        // return "(" + std::to_string(this->x) + "," + std::to_string(this->y) + ")";
     }
 }; // point_t;

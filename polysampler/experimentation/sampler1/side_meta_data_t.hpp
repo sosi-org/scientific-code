@@ -13,7 +13,7 @@ class side_meta_data_t
 {
     double x0, y0;
     double dx, dy; // x1-x0, y1-y0
-    public:
+public:
     side_meta_data_t(const point_t &p0, const point_t &p1)
     {
         this->x0 = p0.x;
@@ -37,7 +37,6 @@ class side_meta_data_t
         return *this;
     }
     */
-
 };
 
 // std::array<side_meta_data_t>
@@ -45,6 +44,6 @@ std::vector<side_meta_data_t> convert(const tesselation_t &tesselation,
                                       const points_t &points)
 {
     // return std::array<side_meta_data_t, 3>
-    //return std::vector<side_meta_data_t>(tesselation.begin(), tesselation.end());
+    // return std::vector<side_meta_data_t>(tesselation.begin(), tesselation.end());
     return std::vector<side_meta_data_t>();
 }

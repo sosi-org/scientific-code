@@ -76,10 +76,10 @@ class vector_map
 
 #include "side_meta_data_t.hpp"
 
-typedef std::vector<side_point_t>  vertiex_indices_t; // vertices; // without coords, just int, refering to the coords index
+typedef std::vector<side_point_t> vertiex_indices_t; // vertices; // without coords, just int, refering to the coords index
 
-//const std::vector<side_point_t> &points_indices_ref;  = vertices
-// const vertiex_indices_t &vertiex_indices,
+// const std::vector<side_point_t> &points_indices_ref;  = vertices
+//  const vertiex_indices_t &vertiex_indices,
 
 // typedef std::unique_ptr<side_meta_data_t[]> fixedsize_side_metadata_t;
 typedef std::vector<side_meta_data_t> fixedsize_side_metadata_t;
@@ -117,25 +117,25 @@ struct patch_t
     /*
         Allocates placeholder. For speed.
     */
-    //rename: points -> points_coords
+    // rename: points -> points_coords
     patch_t(const points_t &points, std::vector<int>::size_type nsides)
         : coords_ref(points) //, side_meta_data(nsides)
           ,
           side_meta_data()
-          //, side_counter(0)
+    //, side_counter(0)
     {
         side_meta_data.reserve(nsides);
         // this->side_meta_data = side_meta_data_t(); //(0); // (nsides)
         std::cout << "polyg[" << nsides << "]: ";
         /* accumulated sides */
-        //this->side_counter = 0;
+        // this->side_counter = 0;
     }
 
     /*
         augment and accumulate
     */
     // rename -> augment this with info from now that (another new side)
-    //void augment_side(const int &from_idx, const int &to_idx /*, int idx*/)
+    // void augment_side(const int &from_idx, const int &to_idx /*, int idx*/)
     void augment_side(const int &from_idx, const int &to_idx /*, int idx*/)
     {
         const auto &p1 = this->coords_ref[from_idx];
@@ -167,19 +167,19 @@ struct patch_t
         // compile-time size? I want const size, not compile-time size.
         // return std::array<side_meta_data_t,>(this->side_meta_data);
 
-        //typedef std::unique_ptr<side_meta_data_t[]> fixedsize_side_metadata_t;
+        // typedef std::unique_ptr<side_meta_data_t[]> fixedsize_side_metadata_t;
 
         // make_unique_for_overwrite
-        //return std::make_unique<side_meta_data_t []> ( this->side_counter );
+        // return std::make_unique<side_meta_data_t []> ( this->side_counter );
 
         // problem: how to copy?
-        //return fixedsize_side_metadata_t(0);
-        //return fixedsize_side_metadata_t(this->side_meta_data.begin(), this->side_meta_data.end());
-        //return fixedsize_side_metadata_t(side_meta_data.size());
+        // return fixedsize_side_metadata_t(0);
+        // return fixedsize_side_metadata_t(this->side_meta_data.begin(), this->side_meta_data.end());
+        // return fixedsize_side_metadata_t(side_meta_data.size());
 
         // std::unique_ptr<side_meta_data_t []>
         // fixedsize_side_metadata_t fixedsize(side_meta_data.size());
-        //std::unique_ptr<side_meta_data_t> fixedsize [side_meta_data.size()];
+        // std::unique_ptr<side_meta_data_t> fixedsize [side_meta_data.size()];
         /*
         std::generate(
             fixedsize.begin(), //std::begin(fixedsize),
@@ -187,24 +187,24 @@ struct patch_t
             []() { return std::make_unique<side_meta_data_t>(1); }
         );
         */
-       /*
-        fixedsize_side_metadata_t fixedsize(side_meta_data.size());
-        std::copy(side_meta_data.begin(), side_meta_data.end(), fixedsize.get());
-        return fixedsize;
-        */
-       //return fixedsize_side_metadata_t(0);
-       return side_meta_data;
-
+        /*
+         fixedsize_side_metadata_t fixedsize(side_meta_data.size());
+         std::copy(side_meta_data.begin(), side_meta_data.end(), fixedsize.get());
+         return fixedsize;
+         */
+        // return fixedsize_side_metadata_t(0);
+        return side_meta_data;
     }
 };
 
-//typedef std::vector<const side_point_t>::iterator side_it;
+// typedef std::vector<const side_point_t>::iterator side_it;
 
 /*
     Goes through iterator range and applies the given lambda on consecutive pairs, circularly.
 */
 template <typename IT>
-void circular_for(IT _begin, IT _end, auto callback_pair) {
+void circular_for(IT _begin, IT _end, auto callback_pair)
+{
     IT last_to;
     for (IT it = _begin; it < _end - 1; ++it)
     {
@@ -218,43 +218,44 @@ void circular_for(IT _begin, IT _end, auto callback_pair) {
 // std::function<void (const patch_t&, const side_it&, const side_it&)> augment_side
 
 template <typename func, typename resultt>
-//template <typename func>
-//template <typename resultt>
-//std::vector<decltype( process_polyg_callback() )>
-//std::vector<resultt>
-void
-traverse_tesselation(const tesselation_t &trigulation, const points_t &points, func process_polyg_callback
-    //resultt*
-    ,
-    std::vector<resultt>&accum
-    /*, auto augment_side*/ )
+// template <typename func>
+// template <typename resultt>
+// std::vector<decltype( process_polyg_callback() )>
+// std::vector<resultt>
+void traverse_tesselation(const tesselation_t &trigulation, const points_t &points, func process_polyg_callback
+                          // resultt*
+                          ,
+                          std::vector<resultt> &accum
+                          /*, auto augment_side*/)
 {
-    //std::vector<resultt> accum{0};
+    // std::vector<resultt> accum{0};
 
     for (auto plg_it = trigulation.begin(); plg_it < trigulation.end(); ++plg_it)
     {
         // Take each polygon from the tesselation
         const auto &polyg = *plg_it;
 
-
-        //fixedsize_side_metadata_t r;
+        // fixedsize_side_metadata_t r;
         resultt r = process_polyg_callback(polyg);
-        //process_polyg_callback(polyg);
-        // if you want to keep them:
-        // std::vector<side_meta_data_t> q = patch.finish();
+        // process_polyg_callback(polyg);
+        //  if you want to keep them:
+        //  std::vector<side_meta_data_t> q = patch.finish();
         accum.push_back(r);
     }
-    //return accum;
+    // return accum;
 }
 /*
     clang++ sampler1.cpp -std=c++2b
 */
 
-void augment_tesselation_polygons(const tesselation_t &trigulation, const points_t &points) {
-    //fixedsize_side_metadata_t *x0;
+void augment_tesselation_polygons(const tesselation_t &trigulation, const points_t &points)
+{
+    // fixedsize_side_metadata_t *x0;
     std::vector<fixedsize_side_metadata_t> r;
-     /* -> fixedsize_side_metadata_t*/
-    traverse_tesselation(trigulation, points, [&points](const auto &polyg) {
+    /* -> fixedsize_side_metadata_t*/
+    traverse_tesselation(
+        trigulation, points, [&points](const auto &polyg)
+        {
 
         patch_t patch{points, polyg.size()};
 
@@ -269,22 +270,24 @@ void augment_tesselation_polygons(const tesselation_t &trigulation, const points
         std::cout << std::endl;
 
         //patch.finish();
-        return patch.finish();
-    }, r);
+        return patch.finish(); },
+        r);
 }
 
-
-string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coords) {
+string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coords)
+{
 
     string *x0;
 
     // todo: const vertex_coords
 
-    //string total_point_seq;
-    //std::vector<string> total_point_seq;
+    // string total_point_seq;
+    // std::vector<string> total_point_seq;
     std::vector<string> total_point_seq;
     // /* -> string */
-    traverse_tesselation(trigulation, vertex_coords, [vertex_coords,&total_point_seq](const auto &polyg)  {
+    traverse_tesselation(
+        trigulation, vertex_coords, [vertex_coords, &total_point_seq](const auto &polyg)
+        {
         // per face
 
         string point_seq{};
@@ -305,19 +308,19 @@ string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coor
 
         //total_point_seq = point_seq;
 
-        return point_seq;
-    }, total_point_seq);
+        return point_seq; },
+        total_point_seq);
 
     string polygon_template = R"XYZ(
         <polygon points="$$POINTS$$" style="fill:yellow;stroke:blue;stroke-width:4" />
     )XYZ";
     string polyss{};
-    for(const auto& point_seq_str : total_point_seq)
+    for (const auto &point_seq_str : total_point_seq)
     {
         polyss += std::regex_replace(polygon_template, std::regex("\\$\\$POINTS\\$\\$"), point_seq_str);
     }
 
-   const string svg_template = R"XYZ(
+    const string svg_template = R"XYZ(
     <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
     <svg height="$HEIGHT" width="$WIDTH"
         xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
@@ -328,28 +331,30 @@ string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coor
     </svg>
    )XYZ";
 
-   // rename: total
-   string ts{};
-   // std::string::replace
-   ts = std::regex_replace(svg_template, std::regex("\\$\\$POLYG\\$\\$"), polyss);
-   ts = std::regex_replace(ts, std::regex("\\$WIDTH"), "500");
-   ts = std::regex_replace(ts, std::regex("\\$HEIGHT"), "400");
-   return ts;
+    // rename: total
+    string ts{};
+    // std::string::replace
+    ts = std::regex_replace(svg_template, std::regex("\\$\\$POLYG\\$\\$"), polyss);
+    ts = std::regex_replace(ts, std::regex("\\$WIDTH"), "500");
+    ts = std::regex_replace(ts, std::regex("\\$HEIGHT"), "400");
+    return ts;
 }
 
 int main()
 {
     // std::cout << "hi" << std::endl;
 
-    std::cout << std::endl << std::endl;
-    //double xi[4][2] = {{220,0}, {300,50}, {170,70}, {0,100}};
-    //std::cout << export_svg3(xi) << std::endl;
+    std::cout << std::endl
+              << std::endl;
+    // double xi[4][2] = {{220,0}, {300,50}, {170,70}, {0,100}};
+    // std::cout << export_svg3(xi) << std::endl;
     std::cout << export_svg3(trigulation, points) << std::endl;
-    std::cout << std::endl << std::endl;
+    std::cout << std::endl
+              << std::endl;
 
-    //std::cout << "ok" << std::endl;
+    // std::cout << "ok" << std::endl;
 
-    augment_tesselation_polygons(trigulation, points/*, callback*/);
+    augment_tesselation_polygons(trigulation, points /*, callback*/);
 
     return 0;
 }
