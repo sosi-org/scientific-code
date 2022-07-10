@@ -277,16 +277,15 @@ void augment_tesselation_polygons(const tesselation_t &trigulation, const points
         r);
     // now r contains the augmented data structure:
     // debug print:
-    for (const auto &poly : r)
+    for (const auto &polysides : r)
     {
-        // fixedsize_side_metadata_t poly;
-        for (const side_meta_data_t &side_ : poly)
+        // fixedsize_side_metadata_t polysides;
+        for (const side_meta_data_t &side_ : polysides)
         {
-            // const side_meta_data_t  & side_ = side;
             std::cout << "( o:" << side_.x0 << "," << side_.y0 << "d:" << side_.dx << "," << side_.dy << ") ";
         }
 
-        auto ip = intersect_lines<double>(poly[0], poly[1]);
+        auto ip = intersect_lines<double>(polysides[0], polysides[1]);
         std::cout << "\nintersection: " << ip.x << "," << ip.y << std::endl;
     }
 }
