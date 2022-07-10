@@ -358,7 +358,7 @@ public:
             total_point_seq);
 
         const string polygon_template = R"XYZ(
-            <polygon points="$$POINTS$$" style="fill:yellow;stroke:blue;stroke-width:$STROKE_WIDTH" />
+            <polygon points="$$POINTS$$" style="fill:yellow;stroke:blue;stroke-width:$STROKE_WIDTH" opacity="0.03" />
         )XYZ";
         string polyss{};
         for (const auto &point_seq_str : total_point_seq)
@@ -432,7 +432,7 @@ public:
         // std::string::replace
 
         ts = std::regex_replace(ts, std::regex("\\$\\$POLYG\\$\\$"), polyss);
-        ts = std::regex_replace(ts, std::regex("\\$\\$HELPER_DOTS\\$\\$"), helper_points +"\n"+ helper_lines_s);
+        ts = std::regex_replace(ts, std::regex("\\$\\$HELPER_DOTS\\$\\$"), helper_points + "\n" + helper_lines_s);
 
         ts = std::regex_replace(ts, std::regex("\\$WIDTH"), svgctx.width);
         ts = std::regex_replace(ts, std::regex("\\$HEIGHT"), svgctx.height);
@@ -449,12 +449,11 @@ std::uniform_real_distribution<double> dist(-1, 2); // distribution in range [-1
 // from https://stackoverflow.com/a/13445752/4374258
 // https://stackoverflow.com/a/19666713/4374258
 
-
 // const int SAMPLING_FACTOR = 16;
-const int SAMPLING_FACTOR = 4;
+const int SAMPLING_FACTOR = 4 * 4 * 4;
 
 template <typename real>
-//std::vector<point_t>
+// std::vector<point_t>
 auto generate_helper_points(const tesselation_t &trigulation, const points_t &vertex_coords)
 {
 
@@ -515,9 +514,8 @@ auto generate_helper_points(const tesselation_t &trigulation, const points_t &ve
 }
 
 void save_svg_file(const string &file_name, const auto &trigulation, const auto &points,
-    const std::vector<point_t> &helper_points,
-    const std::vector<side_meta_data_t> &helper_lines
-    )
+                   const std::vector<point_t> &helper_points,
+                   const std::vector<side_meta_data_t> &helper_lines)
 {
     std::wofstream file;
     file.open(file_name.c_str());
@@ -537,10 +535,10 @@ int main()
 
     augment_tesselation_polygons(trigulation, points);
 
-    //std::vector<point_t> helper_points
-    //std::pair<std::vector<point_t> , std::vector<intersect_lines_segment<real> > > =
+    // std::vector<point_t> helper_points
+    // std::pair<std::vector<point_t> , std::vector<intersect_lines_segment<real> > > =
     auto [hpoints, hlines] =
-       generate_helper_points<double>(trigulation, points); // for debugging
+        generate_helper_points<double>(trigulation, points); // for debugging
 
     save_svg_file("./output.svg", trigulation, points, hpoints, hlines);
 
