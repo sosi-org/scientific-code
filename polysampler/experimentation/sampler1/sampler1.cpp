@@ -348,7 +348,7 @@ string generate_svg(const tesselation_t &trigulation, const points_t &vertex_coo
         return point_seq; },
         total_point_seq);
 
-    string polygon_template = R"XYZ(
+    const string polygon_template = R"XYZ(
         <polygon points="$$POINTS$$" style="fill:yellow;stroke:blue;stroke-width:$STROKE_WIDTH" />
     )XYZ";
     string polyss{};
@@ -379,6 +379,22 @@ string generate_svg(const tesselation_t &trigulation, const points_t &vertex_coo
     ts = std::regex_replace(ts, std::regex("\\$STROKE_WIDTH"), svgctx.stroke_width);
     return ts;
 }
+
+template <typename real>
+class svg_utils
+{
+    static std::string helper_dot(real x, real y)
+    {
+        const string helperdot_template = R"XYZ(
+            circle cx="$X" cy="$Y" r="0.05" fill="red" />
+        )XYZ";
+
+        string s = helperdot_template;
+        s = std::regex_replace(s, std::regex("\\$X"), std::to_string(x));
+        s = std::regex_replace(s, std::regex("\\$Y"), std::to_string(y));
+        return s;
+    }
+};
 
 void save_svg_file(const string &file_name, const auto &trigulation, const auto &points)
 {

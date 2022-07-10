@@ -78,6 +78,7 @@ inline side_side_intersection_solution_t<real> intersect_lines_segment(const sid
     real ady1 = std::abs(side1.y0 - side1.y1);
     real adx2 = std::abs(side2.x0 - side2.x1);
     real ady2 = std::abs(side2.y0 - side2.y1);
+    // todo: check undefined behavior issue in https://en.cppreference.com/w/cpp/algorithm/minmax
 
     /* bounding box method */
     // units: in pixels
