@@ -247,6 +247,15 @@ void augment_tesselation_polygons(const tesselation_t &trigulation, const points
         //patch.finish();
         return patch.finish(); },
         r);
+    // now r contains the augmented data structure:
+    // debug print:
+    for(const auto& poly : r) {
+        //fixedsize_side_metadata_t poly;
+        for (const side_meta_data_t& side_ : poly) {
+            // const side_meta_data_t  & side_ = side;
+            std::cout << "( o:" << side_.x0 << ","<< side_.y0 << "d:" <<  side_.dx <<","<< side_.dy << ") ";
+        }
+    }
 }
 
 string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coords)

@@ -11,6 +11,7 @@ import tesselation_t;
 */
 class side_meta_data_t
 {
+public: // not good
     double x0, y0;
     double dx, dy; // x1-x0, y1-y0
 public:
