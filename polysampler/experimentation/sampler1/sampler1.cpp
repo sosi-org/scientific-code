@@ -281,7 +281,7 @@ void augment_tesselation_polygons(const tesselation_t &trigulation, const points
         // double-circular_for !
         circular_for(polysides.begin(), polysides.end(), [](auto side1, auto side2)
                      {
-            auto ip = intersect_lines<double>(*side1, *side2);
+            auto ip = intersect_lines_segment<double>(*side1, *side2);
             std::cout << "(" << ip.x << "," << ip.y << ") "; });
         std::cout << std::endl;
         /*
