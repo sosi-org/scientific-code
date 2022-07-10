@@ -308,32 +308,44 @@ string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coor
         return point_seq;
     }, total_point_seq);
 
-   string s{};
-   s += R"XYZ(
+    string polygon_template = R"XYZ(
+        <polygon points="$$POINTS$$" style="fill:yellow;stroke:blue;stroke-width:4" />
+    )XYZ";
+    string polyss{};
+    for(const auto& point_seq_str : total_point_seq)
+    {
+        polyss += std::regex_replace(polygon_template, std::regex("\\$\\$POINTS\\$\\$"), point_seq_str);
+    }
 
+   const string svg_template = R"XYZ(
     <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+    <svg height="$HEIGHT" width="$WIDTH"
+        xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
+        >
 
-    <svg height="400" width="500"
-    xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
-    >
-    <polygon points="$$POINTS$$" style="fill:white;stroke:blue;stroke-width:2" />
-    Sorry, your browser does not support inline SVG.
+        $$POLYG$$
+        Sorry, your browser does not support inline SVG.
     </svg>
-
    )XYZ";
 
+   // rename: total
+   string ts{};
    // std::string::replace
-   s = std::regex_replace(s, std::regex("\\$\\$POINTS\\$\\$"), total_point_seq[0]);
-   return s;
+   ts = std::regex_replace(svg_template, std::regex("\\$\\$POLYG\\$\\$"), polyss);
+   ts = std::regex_replace(ts, std::regex("\\$WIDTH"), "500");
+   ts = std::regex_replace(ts, std::regex("\\$HEIGHT"), "400");
+   return ts;
 }
 
 int main()
 {
     // std::cout << "hi" << std::endl;
 
+    std::cout << std::endl << std::endl;
     //double xi[4][2] = {{220,0}, {300,50}, {170,70}, {0,100}};
     //std::cout << export_svg3(xi) << std::endl;
     std::cout << export_svg3(trigulation, points) << std::endl;
+    std::cout << std::endl << std::endl;
 
     //std::cout << "ok" << std::endl;
 
