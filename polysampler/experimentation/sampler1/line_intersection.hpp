@@ -99,14 +99,6 @@ inline side_side_intersection_solution_t<real> intersect_lines_segment(const sid
     {
         return null_intersection;
     }
-    /*
-    if (minx1 > maxx2 + ε) {
-        return null_intersection;
-    }
-    if (miny2 > maxy1 + ε) {
-        return null_intersection;
-    }
-    */
 
     // auto [miny1, maxy1] =
     std::pair<real, real> mmy1 = std::minmax(side1.y0, side1.y1);
@@ -121,9 +113,6 @@ inline side_side_intersection_solution_t<real> intersect_lines_segment(const sid
     {
         return null_intersection;
     }
-    // todo:
-    //  get min of maxes
-    //  get max of mins
 
     real max_of_mins_x = std::max(minx1, minx2);
     real min_of_maxs_x = std::min(maxx1, maxx2);
@@ -134,8 +123,8 @@ inline side_side_intersection_solution_t<real> intersect_lines_segment(const sid
         intersect_lines<real>(side1, side2);
 
     if (
-        (max_of_mins_x > xy.x + ε2) ||
-        (max_of_mins_y > xy.y + ε2) ||
+        (max_of_mins_x - ε2 > xy.x) ||
+        (max_of_mins_y - ε2 > xy.y) ||
         (min_of_maxs_x + ε2 < xy.x) ||
         (min_of_maxs_y + ε2 < xy.y))
     {
