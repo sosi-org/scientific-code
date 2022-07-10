@@ -236,6 +236,16 @@ void circular_for(IT _begin, IT _end, auto callback_pair)
 */
 
 template <typename real>
+struct side_side_intersection_solution_t
+{
+    bool intersect;
+    // real condition_number; // ie do not intersect in case of parallel. or too far.
+    real x;
+    real y;
+};
+
+
+template <typename real>
 side_side_intersection_solution_t<real>
 intersect_lines(const side_meta_data_t &side1, const side_meta_data_t &side2);
 
@@ -277,100 +287,15 @@ void augment_tesselation_polygons(const tesselation_t &trigulation, const points
         }
 
         auto ip = intersect_lines<double>(poly[0], poly[1]);
-        std::cout << "intersection: " << ip.x << "," << ip.y << std::endl;
+        std::cout << "\nintersection: " << ip.x << "," << ip.y << std::endl;
     }
 }
 
-template <typename real>
-typedef struct
-{
-    bool intersect;
-    // real condition_number; // ie do not intersect in case of parallel. or too far.
-    real x;
-    real y;
-} side_side_intersection_solution_t;
-
-/*
-  solveAxb(): solves:
-    [a,b]   [x1]   [x]
-    [c,d] * [y1] = [y]
-
-*/
-template <typename real>
-inline side_side_intersection_solution_t<real> solveAxb(real a, real b, real c, real d, real x, real y)
-{
-    real det = (a * d - b * c);
-    // real [d,-b, -c, a] / det;
-    //[d,-b, -c, a] * [x,y].T / det
-    //[d,-b,  -c, a] * [x,y].T / det
-    //[d *x  + -b*y,  -c*x+ a*y] / det
-    real x1 = (+d * x - b * y) / det;
-    real y1 = (-c * x + a * y) / det;
-
-    return side_side_intersection_solution_t<real>{true, x1, y1};
-}
 // Good test scenario:
 // (x1,y1), (x2,y2) , (x3,y3) -> should give x2,y2
 
-/*
-template <typename real>
-inline inv2x2( real a,  real b,  real c, real d) {
-    real det = (a*d-b*c);
-    real (d,-b, -c, a) / det;
-    (d,-b, -c, a) / det * B
-}
-*/
 
 // todo: move to side_meta_data_t.hpp
-template <typename real>
-// bool
-void intersect_lines_deprecated(const side_meta_data_t &side1, const side_meta_data_t &side2)
-{
-    /*
-    double x0, y0;
-    double dx, dy;
-    double x = ...;
-
-    // a1 * x + b1 * y = c1
-    // a2 * x + b2 * y = c2
-    [a1, b1]
-    [a2, b2]
-    [c1,c2].T
-    det = (a1);
-    */
-
-    real dx1 = side1.dx;
-    real dy1 = side1.dy;
-    real dx2 = side2.dx;
-    real dy2 = side2.dy;
-    real x10 = side1.x0;
-    real y10 = side1.y0;
-    real x20 = side2.x0;
-    real y20 = side2.y0;
-    /*
-    line equation: (1/dy|-1/dx) . ( (x|y) - (x0|y0) ) == 0
-    a x + b y == c
-         a = 1/dy
-         b = -1/dx
-         c = a*x0 + b*y0
-    */
-    // double a1 = 1 / dy1, b1 = -1 / dx1;
-    // double a2 = 1 / dy2, b2 = -1 / dx2;
-    double a1 = dx1, b1 = dy1;
-    double a2 = dx2, b2 = dy2;
-    real c1 = a1 * x10 + b1 * y10;
-    real c2 = a2 * x20 + b2 * y20;
-    // returntype<real> funcname<real>  --> why none is needed?
-    side_side_intersection_solution_t ip =
-        solveAxb(
-            a1, b1,
-            a2, b2,
-
-            -c1, -c2);
-
-    std::cout << "intersection: " << ip.x << "," << ip.y << std::endl;
-}
-
 template <typename real>
 inline side_side_intersection_solution_t<real> intersect_lines(const side_meta_data_t &side1, const side_meta_data_t &side2)
 {
@@ -389,7 +314,13 @@ inline side_side_intersection_solution_t<real> intersect_lines(const side_meta_d
     real numerator_y = -x2 * y3 + x2 * y4 + x3 * y2 - x3 * y4 - x4 * y2 + x4 * y3;
     real denom = x1 * y2 - x1 * y4 - x2 * y1 + x2 * y4 + x4 * y1 - x4 * y2;
 
-    return side_side_intersection_solution_t{
+    std::cout << "numerator_x:" << numerator_x << std::endl;
+    std::cout << "numerator_y:" << numerator_y << std::endl;
+    std::cout << "numerator_d:" << denom << std::endl;
+    /*
+    <circle cx="" cy="" r="0.05" fill="red" />
+    */
+    return side_side_intersection_solution_t<real>{
         true,
         numerator_x / denom,
         numerator_y / denom,
