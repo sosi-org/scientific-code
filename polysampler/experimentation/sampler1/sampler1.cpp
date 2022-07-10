@@ -236,7 +236,8 @@ void circular_for(IT _begin, IT _end, auto callback_pair)
 */
 
 template <typename real>
-void intersect_lines(const side_meta_data_t &side1, const side_meta_data_t &side2);
+side_side_intersection_solution_t<real>
+intersect_lines(const side_meta_data_t &side1, const side_meta_data_t &side2);
 
 // std::function<void (const patch_t&, const side_it&, const side_it&)> augment_side
 
@@ -274,19 +275,27 @@ void augment_tesselation_polygons(const tesselation_t &trigulation, const points
             // const side_meta_data_t  & side_ = side;
             std::cout << "( o:" << side_.x0 << "," << side_.y0 << "d:" << side_.dx << "," << side_.dy << ") ";
         }
-        intersect_lines<double>(poly[0], poly[1]);
+
+        auto ip = intersect_lines<double>(poly[0], poly[1]);
+        std::cout << "intersection: " << ip.x << "," << ip.y << std::endl;
     }
 }
 
 template <typename real>
-struct side_side_intersection_solution_t
+typedef struct
 {
     bool intersect;
     // real condition_number; // ie do not intersect in case of parallel. or too far.
     real x;
     real y;
-};
+} side_side_intersection_solution_t;
 
+/*
+  solveAxb(): solves:
+    [a,b]   [x1]   [x]
+    [c,d] * [y1] = [y]
+
+*/
 template <typename real>
 inline side_side_intersection_solution_t<real> solveAxb(real a, real b, real c, real d, real x, real y)
 {
@@ -315,7 +324,7 @@ inline inv2x2( real a,  real b,  real c, real d) {
 // todo: move to side_meta_data_t.hpp
 template <typename real>
 // bool
-void intersect_lines(const side_meta_data_t &side1, const side_meta_data_t &side2)
+void intersect_lines_deprecated(const side_meta_data_t &side1, const side_meta_data_t &side2)
 {
     /*
     double x0, y0;
@@ -345,17 +354,46 @@ void intersect_lines(const side_meta_data_t &side1, const side_meta_data_t &side
          b = -1/dx
          c = a*x0 + b*y0
     */
-    double a1 = 1 / dy1, b1 = -1 / dx1;
-    double a2 = 1 / dy2, b2 = -1 / dx2;
+    // double a1 = 1 / dy1, b1 = -1 / dx1;
+    // double a2 = 1 / dy2, b2 = -1 / dx2;
+    double a1 = dx1, b1 = dy1;
+    double a2 = dx2, b2 = dy2;
+    real c1 = a1 * x10 + b1 * y10;
+    real c2 = a2 * x20 + b2 * y20;
     // returntype<real> funcname<real>  --> why none is needed?
     side_side_intersection_solution_t ip =
         solveAxb(
             a1, b1,
             a2, b2,
 
-            a1 * x10 + b1 * y10, a2 * x20 + b2 * y20);
+            -c1, -c2);
 
     std::cout << "intersection: " << ip.x << "," << ip.y << std::endl;
+}
+
+template <typename real>
+inline side_side_intersection_solution_t<real> intersect_lines(const side_meta_data_t &side1, const side_meta_data_t &side2)
+{
+
+    real x1 = side1.x0;
+    real y1 = side1.y0;
+    real x2 = side1.x1;
+    real y2 = side1.y1;
+
+    real x3 = side2.x0;
+    real y3 = side2.y0;
+    real x4 = side2.x1;
+    real y4 = side2.y1;
+
+    real numerator_x = x1 * y3 - x1 * y4 - x2 * y3 + x2 * y4 - x3 * y1 + x3 * y2 + x4 * y1 - x4 * y2;
+    real numerator_y = -x2 * y3 + x2 * y4 + x3 * y2 - x3 * y4 - x4 * y2 + x4 * y3;
+    real denom = x1 * y2 - x1 * y4 - x2 * y1 + x2 * y4 + x4 * y1 - x4 * y2;
+
+    return side_side_intersection_solution_t{
+        true,
+        numerator_x / denom,
+        numerator_y / denom,
+    };
 }
 
 void intersect_polys(fixedsize_side_metadata_t poly1, fixedsize_side_metadata_t poly2)

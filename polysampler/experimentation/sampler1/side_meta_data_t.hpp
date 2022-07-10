@@ -9,11 +9,13 @@ import tesselation_t;
 /*
     Datastructure fot storing cacehed augmented data about a side of a polygon
 */
+// todo: template<real>
 class side_meta_data_t
 {
 public: // not good
     double x0, y0;
     double dx, dy; // x1-x0, y1-y0
+    double x1,y1;
 public:
     side_meta_data_t(const point_t &p0, const point_t &p1)
     {
@@ -21,6 +23,9 @@ public:
         this->y0 = p0.y;
         this->dx = p1.x - p0.x;
         this->dy = p1.y - p0.y;
+
+        this->x1 = p1.x;
+        this->y1 = p1.y;
     }
     /*
     side_meta_data_t() = default;
