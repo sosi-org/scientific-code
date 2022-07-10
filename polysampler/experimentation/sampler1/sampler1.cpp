@@ -367,8 +367,7 @@ void intersect_polys(fixedsize_side_metadata_t poly1, fixedsize_side_metadata_t 
     }
 }
 
-// rename: generate_svg
-string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coords)
+string generate_svg(const tesselation_t &trigulation, const points_t &vertex_coords)
 {
     /* svg parameters */
     const struct
@@ -445,38 +444,25 @@ string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coor
 
 void save_svg_file(const string &file_name, const auto &trigulation, const auto &points)
 {
-
     std::wofstream file;
     file.open(file_name.c_str());
 
-    std::cout << std::endl
-              << std::endl;
-    // double xi[4][2] = {{220,0}, {300,50}, {170,70}, {0,100}};
-    // std::cout << export_svg3(xi) << std::endl;
-
     // will it be efficient?
-    string contents = export_svg3(trigulation, points);
+    string contents = generate_svg(trigulation, points);
     std::cout << contents << std::endl;
 
     file << contents.c_str();
 
     file.close();
-    std::cout << std::endl
-              << std::endl;
 }
 
-int main(int argc, char **argv)
+int main()
 {
-    bool svg_only = (argc > 0);
-    // std::cout << "hi" << std::endl;
+    // bool svg_only = (argc > 0);
 
     save_svg_file("./output.svg", trigulation, points);
 
-    if (svg_only)
-        return 0;
-    // std::cout << "ok" << std::endl;
-
-    augment_tesselation_polygons(trigulation, points /*, callback*/);
+    augment_tesselation_polygons(trigulation, points);
 
     return 0;
 }
