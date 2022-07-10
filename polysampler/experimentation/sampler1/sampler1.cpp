@@ -315,15 +315,17 @@ inline side_side_intersection_solution_t<real> intersect_lines(const side_meta_d
     real x4 = side2.x1;
     real y4 = side2.y1;
 
-    real numerator_x = x1 * y3 - x1 * y4 - x2 * y3 + x2 * y4 - x3 * y1 + x3 * y2 + x4 * y1 - x4 * y2;
-    real numerator_y = -x2 * y3 + x2 * y4 + x3 * y2 - x3 * y4 - x4 * y2 + x4 * y3;
-    real denom = x1 * y2 - x1 * y4 - x2 * y1 + x2 * y4 + x4 * y1 - x4 * y2;
+    real numerator_x = x1 * x3 * y2 - x1 * x3 * y4 - x1 * x4 * y2 + x1 * x4 * y3 - x2 * x3 * y1 + x2 * x3 * y4 + x2 * x4 * y1 - x2 * x4 * y3;
+    real numerator_y = x1 * y2 * y3 - x1 * y2 * y4 - x2 * y1 * y3 + x2 * y1 * y4 - x3 * y1 * y4 + x3 * y2 * y4 + x4 * y1 * y3 - x4 * y2 * y3;
+    real denom = x1 * y3 - x1 * y4 - x2 * y3 + x2 * y4 - x3 * y1 + x3 * y2 + x4 * y1 - x4 * y2;
 
-    // typical extents of the values: -0.65 , 2.77556e-17 , -0.65
+    // typical extents of the values: -0.585 , -0.325 , -0.65
 
+    /*
     std::cout << "numerator_x:" << numerator_x << std::endl;
     std::cout << "numerator_y:" << numerator_y << std::endl;
     std::cout << "numerator_d:" << denom << std::endl;
+    */
     /*
     <circle cx="" cy="" r="0.05" fill="red" />
     */

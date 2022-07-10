@@ -80,6 +80,11 @@ Intersection:
 DoF: 2 + 6 - (4+2)   ---> DoF = 2: for choice of alpha , beta, gamma. But no DoF for X. => "DoF for"
 DoF(n-Dim): 2n + 6 (may not intersect) => null.
 
+
+# verification: for given X:
+Find grad(α) or any other one. See if their sum is zero? (if it can be found).
+But it always can be found.
+Can we use this to verify?
 """
 
 
@@ -110,8 +115,9 @@ sol_u = solution[0]
 sol_v = solution[1]
 sympy.pprint(sol_u)
 sympy.pprint(sol_v)
-# The GCD trick in sympy
+print('^^^^^^^^')
 
+# The GCD trick in sympy
 
 # or euqally, rayB. Because rayB=rayA
 sol_xy = rayA.subs(u, sol_u).subs(v,sol_v)
@@ -123,14 +129,17 @@ print(xy[1])
 d = gcd(xy[0], xy[1])
 denom = 1/d   # has non-fraction form
 print('gcd = ', denom)
-numerator_x = sol_u * denom
-numerator_y = sol_v * denom
+numerator_x = xy[0] * denom
+numerator_y = xy[1] * denom
 
 # polynomials:
 sympy.pprint(numerator_x)
 sympy.pprint(numerator_y)
 sympy.pprint(denom)
 
+# todo: verify:
+# ... .subs(x, numerator_x/denom)
+# how to verify?
 
 from sympy.utilities.codegen import codegen
 
@@ -160,8 +169,8 @@ intersect.c
 #include <math.h>
 void intersect(double x1, double x2, double x3, double x4, double y1, double y2, double y3, double y4, double *d, double *x, double *y) {
    (*d) = x1*y3 - x1*y4 - x2*y3 + x2*y4 - x3*y1 + x3*y2 + x4*y1 - x4*y2;
-   (*x) = -x2*y3 + x2*y4 + x3*y2 - x3*y4 - x4*y2 + x4*y3;
-   (*y) = x1*y2 - x1*y4 - x2*y1 + x2*y4 + x4*y1 - x4*y2;
+   (*x) = x1*x3*y2 - x1*x3*y4 - x1*x4*y2 + x1*x4*y3 - x2*x3*y1 + x2*x3*y4 + x2*x4*y1 - x2*x4*y3;
+   (*y) = x1*y2*y3 - x1*y2*y4 - x2*y1*y3 + x2*y1*y4 - x3*y1*y4 + x3*y2*y4 + x4*y1*y3 - x4*y2*y3;
 }
 """
 
