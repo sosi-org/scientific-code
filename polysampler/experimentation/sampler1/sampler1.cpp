@@ -436,7 +436,7 @@ std::vector<point_t> generate_helper_points(const tesselation_t &trigulation, co
     side_meta_data_t s0md = side_meta_data_t{p1, p2};
 
     traverse_tesselation(
-        trigulation, vertex_coords, [vertex_coords, &helper_points,s0md](const auto &polyg)
+        trigulation, vertex_coords, [vertex_coords, &helper_points, s0md](const auto &polyg)
         {
             // per face
 
@@ -461,22 +461,22 @@ std::vector<point_t> generate_helper_points(const tesselation_t &trigulation, co
             };
 
             circular_for(polyg.begin(), polyg.end(),callback);
-            return std::vector<point_t>{};
-        }, helper_points2d);
+            return std::vector<point_t>{}; },
+        helper_points2d);
 
-/*
+    /*
+        return helper_points;
+    },
+            helper_points2d
+        );
+        */
+    /*
+    //intersect_lines_segment(s0, const side_meta_data_t &side2);
+
     return helper_points;
-},
-        helper_points2d
-    );
+    }
     */
-/*
-//intersect_lines_segment(s0, const side_meta_data_t &side2);
-
-return helper_points;
-}
-*/
-return helper_points;
+    return helper_points;
 }
 
 void save_svg_file(const string &file_name, const auto &trigulation, const auto &points, const std::vector<point_t> helper_points)
