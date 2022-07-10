@@ -89,8 +89,11 @@ inline side_side_intersection_solution_t<real> intersect_lines_segment(const sid
     // more permissive:
     constexpr real ε2 = 0.0000001;
 
-    auto [minx1, maxx1] = std::minmax(side1.x0, side1.x1);
-    auto [minx2, maxx2] = std::minmax(side2.x0, side2.x1);
+    // auto [minx1, maxx1] =
+    std::pair<real,real> mmx1 = std::minmax(side1.x0, side1.x1);
+    std::pair<real,real> mmx2 = std::minmax(side2.x0, side2.x1);
+    auto [minx1, maxx1] = mmx1;
+    auto [minx2, maxx2] = mmx2;
     if (minx1 > maxx2 + ε)
     {
         return null_intersection;
@@ -108,8 +111,12 @@ inline side_side_intersection_solution_t<real> intersect_lines_segment(const sid
     }
     */
 
-    auto [miny1, maxy1] = std::minmax(side1.y0, side1.y1);
-    auto [miny2, maxy2] = std::minmax(side2.y0, side2.y1);
+    // auto [miny1, maxy1] =
+    std::pair<real,real> mmy1 = std::minmax(side1.y0, side1.y1);
+    std::pair<real,real> mmy2 = std::minmax(side2.y0, side2.y1);
+    auto [miny1, maxy1] = mmy1;
+    auto [miny2, maxy2] = mmy2;
+
     if (miny1 > maxy2 + ε)
     {
         return null_intersection;
@@ -118,6 +125,8 @@ inline side_side_intersection_solution_t<real> intersect_lines_segment(const sid
     {
         return null_intersection;
     }
+    // get min of maxes
+    // get max of mins
 
     side_side_intersection_solution_t<real> xy =
         intersect_lines<real>(side1, side2);
@@ -138,6 +147,24 @@ inline side_side_intersection_solution_t<real> intersect_lines_segment(const sid
     {
         return null_intersection;
     }
+
+    if (maxx1 + ε2 < xy.x)
+    {
+        return null_intersection;
+    }
+    if (maxx2 + ε2  < xy.x)
+    {
+        return null_intersection;
+    }
+    if (maxy1 + ε2  < xy.y)
+    {
+        return null_intersection;
+    }
+    if (maxy2 + ε2  < xy.y)
+    {
+        return null_intersection;
+    }
+
     // This is not enough. It will not work well if one of the lines is paralllel (or almost parallel) to one of the axes.
     // next: more precise: use two perpendicular planes. Parts of solution 2,3 below.
 

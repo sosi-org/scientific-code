@@ -315,7 +315,7 @@ public:
     {
         real scale = 1.0, offsetx = 0.0, offsety = 0.0;
         string width = "5cm", height = "5cm";
-        string view_box = "-1 -1 2 2";
+        string view_box = "-1 -1 4 4";
         string stroke_width = "0.04";
     };
 
