@@ -34,6 +34,138 @@ X1 = Matrix([x1,y1])
 X2 = Matrix([x2,y2])
 X3 = Matrix([x3,y3])
 X4 = Matrix([x4,y4])
+"""
+(X2-X1) + (X-X1)
+
+(X2-X1) = t* (X-X1)
+X2-X1 = t*X-t*X1
+X2-(-t*X1+X1) = t*X
+X2+t*X1-X1 = t*X
+X2+(t-1)*X1 = t*X # what?
+
+X2 = t*X +(1-t)*X1
+# any three?
+0 = t*X +(1-t)*X1 -1* X2
+0 = X +(1-t)/t*X1 -1/t * X2
+(t, 1-t, -1)
+(+1, (1-t)/t, -1/t)
+
+# Another way:
+X = (t)*X1 + (1-t)*X2
+
+# swap: (substitution)
+X1 = (t)*X + (1-t)*X2
+-(t)*X = -X1 + (1-t)*X2
+# re-order
+X = 1/t*X1 + (t-1)/t*X2
+# 1/t + (t-1)/t = ?
+#!!
+
+I think:
+alpha X + ...
+
+α * X + β * X1 + γ * X2
+s.t.
+α + β + γ = 0
+
+This is the ultimate line equation. (Canonical?)
+Why at least three terms are needed?
+
+Intersection:
+    α  * X + β  * X1 + γ  * X2 = 0
+    α' * X + β' * X3 + γ' * X4 = 0
+    α + β + γ = 0
+    α' + β' + γ' = 0
+
+DoF: 2 + 6 - (4+2)   ---> DoF = 2: for choice of alpha , beta, gamma. But no DoF for X. => "DoF for"
+DoF(n-Dim): 2n + 6 (may not intersect) => null.
+
+"""
+
+
+# line parameters:  Ray drive
+u, v = symbols('u v')
+rayA = u * X1 + (1-u) * X2
+rayB = v * X3 + (1-v) * X4
+
+# lost equation:
+# rayA - rayB = 0
+
+
+eq_uv = Equation(rayA, rayB)
+
+sympy.pprint(eq_uv)
+
+solutions = solve(eq_uv, (u,v), force=True, manual=True,
+    set=False,
+    check=False,
+    numerical=False,
+    warn=True,
+)
+assert len(solutions) == 1
+solution = solutions[0]
+del solutions
+sympy.pprint(solution)
+sol_u = solution[0]
+sol_v = solution[1]
+sympy.pprint(sol_u)
+sympy.pprint(sol_v)
+# The GCD trick in sympy
+
+d = gcd(sol_u, sol_v)
+denom = 1/d  # has non-fraction form
+print('gcd = ', denom)
+numerator_u = sol_u * denom
+numerator_v = sol_v * denom
+
+# polygons:
+sympy.pprint(numerator_u)
+sympy.pprint(numerator_v)
+sympy.pprint(denom)
+
+
+print(numerator_v.free_symbols)
+
+# https://afalaize.github.io/posts/170614_ulr_python/
+# https://github.com/sohale/implisolid/blob/7b31fcee28618f928baec8fba6e301ec623d90d0/js_iteration_1/symbolic_gradients.py
+# https://docs.sympy.org/latest/modules/utilities/codegen.html
+
+from sympy.utilities.codegen import codegen
+
+from sympy.abc import f, g, h
+
+eqlist = [
+   # ("implicit", numerator_u),
+    ("intersect",
+        [
+            Equation(f, numerator_u), #Eq(f, gx),
+            Equation(g, numerator_v),
+            Equation(h, denom),
+        ]
+    )
+]
+
+[(c_name, c_code), (h_name, c_header)] = codegen( \
+      eqlist, \
+      "C", header=False, empty=False)
+
+print(c_name)
+print(c_code)
+"""
+output:
+intersect.c
+#include "intersect.h"
+#include <math.h>
+void intersect(double x1, double x2, double x3, double x4, double y1, double y2, double y3, double y4, double *f, double *g, double *h) {
+   (*f) = -x2*y3 + x2*y4 + x3*y2 - x3*y4 - x4*y2 + x4*y3;
+   (*g) = x1*y2 - x1*y4 - x2*y1 + x2*y4 + x4*y1 - x4*y2;
+   (*h) = x1*y3 - x1*y4 - x2*y3 + x2*y4 - x3*y1 + x3*y2 + x4*y1 - x4*y2;
+}
+
+"""
+
+exit()
+
 
 # line parameters
 # Ray drive
