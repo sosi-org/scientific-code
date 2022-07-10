@@ -276,8 +276,12 @@ void augment_tesselation_polygons(const tesselation_t &trigulation, const points
 
 string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coords)
 {
-
-    string *x0;
+    /* svg parameters */
+    const struct
+    {
+        double scale = 150, offsetx = 200, offsety = 200;
+        string width = "500", height = "400";
+    } svgctx;
 
     // todo: const vertex_coords
 
@@ -286,20 +290,20 @@ string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coor
     std::vector<string> total_point_seq;
     // /* -> string */
     traverse_tesselation(
-        trigulation, vertex_coords, [vertex_coords, &total_point_seq](const auto &polyg)
+        trigulation, vertex_coords, [vertex_coords, &total_point_seq, svgctx](const auto &polyg)
         {
         // per face
 
         string point_seq{};
 
-        circular_for(polyg.begin(), polyg.end(), [&point_seq, vertex_coords]<typename IT>(const IT &from_vert, const IT &to_vert)  {
+        circular_for(polyg.begin(), polyg.end(), [&point_seq, vertex_coords, svgctx]<typename IT>(const IT &from_vert, const IT &to_vert)  {
             // per edge
             // point_seq = point_seq + std::format("{} ", (int) (xi[i]));
             // point_seq = point_seq + " " + std::to_string(xi[i][0]) + "," + std::to_string(xi[i][1]);
             //std::cout << from_vert;
             const point_t & point = vertex_coords[*from_vert];
-            double x = point.x * 150 + 200;
-            double y = point.y * 150 + 200;
+            double x = point.x * svgctx.scale + svgctx.offsetx;
+            double y = point.y * svgctx.scale + svgctx.offsety;
             point_seq = point_seq + " " + std::to_string(x) + "," + std::to_string(y);
             std::cout << " " + std::to_string(x) + "," + std::to_string(y);
         });
@@ -335,8 +339,8 @@ string export_svg3(const tesselation_t &trigulation, const points_t &vertex_coor
     string ts{};
     // std::string::replace
     ts = std::regex_replace(svg_template, std::regex("\\$\\$POLYG\\$\\$"), polyss);
-    ts = std::regex_replace(ts, std::regex("\\$WIDTH"), "500");
-    ts = std::regex_replace(ts, std::regex("\\$HEIGHT"), "400");
+    ts = std::regex_replace(ts, std::regex("\\$WIDTH"), svgctx.width);
+    ts = std::regex_replace(ts, std::regex("\\$HEIGHT"), svgctx.height);
     return ts;
 }
 
