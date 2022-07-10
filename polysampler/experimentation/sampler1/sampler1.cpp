@@ -305,26 +305,32 @@ void intersect_polys(fixedsize_side_metadata_t poly1, fixedsize_side_metadata_t 
     }
 }
 
-string generate_svg(const tesselation_t &trigulation, const points_t &vertex_coords)
+template <typename real>
+class svg_utils
 {
+public:
     /* svg parameters */
-    const struct
+    struct svgctx_t
     {
-        double scale = 1.0, offsetx = 0.0, offsety = 0.0;
+        real scale = 1.0, offsetx = 0.0, offsety = 0.0;
         string width = "5cm", height = "5cm";
         string view_box = "-1 -1 2 2";
         string stroke_width = "0.04";
-    } svgctx;
+    };
 
-    // todo: const vertex_coords
+    // static std::string multi_polygon(total_point_seq)
+    static std::string tessellation(const svgctx_t &svgctx, const tesselation_t &trigulation, const points_t &vertex_coords)
+    {
 
-    // string total_point_seq;
-    // std::vector<string> total_point_seq;
-    std::vector<string> total_point_seq;
-    // /* -> string */
-    traverse_tesselation(
-        trigulation, vertex_coords, [vertex_coords, &total_point_seq, svgctx](const auto &polyg)
-        {
+        // todo: const vertex_coords
+
+        // string total_point_seq;
+        // std::vector<string> total_point_seq;
+        std::vector<string> total_point_seq;
+        // /* -> string */
+        traverse_tesselation(
+            trigulation, vertex_coords, [vertex_coords, &total_point_seq, svgctx](const auto &polyg)
+            {
         // per face
 
         string point_seq{};
@@ -335,8 +341,8 @@ string generate_svg(const tesselation_t &trigulation, const points_t &vertex_coo
             // point_seq = point_seq + " " + std::to_string(xi[i][0]) + "," + std::to_string(xi[i][1]);
             //std::cout << from_vert;
             const point_t & point = vertex_coords[*from_vert];
-            double x = point.x * svgctx.scale + svgctx.offsetx;
-            double y = point.y * svgctx.scale + svgctx.offsety;
+            real x = point.x * svgctx.scale + svgctx.offsetx;
+            real y = point.y * svgctx.scale + svgctx.offsety;
             point_seq = point_seq + " " + std::to_string(x) + "," + std::to_string(y);
             std::cout << " " + std::to_string(x) + "," + std::to_string(y);
         });
@@ -346,43 +352,19 @@ string generate_svg(const tesselation_t &trigulation, const points_t &vertex_coo
         //total_point_seq = point_seq;
 
         return point_seq; },
-        total_point_seq);
+            total_point_seq);
 
-    const string polygon_template = R"XYZ(
-        <polygon points="$$POINTS$$" style="fill:yellow;stroke:blue;stroke-width:$STROKE_WIDTH" />
-    )XYZ";
-    string polyss{};
-    for (const auto &point_seq_str : total_point_seq)
-    {
-        polyss += std::regex_replace(polygon_template, std::regex("\\$\\$POINTS\\$\\$"), point_seq_str);
+        const string polygon_template = R"XYZ(
+            <polygon points="$$POINTS$$" style="fill:yellow;stroke:blue;stroke-width:$STROKE_WIDTH" />
+        )XYZ";
+        string polyss{};
+        for (const auto &point_seq_str : total_point_seq)
+        {
+            polyss += std::regex_replace(polygon_template, std::regex("\\$\\$POINTS\\$\\$"), point_seq_str);
+        }
+        return polyss;
     }
 
-    const string svg_template = R"XYZ(
-    <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-    <svg height="$HEIGHT" width="$WIDTH"
-        xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
-        viewBox="$VIEWBOX"
-        >
-
-        $$POLYG$$
-        Sorry, your browser does not support inline SVG.
-    </svg>
-   )XYZ";
-
-    // rename: total
-    string ts{};
-    // std::string::replace
-    ts = std::regex_replace(svg_template, std::regex("\\$\\$POLYG\\$\\$"), polyss);
-    ts = std::regex_replace(ts, std::regex("\\$WIDTH"), svgctx.width);
-    ts = std::regex_replace(ts, std::regex("\\$HEIGHT"), svgctx.height);
-    ts = std::regex_replace(ts, std::regex("\\$VIEWBOX"), svgctx.view_box);
-    ts = std::regex_replace(ts, std::regex("\\$STROKE_WIDTH"), svgctx.stroke_width);
-    return ts;
-}
-
-template <typename real>
-class svg_utils
-{
     static std::string helper_dot(real x, real y)
     {
         const string helperdot_template = R"XYZ(
@@ -394,6 +376,36 @@ class svg_utils
         s = std::regex_replace(s, std::regex("\\$Y"), std::to_string(y));
         return s;
     }
+
+    static string generate_svg(const tesselation_t &trigulation, const points_t &vertex_coords)
+    {
+
+        const svg_utils::svgctx_t svgctx;
+
+        string polyss = tessellation(svgctx, trigulation, vertex_coords);
+
+        const string svg_template = R"XYZ(
+        <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+            <svg height="$HEIGHT" width="$WIDTH"
+                xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
+                viewBox="$VIEWBOX"
+                >
+
+                $$POLYG$$
+                Sorry, your browser does not support inline SVG.
+            </svg>
+        )XYZ";
+
+        // rename: total
+        string ts{};
+        // std::string::replace
+        ts = std::regex_replace(svg_template, std::regex("\\$\\$POLYG\\$\\$"), polyss);
+        ts = std::regex_replace(ts, std::regex("\\$WIDTH"), svgctx.width);
+        ts = std::regex_replace(ts, std::regex("\\$HEIGHT"), svgctx.height);
+        ts = std::regex_replace(ts, std::regex("\\$VIEWBOX"), svgctx.view_box);
+        ts = std::regex_replace(ts, std::regex("\\$STROKE_WIDTH"), svgctx.stroke_width);
+        return ts;
+    }
 };
 
 void save_svg_file(const string &file_name, const auto &trigulation, const auto &points)
@@ -402,7 +414,7 @@ void save_svg_file(const string &file_name, const auto &trigulation, const auto 
     file.open(file_name.c_str());
 
     // will it be efficient?
-    string contents = generate_svg(trigulation, points);
+    string contents = svg_utils<double>::generate_svg(trigulation, points);
     std::cout << contents << std::endl;
 
     file << contents.c_str();
