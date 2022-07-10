@@ -452,16 +452,17 @@ public:
 #include <random>
 std::random_device rdev;
 std::mt19937 rngmt(rdev());
-std::uniform_real_distribution<double> dist(-1, 2); // distribution in range [-1.0, 2.0]
+std::uniform_real_distribution<double> dist(-1-2, 2+2); // distribution in range [-1.0, 2.0]
 // from https://stackoverflow.com/a/13445752/4374258
 // https://stackoverflow.com/a/19666713/4374258
 
 // const int SAMPLING_FACTOR = 16;
 const int SAMPLING_FACTOR = 4 * 4 * 4;
+// const int SAMPLING_FACTOR = 4 * 4 * 4 * 4 * 4;
 
 template <typename real>
 // std::vector<point_t>
-auto generate_helper_points(const tesselation_t &trigulation, const points_t &vertex_coords)
+auto generate_helper_annots(const tesselation_t &trigulation, const points_t &vertex_coords)
 {
 
     std::vector<point_t> helper_points{};
@@ -495,7 +496,7 @@ auto generate_helper_points(const tesselation_t &trigulation, const points_t &ve
                 std::cout << "(" << ip.x << "," << ip.y << ") ";
                 if (ip.intersect) {
                     helper_points.push_back(point_t{ip.x,ip.y});
-                    helper_lines.push_back(s0md);
+                    // helper_lines.push_back(s0md);
                 }
                 }
                 //return std::vector<point_t>{};
@@ -545,7 +546,7 @@ int main()
     // std::vector<point_t> helper_points
     // std::pair<std::vector<point_t> , std::vector<intersect_lines_segment<real> > > =
     auto [hpoints, hlines] =
-        generate_helper_points<double>(trigulation, points); // for debugging
+        generate_helper_annots<double>(trigulation, points); // for debugging
 
     save_svg_file("./output.svg", trigulation, points, hpoints, hlines);
 
