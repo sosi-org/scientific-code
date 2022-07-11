@@ -8,6 +8,7 @@ FLAGS="-std=c++20 -stdlib=libc++ -fmodules -fbuiltin-module-map"
 cd /sosi/sampler1
 mkdir -p ./target
 
+#     -O3 \
 ls -1 ./target/point_t.module.precompiled || \
 clang++ $FLAGS \
     -fprebuilt-module-path=./target \
@@ -23,7 +24,7 @@ clang++ $FLAGS \
     pmain.cpp \
     -o ./target/pmain.out
 
-
+#     -O3 \
 clang++ $FLAGS \
     -fprebuilt-module-path=./target -fmodule-file=point_t=./target/point_t.module.precompiled \
     -c -Xclang -emit-module-interface  \
@@ -49,6 +50,7 @@ clang++ $FLAGS \
     -o ./target/export_svg_demo.o
 #         -fmodule-file=point_t=./target/point_t.module.precompiled \
 
+#     -O3 \
 clang++ $FLAGS \
     -fprebuilt-module-path=./target \
     -fmodule-file=point_t=./target/point_t.module.precompiled \
