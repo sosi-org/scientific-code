@@ -16,6 +16,40 @@ export LOCAL_RUNTIME="$LOCAL_BUILD_COPY/output"
 #  bash $REMOTE_SRC/experimentation/sampler1/dk.bash  'sampler1/target/sampler1.out';
 #  bash $REMOTE_SRC/experimentation/sampler1/dk.bash  bash -c 'cd sampler1/target;./sampler1.out';
 
+{
+echo "to execute:"
+ssh -t ssss@206.189.2.78 "
+ set -eux;
+ cd $REMOTE_BUILD; echo 'output files will be put there'
+ ls -alt;
+ bash $REMOTE_SRC/experimentation/sampler1/dk.bash  ./sampler1/target/sampler1.out;
+ ls -alt;
+ find .;
+ echo '**';
+ find $REMOTE_RUNTIME;
+ echo;
+ echo '******\n*\n* ssh:bye-remote'
+"
+echo 'back to local (1)'
+
+mkdir -p $LOCAL_BUILD_COPY
+
+rsync \
+   -rv \
+   ssss@206.189.2.78:$REMOTE_BUILD \
+   "$LOCAL_BUILD_COPY"
+
+rsync \
+   -v \
+   ssss@206.189.2.78:$REMOTE_RUNTIME/* \
+   "$LOCAL_RUNTIME"
+
+echo 'back to local (2)'
+
+exit
+}
+echo 'leaked'
+exit
 #  bash #./dk.bash
 echo '' || \
 ssh -t ssss@206.189.2.78 '

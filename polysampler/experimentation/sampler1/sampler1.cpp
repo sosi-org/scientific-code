@@ -457,8 +457,8 @@ std::uniform_real_distribution<double> dist(-1 - 2, 2 + 2); // distribution in r
 // https://stackoverflow.com/a/19666713/4374258
 
 // const int SAMPLING_FACTOR = 16;
-const int SAMPLING_FACTOR = 4 * 4 * 4;
-// const int SAMPLING_FACTOR = 4 * 4 * 4 * 4 * 4;
+//const int SAMPLING_FACTOR = 4 * 4 * 4;
+const int SAMPLING_FACTOR = 4 * 4 * 4 * 4 * 4;
 
 template <typename real>
 // std::vector<point_t>
@@ -493,9 +493,9 @@ auto generate_helper_annots(const tesselation_t &trigulation, const points_t &ve
                 side_meta_data_t s0md = side_meta_data_t{p1, p2};
 
                 auto ip = intersect_lines_segment<real>(s0md, md);
-                std::cout << "(" << ip.x << "," << ip.y << ") ";
+                //std::cout << "(" << ip.x << "," << ip.y << ") ";
                 if (ip.intersect) {
-                    helper_points.push_back(point_t{ip.x,ip.y});
+                   helper_points.push_back(point_t{ip.x,ip.y});
                     // helper_lines.push_back(s0md);
                 }
                 }
