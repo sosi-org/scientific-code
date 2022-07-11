@@ -1,5 +1,6 @@
 # ssh  ssss@206.189.2.78
 
+THIS_SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
 # REMOTE_LOCATION_OF_INTEREST
 #export LOCAL_BUILD="$WD/remote-build"
@@ -13,14 +14,14 @@ export LOCAL_BUILD_COPY="$LOCAL_SRC/sampler1/remote-target"
 export REMOTE_RUNTIME="$REMOTE_SRC/experimentation"
 export LOCAL_RUNTIME="$LOCAL_BUILD_COPY/output"
 
-#  bash $REMOTE_SRC/experimentation/sampler1/dk.bash  'sampler1/target/sampler1.out';
-#  bash $REMOTE_SRC/experimentation/sampler1/dk.bash  bash -c 'cd sampler1/target;./sampler1.out';
+#  bash $REMOTE_SRC/experimentation/sampler1/scripts/remote/dk.bash  'sampler1/target/sampler1.out';
+#  bash $REMOTE_SRC/experimentation/sampler1/scripts/remote/dk.bash  bash -c 'cd sampler1/target;./sampler1.out';
 
-#  bash #./dk.bash
+#  bash #./scripts/remote/dk.bash
 echo '' || \
 ssh -t ssss@206.189.2.78 '
  cd ~/cs/scientific-code/polysampler/experimentation/sampler1;
- bash ./dk.bash;
+ bash ./scripts/remote/dk.bash;
  echo;
  echo "******\n*\n* ssh:bye-remote"
 '
@@ -57,7 +58,7 @@ ssh -t ssss@206.189.2.78 "
  set -eux;
  cd $REMOTE_SRC;
  cd experimentation/sampler1;
- bash ./dk.bash;
+ bash ./scripts/remote/dk.bash;
  echo;
  echo '******\n*\n* ssh:bye-remote'
 "
