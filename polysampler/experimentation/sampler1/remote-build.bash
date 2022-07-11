@@ -27,9 +27,9 @@ ssh -t ssss@206.189.2.78 '
 #export REMOTE_LOI="~/remote-build/polysampler"
 #export LOCAL_LOI="~/cs/scientific-code/polysampler/experimentation"
 export LOCAL_SRC="$HOME/cs/scientific-code/polysampler/experimentation"
-export REMOTE_SRC="~/remote-build/polysampler"
+export REMOTE_SRC="~/remote-target/polysampler"
 export REMOTE_BUILD="$REMOTE_SRC/experimentation/sampler1/target"
-export LOCAL_BUILD_COPY="$LOCAL_SRC/sampler1/remote-build"
+export LOCAL_BUILD_COPY="$LOCAL_SRC/sampler1/remote-target"
 
 mkdir  -p $LOCAL_BUILD_COPY
 
@@ -39,13 +39,13 @@ ssh -t ssss@206.189.2.78 "
 mkdir -p $REMOTE_SRC
 "
 
-echo 'skip pre-sync' || \
+#echo 'skip pre-sync' || \
 rsync \
    -rv \
    "$LOCAL_SRC" \
    ssss@206.189.2.78:$REMOTE_SRC
 
-echo 'skip build' || \
+#echo 'skip build' || \
 ssh -t ssss@206.189.2.78 "
  set -eux;
  cd $REMOTE_SRC;
