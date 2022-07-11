@@ -22,3 +22,5 @@ DEFAULT_COMMAND="bash ./sampler1/build-20-all.bash"
 #DEFAULT_COMMAND="pwd"
 docker run -it --rm -v "$DOCKER_FOLDER":/sosi -w="/sosi" conanio/clang14-ubuntu16.04:latest  \
     ${@:-$DEFAULT_COMMAND}
+
+# outputs put in CWD can eb found in $DOCKER_FOLDER

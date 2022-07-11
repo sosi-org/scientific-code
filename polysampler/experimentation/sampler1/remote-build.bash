@@ -1,5 +1,55 @@
 # ssh  ssss@206.189.2.78
 
+
+# REMOTE_LOCATION_OF_INTEREST
+#export LOCAL_BUILD="$WD/remote-build"
+#export REMOTE_LOI="~/remote-build/polysampler"
+#export LOCAL_LOI="~/cs/scientific-code/polysampler/experimentation"
+export LOCAL_SRC="$HOME/cs/scientific-code/polysampler/experimentation"
+export REMOTE_SRC="~/remote-target/polysampler"
+export REMOTE_BUILD="$REMOTE_SRC/experimentation/sampler1/target"
+export LOCAL_BUILD_COPY="$LOCAL_SRC/sampler1/remote-target"
+# from inside docker in remote
+export REMOTE_RUNTIME="$REMOTE_SRC/experimentation"
+export LOCAL_RUNTIME="$LOCAL_BUILD_COPY/output"
+
+#  bash $REMOTE_SRC/experimentation/sampler1/dk.bash  'sampler1/target/sampler1.out';
+#  bash $REMOTE_SRC/experimentation/sampler1/dk.bash  bash -c 'cd sampler1/target;./sampler1.out';
+
+{
+echo "to execute:"
+ssh -t ssss@206.189.2.78 "
+ set -eux;
+ cd $REMOTE_BUILD; echo 'output files will be put there'
+ ls -alt;
+ bash $REMOTE_SRC/experimentation/sampler1/dk.bash  ./sampler1/target/sampler1.out;
+ ls -alt;
+ find .;
+ echo '**';
+ find $REMOTE_RUNTIME;
+ echo;
+ echo '******\n*\n* ssh:bye-remote'
+"
+echo 'back to local (1)'
+
+mkdir -p $LOCAL_BUILD_COPY
+
+rsync \
+   -rv \
+   ssss@206.189.2.78:$REMOTE_BUILD \
+   "$LOCAL_BUILD_COPY"
+
+rsync \
+   -v \
+   ssss@206.189.2.78:$REMOTE_RUNTIME/* \
+   "$LOCAL_RUNTIME"
+
+echo 'back to local (2)'
+
+exit
+}
+echo 'leaked'
+exit
 #  bash #./dk.bash
 echo '' || \
 ssh -t ssss@206.189.2.78 '
@@ -21,15 +71,6 @@ ssh -t ssss@206.189.2.78 '
 #rm -rf $WD/remote-target
 #mkdir  -p $WD/remote-target
 
-
-# REMOTE_LOCATION_OF_INTEREST
-#export LOCAL_BUILD="$WD/remote-build"
-#export REMOTE_LOI="~/remote-build/polysampler"
-#export LOCAL_LOI="~/cs/scientific-code/polysampler/experimentation"
-export LOCAL_SRC="$HOME/cs/scientific-code/polysampler/experimentation"
-export REMOTE_SRC="~/remote-target/polysampler"
-export REMOTE_BUILD="$REMOTE_SRC/experimentation/sampler1/target"
-export LOCAL_BUILD_COPY="$LOCAL_SRC/sampler1/remote-target"
 
 mkdir  -p $LOCAL_BUILD_COPY
 
@@ -70,3 +111,4 @@ ls -alt $LOCAL_BUILD_COPY
 #find $LOCAL_BUILD_COPY
 export RELATIVE=$(realpath --relative-to="$(pwd)" "$LOCAL_BUILD_COPY")
 find $RELATIVE
+
