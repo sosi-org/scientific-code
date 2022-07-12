@@ -56,6 +56,8 @@ side_meta_data_t.hpp \
 -o $BTARGET/side_meta_data_t.module
 
 
+# fails: 1. asks to use std.fstream (include does not work), 2.module std.fstream not found
+# Hence. I did not this it as a module:
 #clang++ $FLAGS \
 #    -fprebuilt-module-path=$BTARGET \
 #    -fmodule-file=tesselation_t=$BTARGET/tesselation_t.module.o \
