@@ -4,7 +4,8 @@
 Line-segment intersection
 */
 
-#include "./side_meta_data_t.hpp"
+// #include "./side_meta_data_t.hpp"
+import side_meta_data_t;
 
 template <typename real>
 struct side_side_intersection_solution_t

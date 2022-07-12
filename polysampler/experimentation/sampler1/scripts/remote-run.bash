@@ -2,6 +2,8 @@
 
 THIS_SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
+set -eux
+
 # REMOTE_LOCATION_OF_INTEREST
 #export LOCAL_BUILD="$WD/remote-build"
 #export REMOTE_LOI="~/remote-build/polysampler"

@@ -3,7 +3,7 @@
 # Linux/amd64 bash only. Will not work on Arm-based m1 MacBook
 
 
-set -xu
+set -exu
 
 export ORIG_FOLDER=$(pwd)
 

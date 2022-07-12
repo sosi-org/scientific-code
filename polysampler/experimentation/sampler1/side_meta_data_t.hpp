@@ -1,4 +1,5 @@
-#pragma once
+export module side_meta_data_t;
+// #pragma once
 
 #include <array>
 
@@ -10,6 +11,7 @@ import tesselation_t;
     Datastructure fot storing cacehed augmented data about a side of a polygon
 */
 // todo: template<real>
+export
 class side_meta_data_t
 {
 public: // not good
@@ -45,6 +47,9 @@ public:
     }
     */
 };
+
+// import std.vector;
+#include <vector>
 
 // std::array<side_meta_data_t>
 std::vector<side_meta_data_t> convert(const tesselation_t &tesselation,

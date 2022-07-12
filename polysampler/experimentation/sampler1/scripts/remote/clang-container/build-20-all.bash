@@ -46,14 +46,30 @@ clang++ $FLAGS \
     -o $BTARGET/tesselation_t.module.o
 # .module .mo
 
-clang++ $FLAGS \
-    -fprebuilt-module-path=$BTARGET \
-    -fmodule-file=point_t=$BTARGET/point_t.module.precompiled \
-    -Xclang -emit-module-interface  \
-    -c \
-    export_svg.hpp \
-    -o $BTARGET/export_svg.module.o
+ clang++ $FLAGS \
+-fprebuilt-module-path=$BTARGET \
+-fmodule-file=tesselation_t=$BTARGET/tesselation_t.module.o \
+-fmodule-file=point_t=$BTARGET/point_t.module.precompiled \
+-Xclang -emit-module-interface  \
+-c \
+side_meta_data_t.hpp \
+-o $BTARGET/side_meta_data_t.module
+
+
+#clang++ $FLAGS \
+#    -fprebuilt-module-path=$BTARGET \
+#    -fmodule-file=tesselation_t=$BTARGET/tesselation_t.module.o \
+#    -fmodule-file=point_t=$BTARGET/point_t.module.precompiled \
+#    -fmodule-file=side_meta_data_t=$BTARGET/side_meta_data_t.module \
+#    -c \
+#    -Xclang -emit-module-interface  \
+#    svg_utils.hpp \
+#    -o $BTARGET/svg_utils.module.precompiled
 # necesary ^ : -Xclang -emit-module-interface  \
+
+# todo: remove:
+#     export_svg.hpp \
+
 
 echo 'skip' || \
 clang++ $FLAGS \
@@ -69,8 +85,15 @@ clang++ $FLAGS \
     -fprebuilt-module-path=$BTARGET \
     -fmodule-file=point_t=$BTARGET/point_t.module.precompiled \
     -fmodule-file=tesselation_t=$BTARGET/tesselation_t.module.o \
+    -fmodule-file=side_meta_data_t=$BTARGET/side_meta_data_t.module \
+    -fmodule-file=svg_utils=$BTARGET/svg_utils.module \
     -v \
     sampler1.cpp \
     -o $BTARGET/sampler1.out
 
 date
+# todo: unify the names of the compiled modules: .compiled_module
+#    .compiled_module
+#    .module.precompiled
+#    .module.o
+#    .module
