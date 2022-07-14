@@ -42,6 +42,8 @@ rsync \
    ssss@206.189.2.78:$REMOTE_BUILD \
    "$LOCAL_BUILD_COPY"
 
+mkdir -p "$LOCAL_RUNTIME"
+
 rsync \
    -v \
    ssss@206.189.2.78:$REMOTE_RUNTIME/* \

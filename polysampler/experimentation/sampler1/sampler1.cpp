@@ -246,7 +246,7 @@ void circular_for(IT _begin, IT _end, auto callback_pair)
     clang++ sampler1.cpp -std=c++2b
 */
 
-
+// receive: points
 // simple_polygi_t: polygon of integer vertices ("normalised")
 fixedsize_side_metadata_t  t2patch(const simple_polygi_t& polyg) {
 
@@ -399,6 +399,7 @@ auto generate_helper_annots(const tesselation_t &trigulation, const points_t &ve
     return std::make_pair(helper_points, helper_lines);
 }
 
+// #include "./cpolyg_intersection.hpp"
 
 int main()
 {
