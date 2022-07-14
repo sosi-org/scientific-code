@@ -53,6 +53,18 @@ simple_hacky_polygp_t testutil_simply_polygon(simple_hacky_polygp_t coords) {
     return pp;
 }
 
+full_tesselation testutil_tessellation_from_single_polygon(simple_hacky_polygp_t coords) {
+    full_tesselation pnp;
+    for( const auto& c : coords) {
+        // pair<> is used only for simpler constructor-literal
+        point_t pnt {c.first, c.second};
+        pnp.points.push_back(pnt);
+        // .. in progress
+    }
+    pnp.tesselation.push_back();
+    return pnp;
+}
+
 /*
 test{} (
     (0,0), (1,0), (0,1), (1,1)
@@ -61,12 +73,12 @@ test{} (
 );
 */
 
-
-fixedsize_side_metadata_t  t2patch(const simple_polygi_t& polyg);
+// for a single poylgon, not the full tessellation:
+fixedsize_side_metadata_t  t2patch(const simple_polygi_t& polyg, const points_t& points);
 
 void test1_convex_polygon_area() {
-    simple_hacky_polygp_t square
-        = testutil_simply_polygon(simple_hacky_polygp_t{{0,0}, {1,0}, {0,1}, {1,1}});
+    full_tesselation  square
+        = testutil_tessellation_from_single_polygon(simple_hacky_polygp_t{{0,0}, {1,0}, {0,1}, {1,1}});
     // convert to side_meta_data_t
     // using constructor side_meta_data_t{p1, p2}
     fixedsize_side_metadata_t poly1 = t2patch(square);
@@ -76,6 +88,12 @@ void test1_convex_polygon_area() {
 /*
 fixedsize_side_metadata_t  t2patch(const simple_polygi_t& polyg)
 */
+
+void dummy1() {
+    /*  works but not useful: */
+    simple_hacky_polygp_t square
+        = testutil_simply_polygon(simple_hacky_polygp_t{{0,0}, {1,0}, {0,1}, {1,1}});
+}
 
 /*
 map:

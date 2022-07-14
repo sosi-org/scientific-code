@@ -372,7 +372,14 @@ auto generate_helper_annots(const tesselation_t &trigulation, const points_t &ve
     return std::make_pair(helper_points, helper_lines);
 }
 
-// #include "./cpolyg_intersection.hpp"
+struct full_tesselation {
+    points_t points;
+
+    tesselation_t trigulation;
+};
+
+#include "./cpolyg_intersection.hpp"
+
 
 int main()
 {
@@ -384,8 +391,10 @@ int main()
     tesselation_t trigulation = {{1, 2, 3, 4, 5}, {1, 2, 6}};
     */
 
-    struct {
-        points_t points = {
+
+    full_tesselation example2(
+        // points:
+        {
             point_t{-0.2, 0.8}, // 0
             {0.4, 0.8},         // 1
             {0.9, 0.5},         // 2
@@ -393,18 +402,18 @@ int main()
             {0, -1},            // 4
             {-1, 0},            // 5
             {-0.1, -0.2},       // 6
-        };
-
-        tesselation_t trigulation = {
+        },
+        // trigulation:
+        {
             //{1, 2, 3, 4, 5},
             {1, 2, 6},
             //{0,1,2,6,5},
             {0, 1, 6, 5},
             {2, 3, 4, 6},
             {4, 6, 5},
+        }
 
-        };
-    } example2;
+    );
 
     // bool svg_only = (argc > 0);
 
