@@ -246,6 +246,27 @@ void circular_for(IT _begin, IT _end, auto callback_pair)
     clang++ sampler1.cpp -std=c++2b
 */
 
+
+// simple_polygi_t: polygon of integer vertices ("normalised")
+fixedsize_side_metadata_t  t2patch(const simple_polygi_t& polyg) {
+
+    patch_t patch{points, polyg.size()};
+
+    // lambda capture list:  [patch_t&patch]  -> [&patch]
+    auto callback_pair = [&patch]<typename IT>(const IT &from_it, const IT &to_it) {
+        // todo: move to a seaparate fixedsize_side_metadata_t element
+        //       as opposed to storing it inside the `patch` itself.
+        patch.augment_side(*from_it, *to_it);
+        // cout << *from_i << ',' << *next_it <<' ';
+    };
+    // circular_for_pairs
+    circular_for(polyg.begin(), polyg.end(), callback_pair);
+
+    std::cout << std::endl;
+
+    //patch.finish();
+    return patch.finish();
+}
 /*
 template <typename real>
 side_side_intersection_solution_t<real>
@@ -254,6 +275,7 @@ intersect_lines(const side_meta_data_t &side1, const side_meta_data_t &side2);
 
 // std::function<void (const patch_t&, const side_it&, const side_it&)> augment_side
 
+// sepaate function for each?
 void augment_tesselation_polygons(const tesselation_t &trigulation, const points_t &points)
 {
     // fixedsize_side_metadata_t *x0;
@@ -262,21 +284,8 @@ void augment_tesselation_polygons(const tesselation_t &trigulation, const points
     traverse_tesselation(
         trigulation, points, [&points](const auto &polyg)
         {
-
-        patch_t patch{points, polyg.size()};
-
-        // lambda capture list:  [patch_t&patch]  -> [&patch]
-        auto callback_pair = [&patch]<typename IT>(const IT &from_it, const IT &to_it) {
-            patch.augment_side(*from_it, *to_it);
-            // cout << *from_i << ',' << *next_it <<' ';
-        };
-        // circular_for_pairs
-        circular_for(polyg.begin(), polyg.end(), callback_pair);
-
-        std::cout << std::endl;
-
-        //patch.finish();
-        return patch.finish(); },
+            return t2patch(polyg);
+        },
         r);
     // now r contains the augmented data structure:
     // debug print:
@@ -338,7 +347,7 @@ auto generate_helper_annots(const tesselation_t &trigulation, const points_t &ve
     std::vector<std::vector<point_t>> helper_points1{};
     std::vector<std::vector<point_t>> helper_points2d{};
 
-    fixedsize_side_metadata_t helper_lines{};
+    std::vector<side_meta_data_t> helper_lines{};
 
     traverse_tesselation(
         trigulation, vertex_coords, [vertex_coords, &helper_points, &helper_lines](const auto &polyg)
