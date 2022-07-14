@@ -46,6 +46,9 @@ import side_meta_data_t;
 // #include "../sampler1/tesselation_t.hpp"
 import tesselation_t;
 
+// #include "./polyg.hpp"
+import polyg;
+
 // import svg_utils;
 #include "svg_utils.hpp"
 
@@ -104,14 +107,9 @@ class vector_map
 // #include "side_meta_data_t.hpp"
 import side_meta_data_t;
 
-typedef std::vector<side_point_t> vertiex_indices_t; // vertices; // without coords, just int, refering to the coords index
 
-// const std::vector<side_point_t> &points_indices_ref;  = vertices
-//  const vertiex_indices_t &vertiex_indices,
-
-// std::array<side_meta_data_t>
-// typedef std::unique_ptr<side_meta_data_t[]> fixedsize_side_metadata_t;
-typedef std::vector<side_meta_data_t> fixedsize_side_metadata_t;
+// #include "./polyg.hpp"
+import polyg;
 
 /*
 

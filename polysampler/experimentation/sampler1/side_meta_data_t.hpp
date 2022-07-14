@@ -2,6 +2,8 @@ export module side_meta_data_t;
 // #pragma once
 
 #include <array>
+// import std.vector;
+#include <vector>
 
 import point_t;
 import tesselation_t;
@@ -48,8 +50,9 @@ public:
     */
 };
 
-// import std.vector;
-#include <vector>
+/*
+// #include "./polyg.hpp"
+import polyg;
 
 
 fixedsize_side_metadata_t convert(const tesselation_t &tesselation,
@@ -59,3 +62,4 @@ fixedsize_side_metadata_t convert(const tesselation_t &tesselation,
     // return std::vector<side_meta_data_t>(tesselation.begin(), tesselation.end());
     return std::vector<side_meta_data_t>();
 }
+*/

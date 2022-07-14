@@ -50,10 +50,23 @@ clang++ $FLAGS \
 -fprebuilt-module-path=$BTARGET \
 -fmodule-file=tesselation_t=$BTARGET/tesselation_t.module.o \
 -fmodule-file=point_t=$BTARGET/point_t.module.precompiled \
+\
 -Xclang -emit-module-interface  \
 -c \
 side_meta_data_t.hpp \
 -o $BTARGET/side_meta_data_t.module
+
+
+clang++ $FLAGS \
+-fprebuilt-module-path=$BTARGET \
+    -fmodule-file=point_t=$BTARGET/point_t.module.precompiled \
+    -fmodule-file=tesselation_t=$BTARGET/tesselation_t.module.o \
+    -fmodule-file=side_meta_data_t=$BTARGET/side_meta_data_t.module \
+    -fmodule-file=svg_utils=$BTARGET/svg_utils.module \
+-Xclang -emit-module-interface  \
+-c \
+polyg.cpp \
+-o $BTARGET/polyg.module
 
 
 # fails: 1. asks to use std.fstream (include does not work), 2.module std.fstream not found
@@ -89,6 +102,7 @@ clang++ $FLAGS \
     -fmodule-file=tesselation_t=$BTARGET/tesselation_t.module.o \
     -fmodule-file=side_meta_data_t=$BTARGET/side_meta_data_t.module \
     -fmodule-file=svg_utils=$BTARGET/svg_utils.module \
+    -fmodule-file=polyg=$BTARGET/polyg.module \
     -v \
     sampler1.cpp \
     -o $BTARGET/sampler1.out
