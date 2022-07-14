@@ -61,33 +61,6 @@ const tesselation_t &poly_poly_intersection(
     return tesselation1;
 }
 
-/*
-points_t points = // {{1,2}, {3,4}};
-    {point_t{0, 1}, {0.4, 0.8}, {0.8, 0.5}, {1, 0.3}, {0, -1}, {-1, 0}, {-0.3, 0.3}};
-
-tesselation_t trigulation = {{1, 2, 3, 4, 5}, {1, 2, 6}};
-*/
-
-points_t points = {
-    point_t{-0.2, 0.8}, // 0
-    {0.4, 0.8},         // 1
-    {0.9, 0.5},         // 2
-    {1, 0.0},           // 3
-    {0, -1},            // 4
-    {-1, 0},            // 5
-    {-0.1, -0.2},       // 6
-};
-
-tesselation_t trigulation = {
-    //{1, 2, 3, 4, 5},
-    {1, 2, 6},
-    //{0,1,2,6,5},
-    {0, 1, 6, 5},
-    {2, 3, 4, 6},
-    {4, 6, 5},
-
-};
-
 // https://github.com/sosi-org/scientific-code/blob/main/beeseyes/pycode/polygon_sampler.py
 
 // draft only:
@@ -248,7 +221,7 @@ void circular_for(IT _begin, IT _end, auto callback_pair)
 
 // receive: points
 // simple_polygi_t: polygon of integer vertices ("normalised")
-fixedsize_side_metadata_t  t2patch(const simple_polygi_t& polyg) {
+fixedsize_side_metadata_t  t2patch(const simple_polygi_t& polyg, const points_t& points) {
 
     patch_t patch{points, polyg.size()};
 
@@ -284,7 +257,7 @@ void augment_tesselation_polygons(const tesselation_t &trigulation, const points
     traverse_tesselation(
         trigulation, points, [&points](const auto &polyg)
         {
-            return t2patch(polyg);
+            return t2patch(polyg, points);
         },
         r);
     // now r contains the augmented data structure:
@@ -403,16 +376,46 @@ auto generate_helper_annots(const tesselation_t &trigulation, const points_t &ve
 
 int main()
 {
+
+    /*
+    points_t points = // {{1,2}, {3,4}};
+        {point_t{0, 1}, {0.4, 0.8}, {0.8, 0.5}, {1, 0.3}, {0, -1}, {-1, 0}, {-0.3, 0.3}};
+
+    tesselation_t trigulation = {{1, 2, 3, 4, 5}, {1, 2, 6}};
+    */
+
+    struct {
+        points_t points = {
+            point_t{-0.2, 0.8}, // 0
+            {0.4, 0.8},         // 1
+            {0.9, 0.5},         // 2
+            {1, 0.0},           // 3
+            {0, -1},            // 4
+            {-1, 0},            // 5
+            {-0.1, -0.2},       // 6
+        };
+
+        tesselation_t trigulation = {
+            //{1, 2, 3, 4, 5},
+            {1, 2, 6},
+            //{0,1,2,6,5},
+            {0, 1, 6, 5},
+            {2, 3, 4, 6},
+            {4, 6, 5},
+
+        };
+    } example2;
+
     // bool svg_only = (argc > 0);
 
-    augment_tesselation_polygons(trigulation, points);
+    augment_tesselation_polygons(example2.trigulation, example2.points);
 
     // std::vector<point_t> helper_points
     // std::pair<std::vector<point_t> , std::vector<intersect_lines_segment<real> > > =
     auto [hpoints, hlines] =
-        generate_helper_annots<double>(trigulation, points); // for debugging
+        generate_helper_annots<double>(example2.trigulation, example2.points); // for debugging
 
-    save_svg_file("./output.svg", trigulation, points, hpoints, hlines);
+    save_svg_file("./output.svg", example2.trigulation, example2.points, hpoints, hlines);
 
     return 0;
 }
