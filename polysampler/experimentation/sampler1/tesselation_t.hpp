@@ -10,6 +10,7 @@ export
 {
     // typedef struct {struct{int point_idx} main; struct {double a;} cache;} side_point;
     typedef int side_point_t; // FROM, and TO is the next one.
+    // todo: rename: side_point_t -> side_point_int_t or  point_index_t
 
     typedef std::vector<side_point_t> simple_polygi_t; // points are integers
 
@@ -18,6 +19,15 @@ export
 
     typedef std::vector<point_t> points_t;
     // Delaunay triangulation
+
+    struct full_tesselation {
+        points_t points;
+
+        // todo: rename: triangulation
+        tesselation_t trigulation;
+
+        // full_tesselation();
+    };
 }
 /*
 todo: rename `points_t`. Too similar to `point_t`

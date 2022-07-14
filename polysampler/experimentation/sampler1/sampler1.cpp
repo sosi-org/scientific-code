@@ -372,17 +372,14 @@ auto generate_helper_annots(const tesselation_t &trigulation, const points_t &ve
     return std::make_pair(helper_points, helper_lines);
 }
 
-struct full_tesselation {
-    points_t points;
-
-    tesselation_t trigulation;
-};
-
 #include "./cpolyg_intersection.hpp"
 
 
 int main()
 {
+
+    test1_convex_polygon_area();
+    test2_convex_polygon_area();
 
     /*
     points_t points = // {{1,2}, {3,4}};
@@ -391,10 +388,9 @@ int main()
     tesselation_t trigulation = {{1, 2, 3, 4, 5}, {1, 2, 6}};
     */
 
-
-    full_tesselation example2(
+    full_tesselation example2 {
         // points:
-        {
+        points_t{
             point_t{-0.2, 0.8}, // 0
             {0.4, 0.8},         // 1
             {0.9, 0.5},         // 2
@@ -404,16 +400,16 @@ int main()
             {-0.1, -0.2},       // 6
         },
         // trigulation:
-        {
+        tesselation_t{{
             //{1, 2, 3, 4, 5},
             {1, 2, 6},
             //{0,1,2,6,5},
             {0, 1, 6, 5},
             {2, 3, 4, 6},
             {4, 6, 5},
-        }
+        }}
 
-    );
+    };
 
     // bool svg_only = (argc > 0);
 
