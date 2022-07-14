@@ -109,6 +109,7 @@ typedef std::vector<side_point_t> vertiex_indices_t; // vertices; // without coo
 // const std::vector<side_point_t> &points_indices_ref;  = vertices
 //  const vertiex_indices_t &vertiex_indices,
 
+// std::array<side_meta_data_t>
 // typedef std::unique_ptr<side_meta_data_t[]> fixedsize_side_metadata_t;
 typedef std::vector<side_meta_data_t> fixedsize_side_metadata_t;
 
@@ -136,7 +137,7 @@ struct patch_t
     const points_t &coords_ref; // points_ref, rename -> points_coords_ref, coords_ref
     // const std::vector<side_point_t> &points_indices_ref;
 
-    std::vector<side_meta_data_t> side_meta_data; // for output
+    fixedsize_side_metadata_t side_meta_data; // for output
 
     /* accumulated sides: while being built */
     // std::vector<int>::size_type side_counter;
@@ -182,7 +183,7 @@ struct patch_t
         // todo: clip away from the area/shape
     }
 
-    // const std::vector<side_meta_data_t>& finish()
+    // const fixedsize_side_metadata_t& finish()
 
     fixedsize_side_metadata_t finish()
     {
@@ -339,7 +340,7 @@ auto generate_helper_annots(const tesselation_t &trigulation, const points_t &ve
     std::vector<std::vector<point_t>> helper_points1{};
     std::vector<std::vector<point_t>> helper_points2d{};
 
-    std::vector<side_meta_data_t> helper_lines{};
+    fixedsize_side_metadata_t helper_lines{};
 
     traverse_tesselation(
         trigulation, vertex_coords, [vertex_coords, &helper_points, &helper_lines](const auto &polyg)

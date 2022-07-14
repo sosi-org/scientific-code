@@ -44,7 +44,7 @@ void traverse_tesselation(const tesselation_t &trigulation, const points_t &poin
         resultt r = process_polyg_callback(polyg);
         // process_polyg_callback(polyg);
         //  if you want to keep them:
-        //  std::vector<side_meta_data_t> q = patch.finish();
+        //  fixedsize_side_metadata_t q = patch.finish();
         accum.push_back(r);
     }
     // return accum;

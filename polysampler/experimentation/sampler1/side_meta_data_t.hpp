@@ -51,8 +51,8 @@ public:
 // import std.vector;
 #include <vector>
 
-// std::array<side_meta_data_t>
-std::vector<side_meta_data_t> convert(const tesselation_t &tesselation,
+
+fixedsize_side_metadata_t convert(const tesselation_t &tesselation,
                                       const points_t &points)
 {
     // return std::array<side_meta_data_t, 3>
