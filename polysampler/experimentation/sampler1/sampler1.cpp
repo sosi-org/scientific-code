@@ -19,14 +19,9 @@ typedef model::d2::point_xy point;
 
 // #include <string>
 
-
 #include <cassert>
 
-
 // #include <array>
-
-
-
 
 // #include "../sampler1/point_t.hpp"
 import point_t;
@@ -79,7 +74,6 @@ class vector_map
 
 // #include "side_meta_data_t.hpp"
 import side_meta_data_t;
-
 
 // #include "./polyg.hpp"
 import polyg;
@@ -221,12 +215,14 @@ void circular_for(IT _begin, IT _end, auto callback_pair)
 
 // receive: points
 // simple_polygi_t: polygon of integer vertices ("normalised")
-fixedsize_side_metadata_t  t2patch(const simple_polygi_t& polyg, const points_t& points) {
+fixedsize_side_metadata_t t2patch(const simple_polygi_t &polyg, const points_t &points)
+{
 
     patch_t patch{points, polyg.size()};
 
     // lambda capture list:  [patch_t&patch]  -> [&patch]
-    auto callback_pair = [&patch]<typename IT>(const IT &from_it, const IT &to_it) {
+    auto callback_pair = [&patch]<typename IT>(const IT &from_it, const IT &to_it)
+    {
         // todo: move to a seaparate fixedsize_side_metadata_t element
         //       as opposed to storing it inside the `patch` itself.
         patch.augment_side(*from_it, *to_it);
@@ -237,7 +233,7 @@ fixedsize_side_metadata_t  t2patch(const simple_polygi_t& polyg, const points_t&
 
     std::cout << std::endl;
 
-    //patch.finish();
+    // patch.finish();
     return patch.finish();
 }
 /*
@@ -256,9 +252,7 @@ void augment_tesselation_polygons(const tesselation_t &trigulation, const points
     /* -> fixedsize_side_metadata_t*/
     traverse_tesselation(
         trigulation, points, [&points](const auto &polyg)
-        {
-            return t2patch(polyg, points);
-        },
+        { return t2patch(polyg, points); },
         r);
     // now r contains the augmented data structure:
     // debug print:
@@ -298,8 +292,6 @@ void intersect_polys(fixedsize_side_metadata_t poly1, fixedsize_side_metadata_t 
     }
 }
 
-
-
 #include <random>
 std::random_device rdev;
 std::mt19937 rngmt(rdev());
@@ -308,7 +300,7 @@ std::uniform_real_distribution<double> dist(-1 - 2, 2 + 2); // distribution in r
 // https://stackoverflow.com/a/19666713/4374258
 
 // const int SAMPLING_FACTOR = 16;
-//const int SAMPLING_FACTOR = 4 * 4 * 4;
+// const int SAMPLING_FACTOR = 4 * 4 * 4;
 const int SAMPLING_FACTOR = 4 * 4 * 4 * 4 * 4;
 
 template <typename real>
@@ -374,7 +366,6 @@ auto generate_helper_annots(const tesselation_t &trigulation, const points_t &ve
 
 #include "./cpolyg_intersection.hpp"
 
-
 int main()
 {
 
@@ -388,7 +379,7 @@ int main()
     tesselation_t trigulation = {{1, 2, 3, 4, 5}, {1, 2, 6}};
     */
 
-    full_tesselation example2 {
+    full_tesselation example2{
         // points:
         points_t{
             point_t{-0.2, 0.8}, // 0

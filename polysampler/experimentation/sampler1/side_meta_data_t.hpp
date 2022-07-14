@@ -13,8 +13,7 @@ import tesselation_t;
     Datastructure fot storing cacehed augmented data about a side of a polygon
 */
 // todo: template<real>
-export
-class side_meta_data_t
+export class side_meta_data_t
 {
 public: // not good
     double x0, y0;

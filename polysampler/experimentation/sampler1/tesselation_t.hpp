@@ -20,7 +20,8 @@ export
     typedef std::vector<point_t> points_t;
     // Delaunay triangulation
 
-    struct full_tesselation {
+    struct full_tesselation
+    {
         points_t points;
 
         // todo: rename: triangulation

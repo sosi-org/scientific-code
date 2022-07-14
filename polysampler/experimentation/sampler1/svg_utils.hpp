@@ -4,8 +4,8 @@
 
 import point_t;
 import tesselation_t;
-//todo:
-// #include "side_meta_data_t.hpp"
+// todo:
+//  #include "side_meta_data_t.hpp"
 import side_meta_data_t;
 
 // import std.fstream;
@@ -26,8 +26,7 @@ using std::string;
 // import std.fstream;
 // import <std.fstream>;
 
-
-//export
+// export
 template <typename real>
 class svg_utils
 {
@@ -164,7 +163,7 @@ public:
     }
 };
 
-//export
+// export
 void save_svg_file(const string &file_name, const auto &trigulation, const auto &points,
                    const std::vector<point_t> &helper_points,
                    const std::vector<side_meta_data_t> &helper_lines)
