@@ -28,23 +28,35 @@ inline simple_hacky_polygp_t cpoly_intersection(const fixedsize_side_metadata_t 
     return simple_hacky_polygp_t();
 }
 
-template <typename real>
-inline std::vector<point_t> cpoly_intersection__two_points(const fixedsize_side_metadata_t &poly1, const fixedsize_side_metadata_t &poly2)
-{
+// result_thisfunc
+struct collision_of_polyg {
     // point1, side_id1 point2l side_id2
-    struct result_thisfunc {
-        point_t point1, point2;
-        side_index_int_t side_1a, side_1b, side2a, side2b;
-        // bool intersect;
-        // no intersec
-        // bool corner_on_corner;
-        // bool corner_on_edge;
-        /*
-        enum class {no_intersect, two_intersect, corner_on_cronder, sorner_on_edge} result_situation;
-        */
-    };
-    return simple_hacky_polygp_t();
+    point_t point1, point2;
+    side_index_int_t side_1a, side_1b, side2a, side2b;
+    // bool intersect;
+    // no intersec
+    // bool corner_on_corner;
+    // bool corner_on_edge;
+    /*
+    enum class {no_intersect, two_intersect, corner_on_cronder, sorner_on_edge} result_situation;
+    */
+};
+// collision
+template <typename real>
+inline collision_of_polyg cpoly_intersection__two_points(const fixedsize_side_metadata_t &poly1, const fixedsize_side_metadata_t &poly2)
+{
+
+    collision_of_polyg result;
+
+    for(side_index_int_t s1=0; s1 < poly1.size(); ++s1 ) {
+
+    }
+    return result;
+    // return simple_hacky_polygp_t();
 }
+template <typename real>
+inline std::vector<point_t> cpoly_intersection__two_points(const fixedsize_side_metadata_t &poly1, const fixedsize_side_metadata_t &poly2);
+
 
 template <typename real>
 inline real convex_polygon_area(const fixedsize_side_metadata_t &poly1)
