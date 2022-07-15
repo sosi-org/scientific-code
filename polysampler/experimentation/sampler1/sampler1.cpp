@@ -213,6 +213,9 @@ void circular_for(IT _begin, IT _end, auto callback_pair)
     clang++ sampler1.cpp -std=c++2b
 */
 
+// todo: make return value optional at compile-time
+// also pluggable multiple patch types: init, accum )iterate), finlise (closure).
+
 // receive: points
 // simple_polygi_t: polygon of integer vertices ("normalised")
 fixedsize_side_metadata_t t2patch(const simple_polygi_t &polyg, const points_t &points)

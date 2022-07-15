@@ -29,6 +29,24 @@ inline simple_hacky_polygp_t cpoly_intersection(const fixedsize_side_metadata_t 
 }
 
 template <typename real>
+inline std::vector<point_t> cpoly_intersection__two_points(const fixedsize_side_metadata_t &poly1, const fixedsize_side_metadata_t &poly2)
+{
+    // point1, side_id1 point2l side_id2
+    struct result_thisfunc {
+        point_t point1, point2;
+        side_index_int_t side_1a, side_1b, side2a, side2b;
+        // bool intersect;
+        // no intersec
+        // bool corner_on_corner;
+        // bool corner_on_edge;
+        /*
+        enum class {no_intersect, two_intersect, corner_on_cronder, sorner_on_edge} result_situation;
+        */
+    };
+    return simple_hacky_polygp_t();
+}
+
+template <typename real>
 inline real convex_polygon_area(const fixedsize_side_metadata_t &poly1)
 {
     real area = 0;

@@ -12,6 +12,8 @@ export
     typedef int side_point_t; // FROM, and TO is the next one.
     // todo: rename: side_point_t -> side_point_int_t or  point_index_t
 
+    typedef int side_index_int_t;
+
     typedef std::vector<side_point_t> simple_polygi_t; // points are integers
 
     typedef std::vector<simple_polygi_t> tesselation_t; // old name: triaglation_t
