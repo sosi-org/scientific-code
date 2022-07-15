@@ -1,5 +1,9 @@
 #pragma once
 
+
+// for: intersect_lines_segment
+#include "./line_intersection.hpp"
+
 // one of the many representaitons of point !
 /*
 template<typename real>
@@ -49,7 +53,16 @@ inline collision_of_polyg cpoly_intersection__two_points(const fixedsize_side_me
     collision_of_polyg result;
 
     for(side_index_int_t s1=0; s1 < poly1.size(); ++s1 ) {
+        const side_meta_data_t  &side1 = poly1[s1];
 
+        for(side_index_int_t s2=0; s2 < poly2.size(); ++s2 ) {
+
+            const side_meta_data_t  &side2 = poly2[s1];
+
+            side_side_intersection_solution_t<real> is =
+                intersect_lines_segment<real>(side1, side2);
+
+        }
     }
     return result;
     // return simple_hacky_polygp_t();
