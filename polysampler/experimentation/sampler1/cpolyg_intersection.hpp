@@ -323,6 +323,10 @@ bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const pt
 {
     // https://stackoverflow.com/a/2922778/4374258
 
+    if(build.debug) {
+        std::cout << "which_side:";
+    }
+
     const point_t point{.x = point_.first, .y=point_.second};
     const auto xp = point.x;
     const auto yp = point.y;
@@ -339,7 +343,7 @@ bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const pt
         y1 = y2;
 
         if(build.debug) {
-            std::cout << "which_side:" << which_side;
+            std::cout << which_side << ", ";
         }
 
         if (!first && last_sidedness * which_side < 0 ) {

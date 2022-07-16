@@ -110,6 +110,12 @@ void test1_cpoly_intersection__produced()
     debug_print(result_poly3);
     std::cout << std::endl;
 
+    simple_hacky_polygp_t result_poly4 =
+        cpoly_intersection__complete_poly<double>(poly1, poly2, erasing_mod_t::erase_auto);
+
+    std::cout << "Full collision poly  (erase auto):";
+    debug_print(result_poly4);
+    std::cout << std::endl;
 
 
 }
@@ -150,7 +156,7 @@ void test1_insideness()
     assert_equality_i(ins1, true);
 
 
-    bool ins2 = is_inside_poly(poly, pt2_t{0.5, 0.5});
+    bool ins2 = is_inside_poly(poly, pt2_t{1.5, 0.5});
     assert_equality_i(ins2, false);
 
 }
