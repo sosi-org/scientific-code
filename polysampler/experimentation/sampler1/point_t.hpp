@@ -35,5 +35,5 @@ public:
 // todo: move to a master file
 
 export constexpr struct {
-    bool debug = false;
+    bool debug = true;
 } build;

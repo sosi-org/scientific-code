@@ -222,6 +222,19 @@ bool dont_erase, bool erase_between)
             // in worst case, there is one node in the angle
             rpoly.erase(rpoly.begin() + from_toend, rpoly.end());
             rpoly.erase(rpoly.begin(), rpoly.begin() + frombegin_to );
+            if (build.debug)
+            {
+                std::cout << "debug:"
+                          << before_size << "-"
+                          << rpoly.size()
+                          << "=="
+                          << new_point_indices[1]
+                          << "-" << new_point_indices[0]
+                          << "-1"
+                          << std::endl;
+               // (0,0) (1,0) *(1,0.5) (1,1) *(0.5,1) (0,1)
+               // debug:6-4==4-2-1
+            }
             assert(
                 before_size - rpoly.size() ==
                 new_point_indices[1]-new_point_indices[0]-1
