@@ -127,6 +127,8 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
         // side_index_int_t side_1[2], side_2[2];
         // take second polygon
 
+        side_index_int_t new_point_indices[2];
+
         for (int collidx = 0; collidx < TWO; collidx++)
         {
 
@@ -153,20 +155,25 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
             side_index_int_t i2 = collision.side_2[collidx];
             point_t new_point = collision.point[collidx];
 
-            // not right: is it between i1 and i1+1? yes.
-            auto position1 = rpoly.begin() + i1 + 1;
+            side_index_int_t i1next = i1 + 1;
+            // It is between i1 and i1next=i1+1 .
+            auto position1 = rpoly.begin() + i1next;
             // std::vector::insert(position1, pt2_t{new_point.x, new_point.y} );
             rpoly.insert(position1, pt2_t{new_point.x, new_point.y});
 
-            // not right: is it between i1 and i1+1?
+            new_point_indices[collidx] = i1next;
+
+            // It is between i1 and i1+1?
             for (int i = collidx + 1; i < TWO; i++)
             {
                 // needs to be tested and re-thought
-                if (collision.side_1[i] >= i1 + 1) // if on the right side (shifted part) in the vector<>
+                if (collision.side_1[i] >= i1next) // if on the right side (shifted part) in the vector<>
                     collision.side_1[i]++;
+                /*
                 // in fact side_2 will not be used
-                if (collision.side_2[i] >= i1 + 1)
+                if (collision.side_2[i] >= i1next)
                     collision.side_2[i]++;
+                */
             }
             if (build.debug) {
                 std::cout << "in progress:";
@@ -175,6 +182,18 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
             }
         }
         // challenge: which side to keep?
+        // collision.side_1[0],collision.side_1[1]
+        // new_point_indices[0], [1]
+        // slow method
+        if (build.debug) {
+        if (new_point_indices[1] < new_point_indices[0]) {
+            std::cout << "smaller" << new_point_indices[0] << "<" << new_point_indices[1] << std::endl;
+        }
+        for (int i = new_point_indices[0]; i < new_point_indices[1]; i++) {
+            std::cout << i << "";
+        }
+        std::cout << std::endl;
+        }
         return rpoly;
     }
     // empty
