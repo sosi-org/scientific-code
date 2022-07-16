@@ -175,7 +175,8 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
                     collision.side_2[i]++;
                 */
             }
-            if (build.debug) {
+            if (build.debug)
+            {
                 std::cout << "in progress:";
                 debug_print(rpoly);
                 std::cout << std::endl;
@@ -185,14 +186,17 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
         // collision.side_1[0],collision.side_1[1]
         // new_point_indices[0], [1]
         // slow method
-        if (build.debug) {
-        if (new_point_indices[1] < new_point_indices[0]) {
-            std::cout << "smaller" << new_point_indices[0] << "<" << new_point_indices[1] << std::endl;
-        }
-        for (int i = new_point_indices[0]; i < new_point_indices[1]; i++) {
-            std::cout << i << "";
-        }
-        std::cout << std::endl;
+        if (build.debug)
+        {
+            if (new_point_indices[1] < new_point_indices[0])
+            {
+                std::cout << "smaller" << new_point_indices[0] << "<" << new_point_indices[1] << std::endl;
+            }
+            for (int i = new_point_indices[0]; i < new_point_indices[1]; i++)
+            {
+                std::cout << i << "";
+            }
+            std::cout << std::endl;
         }
         return rpoly;
     }
