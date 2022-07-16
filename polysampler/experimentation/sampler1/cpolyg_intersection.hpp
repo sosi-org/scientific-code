@@ -150,17 +150,27 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
         //simple_hacky_polygp_t
 
         side_index_int_t i1 = collision.side_1[collidx];
+        // i2, will not be used, because we are building on top of poly1
         side_index_int_t i2 = collision.side_2[collidx];
         point_t new_point = collision.point[collidx];
 
-        auto position1 = rpoly.begin() + i1;
+        // not right: is it between i1 and i1+1? yes.
+        auto position1 = rpoly.begin() + i1 + 1;
         //std::vector::insert(position1, pt2_t{new_point.x, new_point.y} );
         rpoly.insert(position1, pt2_t{new_point.x, new_point.y} );
 
+        // not right: is it between i1 and i1+1?
         for (int i = collidx+1; i < TWO; i++) {
-            collision.side_1[i] ++;
-            collision.side_2[i] ++;
+            // needs to be tested and re-thought
+            if (collision.side_1[i] >= i1+1) // if on the right side (shifted part) in the vector<>
+                collision.side_1[i] ++;
+            //in fact side_2 will not be used
+            if (collision.side_2[i] >= i1+1)
+                collision.side_2[i] ++;
         }
+        std::cout << "in progress:";
+        debug_print(rpoly);
+        std::cout << std::endl;
         }
         return rpoly;
     }
