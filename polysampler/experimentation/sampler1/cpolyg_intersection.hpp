@@ -128,7 +128,7 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
         // side_index_int_t side_1[2], side_2[2];
         // take second polygon
 
-        for (int collidx = 0; collidx < 1; collidx++) {
+        for (int collidx = 0; collidx < 2; collidx++) {
 
         // what can be do with `poly1`?
         // in fact, we can refer back to its original. maybe a pointer or an integer index in the tessellation?
