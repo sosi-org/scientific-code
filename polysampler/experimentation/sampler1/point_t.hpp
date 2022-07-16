@@ -30,3 +30,10 @@ public:
         // return "(" + std::to_string(this->x) + "," + std::to_string(this->y) + ")";
     }
 }; // point_t;
+
+
+// todo: move to a master file
+
+export constexpr struct {
+    bool debug = false;
+} build;

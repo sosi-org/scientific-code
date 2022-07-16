@@ -168,10 +168,13 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
                 if (collision.side_2[i] >= i1 + 1)
                     collision.side_2[i]++;
             }
-            std::cout << "in progress:";
-            debug_print(rpoly);
-            std::cout << std::endl;
+            if (build.debug) {
+                std::cout << "in progress:";
+                debug_print(rpoly);
+                std::cout << std::endl;
+            }
         }
+        // challenge: which side to keep?
         return rpoly;
     }
     // empty
