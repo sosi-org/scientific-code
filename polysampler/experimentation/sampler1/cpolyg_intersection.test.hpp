@@ -5,7 +5,6 @@
 #include "./cpolyg_intersection.hpp"
 #include "./test_helpers.hpp"
 
-
 void test1_cpoly_intersection__two_points_parametrised(double x0, double y0, double x1, double y1, double xm, double ym, double x2, double y2)
 {
 
@@ -51,7 +50,6 @@ void test2_cpoly_intersection__two_points()
 
 // todo: nested inside eachother
 
-
 void test1_cpoly_intersection__produced()
 {
 
@@ -67,19 +65,17 @@ void test1_cpoly_intersection__produced()
     fixedsize_polygon_with_side_metadata_t poly2 = testhelper_polyg(simple_hacky_polygp_t{
         {xm, ym}, {x2, ym}, {x2, y2}, {xm, y2}});
 
-
     simple_hacky_polygp_t result_poly =
         cpoly_intersection__complete_poly<double>(poly1, poly2);
 
     std::cout << "Full collision poly:";
-    //debug_print(std::cout, result_poly);
+    // debug_print(std::cout, result_poly);
     debug_print(result_poly);
     std::cout << std::endl;
 
     /* failed: not complete:
             Full collision poly:5:(0,0) (1,0.5) (1,0) (1,1) (0,1)
     */
-
 }
 /*
 map:
