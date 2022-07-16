@@ -367,6 +367,9 @@ auto generate_helper_annots(const tesselation_t &trigulation, const points_t &ve
     return std::make_pair(helper_points, helper_lines);
 }
 
+#include "./polygon_area.hpp"
+#include "./polygon_area.test.hpp"
+
 #include "./cpolyg_intersection.hpp"
 #include "./cpolyg_intersection.test.hpp"
 
