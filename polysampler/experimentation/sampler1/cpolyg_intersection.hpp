@@ -112,7 +112,7 @@ The type:
 
 */
 
-// enum class {no_erase, erase_A, erase_B};
+enum class erasing_mod_t {no_erase, erase_between, erase_outside, erase_auto} ;
 
 // can be executed in next vectorized round
 // asymmetric: always use the first poly as basis.
@@ -120,7 +120,7 @@ The type:
 template <typename real>
 inline simple_hacky_polygp_t
 cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &poly1, const fixedsize_polygon_with_side_metadata_t &poly2,
-                                  bool dont_erase, bool erase_between)
+                                  erasing_mod_t mode)
 {
     simple_hacky_polygp_t rpoly; // keep empty hull
 
@@ -204,12 +204,13 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
             }
             std::cout << std::endl;
         }
-        if (!dont_erase)
-        {
+        if (mode == erasing_mod_t::erase_auto) {}
+        if (mode == erasing_mod_t::no_erase) {
+        } else {
             // note: assert(side_1[0] < side_1[1]);
             assert(new_point_indices[0] < new_point_indices[1]);
             assert(new_point_indices[0] + 1 <= new_point_indices[1] - 1); // becauwe we increased the second one
-            if (erase_between)
+            if (mode == erasing_mod_t::erase_between)
             {
                 size_t before_size = rpoly.size();
                 side_index_int_t from = new_point_indices[0] + 1;
@@ -231,7 +232,7 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
                 }
                 assert(before_size - rpoly.size() == to - from + 1);
             }
-            else
+            else if (mode == erasing_mod_t::erase_outside)
             {
                 size_t before_size = rpoly.size();
                 side_index_int_t frombegin_to = new_point_indices[0] - 1;

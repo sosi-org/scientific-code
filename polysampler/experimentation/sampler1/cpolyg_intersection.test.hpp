@@ -83,7 +83,7 @@ void test1_cpoly_intersection__produced()
     std::cout << std::endl;
 
     simple_hacky_polygp_t result_poly =
-        cpoly_intersection__complete_poly<double>(poly1, poly2, true, 0);
+        cpoly_intersection__complete_poly<double>(poly1, poly2, erasing_mod_t::no_erase);
 
     std::cout << "Full collision poly (no erase):";
     // debug_print(std::cout, result_poly);
@@ -95,7 +95,7 @@ void test1_cpoly_intersection__produced()
     */
 
     simple_hacky_polygp_t result_poly2 =
-        cpoly_intersection__complete_poly<double>(poly1, poly2, false, true);
+        cpoly_intersection__complete_poly<double>(poly1, poly2, erasing_mod_t::erase_between);
 
     std::cout << "Full collision poly (erase A):";
     // debug_print(std::cout, result_poly);
@@ -103,12 +103,13 @@ void test1_cpoly_intersection__produced()
     std::cout << std::endl;
 
     simple_hacky_polygp_t result_poly3 =
-        cpoly_intersection__complete_poly<double>(poly1, poly2, false, false);
+        cpoly_intersection__complete_poly<double>(poly1, poly2, erasing_mod_t::erase_outside);
 
     std::cout << "Full collision poly  (erase B):";
     // debug_print(std::cout, result_poly);
     debug_print(result_poly3);
     std::cout << std::endl;
+
 
 
 }
