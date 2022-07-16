@@ -65,6 +65,12 @@ void test1_cpoly_intersection__produced()
     fixedsize_polygon_with_side_metadata_t poly2 = testhelper_polyg(simple_hacky_polygp_t{
         {xm, ym}, {x2, ym}, {x2, y2}, {xm, y2}});
 
+    std::cout << "Pre-collision poly:";
+    // debug_print(std::cout, result_poly);
+    debug_print(poly1);
+    std::cout << std::endl;
+
+
     simple_hacky_polygp_t result_poly =
         cpoly_intersection__complete_poly<double>(poly1, poly2);
 

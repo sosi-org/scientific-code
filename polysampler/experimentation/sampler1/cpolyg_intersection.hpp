@@ -122,13 +122,14 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
     simple_hacky_polygp_t rpoly; // keep empty hull
 
     collision_of_polyg collision = cpoly_intersection__two_points<real>(poly1, poly2);
-    if (collision.count == 2)
+    constexpr int TWO = 2; // magical number
+    if (collision.count == TWO)
     {
         // point_t point[2];
         // side_index_int_t side_1[2], side_2[2];
         // take second polygon
 
-        for (int collidx = 0; collidx < 2; collidx++) {
+        for (int collidx = 0; collidx < TWO; collidx++) {
 
         // what can be do with `poly1`?
         // in fact, we can refer back to its original. maybe a pointer or an integer index in the tessellation?
@@ -156,6 +157,10 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
         //std::vector::insert(position1, pt2_t{new_point.x, new_point.y} );
         rpoly.insert(position1, pt2_t{new_point.x, new_point.y} );
 
+        for (int i = collidx+1; i < TWO; i++) {
+            collision.side_1[i] ++;
+            collision.side_2[i] ++;
+        }
         }
         return rpoly;
     }
