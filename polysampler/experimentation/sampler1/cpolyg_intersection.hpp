@@ -90,7 +90,6 @@ inline collision_of_polyg cpoly_intersection__two_points(const fixedsize_polygon
     // return simple_hacky_polygp_t();
 }
 
-
 simple_hacky_polygp_t to_simple_hacky_polygp_t(const fixedsize_polygon_with_side_metadata_t &poly)
 {
     simple_hacky_polygp_t pp;
@@ -115,8 +114,7 @@ The type:
 // asymmetric: always use the first poly as basis.
 // future: se can extract the completemnet (A - B) but we need the intersection only now (A ∩ B).
 template <typename real>
-inline
-simple_hacky_polygp_t
+inline simple_hacky_polygp_t
 cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &poly1, const fixedsize_polygon_with_side_metadata_t &poly2)
 {
     simple_hacky_polygp_t rpoly; // keep empty hull
@@ -129,48 +127,50 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
         // side_index_int_t side_1[2], side_2[2];
         // take second polygon
 
-        for (int collidx = 0; collidx < TWO; collidx++) {
+        for (int collidx = 0; collidx < TWO; collidx++)
+        {
 
-        // what can be do with `poly1`?
-        // in fact, we can refer back to its original. maybe a pointer or an integer index in the tessellation?
-        // but in this algorithm, we really do not need to add these vertices back. we just need to create some polygon to calculate the area with
-        // so, let's see what structures does area() accept.
+            // what can be do with `poly1`?
+            // in fact, we can refer back to its original. maybe a pointer or an integer index in the tessellation?
+            // but in this algorithm, we really do not need to add these vertices back. we just need to create some polygon to calculate the area with
+            // so, let's see what structures does area() accept.
 
+            // simple_hacky_polygp_t rpoly
+            //  how to move from fixedsize_polygon_with_side_metadata_t to simple_hacky_polygp_t ?
 
-        //simple_hacky_polygp_t rpoly
-        // how to move from fixedsize_polygon_with_side_metadata_t to simple_hacky_polygp_t ?
+            // I am on the right track: I ended up to the same signature/declaration as another one on top of this file
+            // simple_hacky_polygp_t rpoly = to_simple_hacky_polygp_t(poly1);
+            if (collidx == 0)
+            {
+                rpoly = to_simple_hacky_polygp_t(poly1);
+            }
 
-        // I am on the right track: I ended up to the same signature/declaration as another one on top of this file
-        //simple_hacky_polygp_t rpoly = to_simple_hacky_polygp_t(poly1);
-        if (collidx == 0) {
-            rpoly = to_simple_hacky_polygp_t(poly1);
-        }
+            // vector<pt2_t>
+            // simple_hacky_polygp_t
 
-        //vector<pt2_t>
-        //simple_hacky_polygp_t
+            side_index_int_t i1 = collision.side_1[collidx];
+            // i2, will not be used, because we are building on top of poly1
+            side_index_int_t i2 = collision.side_2[collidx];
+            point_t new_point = collision.point[collidx];
 
-        side_index_int_t i1 = collision.side_1[collidx];
-        // i2, will not be used, because we are building on top of poly1
-        side_index_int_t i2 = collision.side_2[collidx];
-        point_t new_point = collision.point[collidx];
+            // not right: is it between i1 and i1+1? yes.
+            auto position1 = rpoly.begin() + i1 + 1;
+            // std::vector::insert(position1, pt2_t{new_point.x, new_point.y} );
+            rpoly.insert(position1, pt2_t{new_point.x, new_point.y});
 
-        // not right: is it between i1 and i1+1? yes.
-        auto position1 = rpoly.begin() + i1 + 1;
-        //std::vector::insert(position1, pt2_t{new_point.x, new_point.y} );
-        rpoly.insert(position1, pt2_t{new_point.x, new_point.y} );
-
-        // not right: is it between i1 and i1+1?
-        for (int i = collidx+1; i < TWO; i++) {
-            // needs to be tested and re-thought
-            if (collision.side_1[i] >= i1+1) // if on the right side (shifted part) in the vector<>
-                collision.side_1[i] ++;
-            //in fact side_2 will not be used
-            if (collision.side_2[i] >= i1+1)
-                collision.side_2[i] ++;
-        }
-        std::cout << "in progress:";
-        debug_print(rpoly);
-        std::cout << std::endl;
+            // not right: is it between i1 and i1+1?
+            for (int i = collidx + 1; i < TWO; i++)
+            {
+                // needs to be tested and re-thought
+                if (collision.side_1[i] >= i1 + 1) // if on the right side (shifted part) in the vector<>
+                    collision.side_1[i]++;
+                // in fact side_2 will not be used
+                if (collision.side_2[i] >= i1 + 1)
+                    collision.side_2[i]++;
+            }
+            std::cout << "in progress:";
+            debug_print(rpoly);
+            std::cout << std::endl;
         }
         return rpoly;
     }
