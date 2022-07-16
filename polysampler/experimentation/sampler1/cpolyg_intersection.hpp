@@ -58,7 +58,7 @@ struct collision_of_polyg
         {
             std::cout << side_1[i] << ":(" << point[i].x << "," << point[i].y << ")";
         }
-        std::cout << count << ". ";
+        std::cout << count << ".";
     }
 };
 // collision
