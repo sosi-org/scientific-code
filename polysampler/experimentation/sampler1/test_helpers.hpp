@@ -53,12 +53,11 @@ fixedsize_side_metadata_t testhelper_polyg(const simple_hacky_polygp_t &shp)
 
 #include <cmath>
 
-// C++20
+// C++20:
 
 template <typename real>
-// requires !std::Integral<T>
-// requires std::is_integral<real>::value // error: 'real' does not refer to a value
-requires(!std::integral<real>) void assert_equality_real(real actual_value, real expected_value)
+requires(!std::integral<real>)
+void assert_equality_real(real actual_value, real expected_value)
 {
     constexpr real ε = 0.00000000001;
     if (std::abs(actual_value - expected_value) < ε)
@@ -72,7 +71,6 @@ requires(!std::integral<real>) void assert_equality_real(real actual_value, real
 }
 
 template <typename T>
-// requires std::Integral<T>
 requires std::integral<T>
 void assert_equality_i(T actual_value, T expected_value)
 {

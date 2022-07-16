@@ -19,8 +19,7 @@ void test1_convex_polygon_area()
     fixedsize_side_metadata_t poly1 = t2patch(square.trigulation[0], square.points);
     double a = convex_polygon_area<double>(poly1);
     std::cout << a << " expected.to.be 1" << std::endl;
-
-    assert_equality_real<double>(a, 1);
+    assert_equality_real<double>(a, 1.0);
 }
 /*
 fixedsize_side_metadata_t  t2patch(const simple_polygi_t& polyg)
@@ -34,6 +33,6 @@ void test2_convex_polygon_area()
 
     std::cout << a << " expected.to.be 1" << std::endl;
 
-    assert_equality_real<double>(a, 1);
-    assert_equality_i<int>((int)2, 1+1);
+    assert_equality_real<double>(a, 1.0);
+    assert_equality_i<int>((int)2, 1 + 1);
 }
