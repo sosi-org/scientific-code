@@ -112,7 +112,7 @@ The type:
 
 */
 
-//enum class {no_erase, erase_A, erase_B};
+// enum class {no_erase, erase_A, erase_B};
 
 // can be executed in next vectorized round
 // asymmetric: always use the first poly as basis.
@@ -120,7 +120,7 @@ The type:
 template <typename real>
 inline simple_hacky_polygp_t
 cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &poly1, const fixedsize_polygon_with_side_metadata_t &poly2,
-bool dont_erase, bool erase_between)
+                                  bool dont_erase, bool erase_between)
 {
     simple_hacky_polygp_t rpoly; // keep empty hull
 
@@ -192,7 +192,6 @@ bool dont_erase, bool erase_between)
         // new_point_indices[0], [1]
         // slow method
 
-
         if (build.debug)
         {
             if (new_point_indices[1] < new_point_indices[0])
@@ -205,60 +204,62 @@ bool dont_erase, bool erase_between)
             }
             std::cout << std::endl;
         }
-        if (!dont_erase) {
-        // note: assert(side_1[0] < side_1[1]);
-        assert(new_point_indices[0] < new_point_indices[1]);
-        assert(new_point_indices[0]+1 <= new_point_indices[1]-1); // becauwe we increased the second one
-        if (erase_between) {
-            size_t before_size = rpoly.size();
-            side_index_int_t from = new_point_indices[0]+1;
-            side_index_int_t to = new_point_indices[1]-1;
-            assert(from <= to); // proved
-            rpoly.erase(rpoly.begin() + from, rpoly.begin() + to+1 );
-            if (build.debug)
+        if (!dont_erase)
+        {
+            // note: assert(side_1[0] < side_1[1]);
+            assert(new_point_indices[0] < new_point_indices[1]);
+            assert(new_point_indices[0] + 1 <= new_point_indices[1] - 1); // becauwe we increased the second one
+            if (erase_between)
             {
-                std::cout << "debugA:"
-                          << before_size << "-"
-                          << rpoly.size()
-                          << "=="
-                          << to
-                          << "-" << from
-                          << "+1"
-                          << std::endl;
-               // (0,0) (1,0) *(1,0.5) (1,1) *(0.5,1) (0,1)
-               // debug:6-4==4-2-1
+                size_t before_size = rpoly.size();
+                side_index_int_t from = new_point_indices[0] + 1;
+                side_index_int_t to = new_point_indices[1] - 1;
+                assert(from <= to); // proved
+                rpoly.erase(rpoly.begin() + from, rpoly.begin() + to + 1);
+                if (build.debug)
+                {
+                    std::cout << "debugA:"
+                              << before_size << "-"
+                              << rpoly.size()
+                              << "=="
+                              << to
+                              << "-" << from
+                              << "+1"
+                              << std::endl;
+                    // (0,0) (1,0) *(1,0.5) (1,1) *(0.5,1) (0,1)
+                    // debug:6-4==4-2-1
+                }
+                assert(before_size - rpoly.size() == to - from + 1);
             }
-            assert( before_size-rpoly.size() == to - from + 1);
-        } else {
-            size_t before_size = rpoly.size();
-            side_index_int_t frombegin_to = new_point_indices[0]-1;
-            side_index_int_t from_toend = new_point_indices[1]+1;
-            assert(frombegin_to < from_toend); // how to prove?
-            // in worst case, there is one node in the angle
-            rpoly.erase(rpoly.begin() + from_toend, rpoly.end());  // not inclusive for from_toend
-            rpoly.erase(rpoly.begin(), rpoly.begin() + frombegin_to+1 ); // not inclusive for frombegin_to
-            if (build.debug)
+            else
             {
-                std::cout << "debugB:"
-                          //<< before_size << "-"
-                          << rpoly.size()
-                          << "=="
-                          << new_point_indices[1]   // 4
-                          << "-" << new_point_indices[0] // 2
-                          << "+1"
-                          << std::endl;
-               // (0,0) (1,0) *(1,0.5) (1,1) *(0.5,1) (0,1)
-               // debug:6-4==4-2-1
+                size_t before_size = rpoly.size();
+                side_index_int_t frombegin_to = new_point_indices[0] - 1;
+                side_index_int_t from_toend = new_point_indices[1] + 1;
+                assert(frombegin_to < from_toend); // how to prove?
+                // in worst case, there is one node in the angle
+                rpoly.erase(rpoly.begin() + from_toend, rpoly.end());         // not inclusive for from_toend
+                rpoly.erase(rpoly.begin(), rpoly.begin() + frombegin_to + 1); // not inclusive for frombegin_to
+                if (build.debug)
+                {
+                    std::cout << "debugB:"
+                              //<< before_size << "-"
+                              << rpoly.size()
+                              << "=="
+                              << new_point_indices[1]        // 4
+                              << "-" << new_point_indices[0] // 2
+                              << "+1"
+                              << std::endl;
+                    // (0,0) (1,0) *(1,0.5) (1,1) *(0.5,1) (0,1)
+                    // debug:6-4==4-2-1
 
-                // in progress:6:(0,0) (1,0) (1,0.5) (1,1) (0.5,1) (0,1)
-                // debugB:6-5==4-2-1
-
+                    // in progress:6:(0,0) (1,0) (1,0.5) (1,1) (0.5,1) (0,1)
+                    // debugB:6-5==4-2-1
+                }
+                assert(
+                    rpoly.size() ==
+                    new_point_indices[1] - new_point_indices[0] + 1);
             }
-            assert(
-                rpoly.size() ==
-                new_point_indices[1]-new_point_indices[0]+1
-            );
-        }
         }
         return rpoly;
     }
