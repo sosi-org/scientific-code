@@ -64,8 +64,9 @@ template <typename real>
 inline collision_of_polyg cpoly_intersection__two_points(const fixedsize_side_metadata_t &poly1, const fixedsize_side_metadata_t &poly2)
 {
 
-    collision_of_polyg result;
-    result.count = 0;
+    // C++20
+    collision_of_polyg result{.count = 0};
+    // result.count = 0;
     size_t ctr = 0;
 
     for (side_index_int_t s1 = 0; s1 < poly1.size(); ++s1)
@@ -117,12 +118,17 @@ inline real convex_polygon_area(const fixedsize_side_metadata_t &poly1)
 
 // area from simple_hacky_polygp_t
 
-template <typename real>
+// verbose, debug
+template <typename real, bool verbose>
 inline real convex_polygon_area2(const simple_hacky_polygp_t &poly1)
 {
     real area = 0;
+    {
+        // C++23:
+        // std::cout << "area(2):  " if consteval (verbose);
+        // if constexpr (verbose) {
+    if (verbose)
     std::cout << "area(2):  ";
-
     real last_x = poly1[poly1.size() - 1].first;
     real last_y = poly1[poly1.size() - 1].second;
 
@@ -130,20 +136,25 @@ inline real convex_polygon_area2(const simple_hacky_polygp_t &poly1)
     {
         real x = pt.first;
         real y = pt.second;
+        if (verbose)
         std::cout << x << "," << y << ". " << std::endl;
 
         real xyp = last_x * y;
         real xyn = last_y * x;
 
+        if (verbose)
         std::cout << "xy+= " << xyp << "-" << xyn << ". " << std::endl;
 
         area += xyp - xyn;
+        if (verbose)
         std::cout << "area:" << area << std::endl;
 
         last_x = x;
         last_y = y;
     }
+    if (verbose)
     std::cout << std::endl;
+    }
     return area / 2.0;
 }
 
@@ -165,8 +176,7 @@ full_tesselation testutil_tessellation_from_single_polygon(simple_hacky_polygp_t
 {
     full_tesselation pnp;
     simple_polygi_t pgi;
-    side_point_t i = 0;
-    for (const auto &c : coords)
+    for (side_point_t i = 0; const auto &c : coords)
     {
         // pair<> is used only for simpler constructor-literal
         point_t pnt{c.first, c.second};
@@ -207,7 +217,7 @@ void test2_convex_polygon_area()
 {
 
     simple_hacky_polygp_t square = testutil_simply_polygon(simple_hacky_polygp_t{{0, 0}, {1, 0}, {1, 1}, {0, 1}});
-    double a = convex_polygon_area2<double>(square);
+    double a = convex_polygon_area2<double, true>(square);
 
     std::cout << a << " expected.to.be 1" << std::endl;
 }
