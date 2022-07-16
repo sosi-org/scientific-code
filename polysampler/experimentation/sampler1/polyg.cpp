@@ -2,6 +2,7 @@ export module polyg;
 // #pragma once
 
 #include <vector>
+#include <iostream>
 
 // import side_meta_data_t;
 import side_meta_data_t;
@@ -22,3 +23,16 @@ export typedef std::vector<side_meta_data_t> fixedsize_polygon_with_side_metadat
 // fixedsize_polygon_with_side_metadata_t = polygon
 
 // todo: rename: fixedsize_polygon_with_side_metadata_t ->? polyg_fixedsize_side_metadata_t
+
+/*
+// only corners
+export void debug_print_xy0(const fixedsize_polygon_with_side_metadata_t &poly)
+{
+    std::cout << poly.size() << ":";
+    for (auto v : poly)
+    {
+        std::cout << "(" << v.x0 << "," << v.y0 << ") ";
+    }
+    // todo: how to avoid such repeat?
+}
+*/

@@ -48,6 +48,18 @@ void test2_cpoly_intersection__two_points()
     test1_cpoly_intersection__two_points_parametrised(x0, y0, x1, y1, xm, ym, x2, y2);
 }
 
+// todo: move to that module
+// only corners
+void debug_print_xy0(const fixedsize_polygon_with_side_metadata_t &poly)
+{
+    std::cout << poly.size() << ":";
+    for (auto v : poly)
+    {
+        std::cout << "(" << v.x0 << "," << v.y0 << ") ";
+    }
+    // todo: how to avoid such repeat?
+}
+
 // todo: nested inside eachother
 
 void test1_cpoly_intersection__produced()
@@ -67,9 +79,8 @@ void test1_cpoly_intersection__produced()
 
     std::cout << "Pre-collision poly:";
     // debug_print(std::cout, result_poly);
-    debug_print(poly1);
+    debug_print_xy0(poly1);
     std::cout << std::endl;
-
 
     simple_hacky_polygp_t result_poly =
         cpoly_intersection__complete_poly<double>(poly1, poly2);
