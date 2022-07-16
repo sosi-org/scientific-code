@@ -238,22 +238,28 @@ fixedsize_side_metadata_t testhelper_polyg(const simple_hacky_polygp_t &shp)
     return poly;
 }
 
-void test1_cpoly_intersection__two_points()
+void test1_cpoly_intersection__two_points_parametrised(double x0, double y0, double x1, double y1, double xm, double ym, double x2, double y2)
 {
-    double x0 = 0, y0 = 0;
-    double x1 = 1, y1 = 1;
-    double xm = 0.5, ym = 0.5;
-    double x2 = 2, y2 = 2;
+
     fixedsize_side_metadata_t poly1 = testhelper_polyg(simple_hacky_polygp_t{
         {x0, y0}, {x1, y0}, {x1, y1}, {x0, y1}});
 
     fixedsize_side_metadata_t poly2 = testhelper_polyg(simple_hacky_polygp_t{
         {xm, ym}, {x2, ym}, {x2, y2}, {xm, y2}});
 
-
     collision_of_polyg cr = cpoly_intersection__two_points<double>(poly1, poly2);
     cr.debug_print();
     std::cout << std::endl;
+}
+
+void test1_cpoly_intersection__two_points()
+{
+    double x0 = 0, y0 = 0;
+    double x1 = 1, y1 = 1;
+    double xm = 0.5, ym = 0.5;
+    double x2 = 2, y2 = 2;
+
+    test1_cpoly_intersection__two_points_parametrised(x0,y0, x1,y1,  xm,ym, x2,y2);
 }
 
 void test2_cpoly_intersection__two_points()
