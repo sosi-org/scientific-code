@@ -76,11 +76,13 @@ inline collision_of_polyg cpoly_intersection__two_points(const fixedsize_polygon
             {
                 result.point[ctr] = point_t{is.x, is.y};
                 result.side_1[ctr] = s1;
+                // good side condition: side_1[0] < side_1[1]
                 result.side_2[ctr] = s2;
                 result.count = ctr + 1;
                 ctr++;
                 if (ctr >= 2)
                 {
+                    assert(result.side_1[0] < result.side_1[1]);
                     return result;
                 }
             }
@@ -110,12 +112,15 @@ The type:
 
 */
 
+//enum class {no_erase, erase_A, erase_B};
+
 // can be executed in next vectorized round
 // asymmetric: always use the first poly as basis.
 // future: se can extract the completemnet (A - B) but we need the intersection only now (A ∩ B).
 template <typename real>
 inline simple_hacky_polygp_t
-cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &poly1, const fixedsize_polygon_with_side_metadata_t &poly2)
+cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &poly1, const fixedsize_polygon_with_side_metadata_t &poly2,
+bool dont_erase, bool erase_between)
 {
     simple_hacky_polygp_t rpoly; // keep empty hull
 
@@ -186,6 +191,8 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
         // collision.side_1[0],collision.side_1[1]
         // new_point_indices[0], [1]
         // slow method
+
+
         if (build.debug)
         {
             if (new_point_indices[1] < new_point_indices[0])
@@ -197,6 +204,29 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
                 std::cout << i << "";
             }
             std::cout << std::endl;
+        }
+        if (!dont_erase) {
+        // note: assert(side_1[0] < side_1[1]);
+        assert(new_point_indices[0] < new_point_indices[1]);
+        assert(new_point_indices[0]+1 <= new_point_indices[1]-1); // becauwe we increased the second one
+        if (erase_between) {
+            side_index_int_t from = new_point_indices[0]+1;
+            side_index_int_t to = new_point_indices[1]-1;
+            assert(from <= to); // proved
+            rpoly.erase(rpoly.begin() + from, rpoly.begin() + to );
+        } else {
+            size_t before_size = rpoly.size();
+            side_index_int_t frombegin_to = new_point_indices[0]-1;
+            side_index_int_t from_toend = new_point_indices[1]+1;
+            assert(frombegin_to < from_toend); // how to prove?
+            // in worst case, there is one node in the angle
+            rpoly.erase(rpoly.begin() + from_toend, rpoly.end());
+            rpoly.erase(rpoly.begin(), rpoly.begin() + frombegin_to );
+            assert(
+                before_size - rpoly.size() ==
+                new_point_indices[1]-new_point_indices[0]-1
+            );
+        }
         }
         return rpoly;
     }
