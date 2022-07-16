@@ -37,7 +37,6 @@ full_tesselation testutil_tessellation_from_single_polygon(simple_hacky_polygp_t
     return pnp;
 }
 
-
 void dummy1()
 {
     /*  works but not useful: */
@@ -57,11 +56,9 @@ fixedsize_side_metadata_t testhelper_polyg(const simple_hacky_polygp_t &shp)
 // C++20
 
 template <typename real>
-    // requires !std::Integral<T>
-    //requires std::is_integral<real>::value // error: 'real' does not refer to a value
-    requires (!std::integral<real>)
-void
-    assert_equality_real(real actual_value, real expected_value)
+// requires !std::Integral<T>
+// requires std::is_integral<real>::value // error: 'real' does not refer to a value
+requires(!std::integral<real>) void assert_equality_real(real actual_value, real expected_value)
 {
     constexpr real ε = 0.00000000001;
     if (std::abs(actual_value - expected_value) < ε)
@@ -75,8 +72,8 @@ void
 }
 
 template <typename T>
-//requires std::Integral<T>
-    requires std::integral<T>
+// requires std::Integral<T>
+requires std::integral<T>
 void assert_equality_i(T actual_value, T expected_value)
 {
     if (actual_value == expected_value)
