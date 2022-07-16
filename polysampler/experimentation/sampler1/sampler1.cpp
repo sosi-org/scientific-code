@@ -374,6 +374,8 @@ int main()
 
     test1_convex_polygon_area();
     test2_convex_polygon_area();
+    test1_cpoly_intersection__two_points();
+    return 0;
 
     /*
     points_t points = // {{1,2}, {3,4}};

@@ -52,7 +52,7 @@ struct collision_of_polyg
     void debug_print()
     {
         std::cout << count << ": ";
-        for (int i = 0; i < 2; ++i)
+        for (int i = 0; i < count; ++i)
         {
             std::cout << side_1[i] << ":(" << point[i].x << "," << point[i].y << ")";
         }
@@ -75,7 +75,7 @@ inline collision_of_polyg cpoly_intersection__two_points(const fixedsize_side_me
         for (side_index_int_t s2 = 0; s2 < poly2.size(); ++s2)
         {
 
-            const side_meta_data_t &side2 = poly2[s1];
+            const side_meta_data_t &side2 = poly2[s2];
 
             side_side_intersection_solution_t<real> is =
                 intersect_lines_segment<real>(side1, side2);
@@ -232,6 +232,7 @@ void test1_cpoly_intersection__two_points()
 
     collision_of_polyg cr = cpoly_intersection__two_points<double>(poly1, poly2);
     cr.debug_print();
+    std::cout << std::endl;
 }
 
 /*
