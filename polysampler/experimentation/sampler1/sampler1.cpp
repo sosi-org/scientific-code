@@ -368,6 +368,7 @@ auto generate_helper_annots(const tesselation_t &trigulation, const points_t &ve
 }
 
 #include "./cpolyg_intersection.hpp"
+#include "./cpolyg_intersection.test.hpp"
 
 void run_tests() {
     test1_convex_polygon_area();
@@ -375,6 +376,7 @@ void run_tests() {
     test1_cpoly_intersection__two_points();
     test2_cpoly_intersection__two_points();
 }
+
 int main()
 {
     run_tests();
