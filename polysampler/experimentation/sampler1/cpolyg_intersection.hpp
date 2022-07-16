@@ -235,24 +235,28 @@ bool dont_erase, bool erase_between)
             side_index_int_t from_toend = new_point_indices[1]+1;
             assert(frombegin_to < from_toend); // how to prove?
             // in worst case, there is one node in the angle
-            rpoly.erase(rpoly.begin() + from_toend+1, rpoly.end());  // not inclusive for from_toend
-            rpoly.erase(rpoly.begin(), rpoly.begin() + frombegin_to ); // not inclusive for frombegin_to
+            rpoly.erase(rpoly.begin() + from_toend, rpoly.end());  // not inclusive for from_toend
+            rpoly.erase(rpoly.begin(), rpoly.begin() + frombegin_to+1 ); // not inclusive for frombegin_to
             if (build.debug)
             {
                 std::cout << "debugB:"
-                          << before_size << "-"
+                          //<< before_size << "-"
                           << rpoly.size()
                           << "=="
-                          << new_point_indices[1]
-                          << "-" << new_point_indices[0]
-                          << "-1"
+                          << new_point_indices[1]   // 4
+                          << "-" << new_point_indices[0] // 2
+                          << "+1"
                           << std::endl;
                // (0,0) (1,0) *(1,0.5) (1,1) *(0.5,1) (0,1)
                // debug:6-4==4-2-1
+
+                // in progress:6:(0,0) (1,0) (1,0.5) (1,1) (0.5,1) (0,1)
+                // debugB:6-5==4-2-1
+
             }
             assert(
-                before_size - rpoly.size() ==
-                new_point_indices[1]-new_point_indices[0]-1
+                rpoly.size() ==
+                new_point_indices[1]-new_point_indices[0]+1
             );
         }
         }
