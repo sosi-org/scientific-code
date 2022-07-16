@@ -327,6 +327,8 @@ bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const pt
         std::cout << "which_side:";
     }
 
+    constexpr real ε2 = 0.0000001;
+
     const point_t point{.x = point_.first, .y=point_.second};
     const auto xp = point.x;
     const auto yp = point.y;
@@ -346,7 +348,7 @@ bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const pt
             std::cout << which_side << ", ";
         }
 
-        if (!first && last_sidedness * which_side < 0 ) {
+        if (!first && last_sidedness * which_side < ε2 ) {
             if(build.debug) {
                 std::cout << "false." << std::endl;
             }
