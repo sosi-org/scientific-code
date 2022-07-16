@@ -204,7 +204,47 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
             }
             std::cout << std::endl;
         }
-        if (mode == erasing_mod_t::erase_auto) {}
+        if (mode == erasing_mod_t::erase_auto) {
+            // get a point in between
+            side_index_int_t midpoint_index =
+                (new_point_indices[0] + new_point_indices[1])/2;
+            // see below for proof
+            assert(new_point_indices[0] + 1 <= new_point_indices[1] - 1);
+
+            /*
+            Proof:
+
+            new_point_indices[0] + 1 <= new_point_indices[1] - 1
+            // n := new_point_indices
+            n[0] + 1 <= n[1] - 1
+            n[0] + 2 <= n[1]
+            n[0] + 2 + δ == n[1], ∃ δ >= 0
+            n[0]*2 + 2 + δ == n[1] +n[0] , ∃δ≥0
+            n[0] + ⌊(2 + δ)/2⌋ == (n[1] +n[0])/2 , ∃δ≥0
+            n[0] + 1 + ⌊δ/2⌋ == midpoint_index ,  ∃δ≥0
+            n[0] < midpoint_index
+            new_point_indices[0] < midpoint_index
+            Q.E.D
+
+
+            n[0] + 2 + δ == n[1] , ∃ δ ≥ 0
+            n[0] + n[1] + 2 + δ == n[1]*2  , ∃ δ ≥ 0
+            (n[0] + n[1])/2 + (2 + δ)/2 == n[1]*2/2  , ∃ δ ≥ 0
+            midpoint_index + 1 + ⌊δ/2⌋ == n[1]  , ∃ δ ≥ 0
+            midpoint_index < n[1]
+            midpoint_index < new_point_indices[1]
+            Q.E.D
+            */
+
+            //note: strict inequality (unequal)
+            assert (midpoint_index > new_point_indices[0]);
+            assert (midpoint_index < new_point_indices[1]);
+
+            const auto &midpoint = poly[midpoint_index];
+            // now what?
+            //todo:
+
+        }
         if (mode == erasing_mod_t::no_erase) {
         } else {
             // note: assert(side_1[0] < side_1[1]);
