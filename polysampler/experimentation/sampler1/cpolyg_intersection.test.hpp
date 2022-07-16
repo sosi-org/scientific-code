@@ -129,3 +129,28 @@ cpoly_intersection(simple_poly, simple_poly);
 // iterator for tesselation?? with ++ operator
 
 */
+
+
+
+
+void test1_insideness()
+{
+    // good overlap
+    double x0 = 0, y0 = 0;
+    double x1 = 1, y1 = 1;
+
+    fixedsize_polygon_with_side_metadata_t poly = testhelper_polyg(simple_hacky_polygp_t{
+        {x0, y0}, {x1, y0}, {x1, y1}, {x0, y1}});
+
+
+    //point_t point{.x= 0.5, .y=0.5};
+    //pt2_t point{.first= 0.5, .second=0.5};
+    pt2_t point{0.5, 0.5};
+    bool ins1 = is_inside_poly(poly, point);
+    assert_equality_i(ins1, true);
+
+
+    bool ins2 = is_inside_poly(poly, pt2_t{0.5, 0.5});
+    assert_equality_i(ins2, false);
+
+}

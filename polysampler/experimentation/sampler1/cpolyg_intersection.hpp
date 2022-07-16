@@ -105,6 +105,9 @@ simple_hacky_polygp_t to_simple_hacky_polygp_t(const fixedsize_polygon_with_side
     return pp;
 }
 
+// declaration only
+bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const pt2_t &point);
+
 /*
 The type:
  `fixedsize_polygon_with_side_metadata_t`
@@ -240,10 +243,17 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
             assert (midpoint_index > new_point_indices[0]);
             assert (midpoint_index < new_point_indices[1]);
 
-            const auto &midpoint = poly[midpoint_index];
+            const auto &midpoint = rpoly[midpoint_index];
             // now what?
-            //todo:
-
+            // too slow
+            // also erasing and insering in the vector is too much waster of CPU
+            bool is_inside = is_inside_poly(poly2, midpoint);
+            if (is_inside) {
+                // keep midpoint
+                mode = erasing_mod_t::erase_outside;
+            } else {
+                mode = erasing_mod_t::erase_between;
+            }
         }
         if (mode == erasing_mod_t::no_erase) {
         } else {
@@ -308,5 +318,34 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
     std::cout << "todo: I dont know if empty, or all of it" << std::endl;
     return simple_hacky_polygp_t{};
 }
+
+bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const pt2_t &point_)
+{
+    // https://stackoverflow.com/a/2922778/4374258
+
+    const point_t point{.x = point_.first, .y=point_.second};
+    const auto xp = point.x;
+    const auto yp = point.y;
+
+    bool first = true;
+    double last_sidedness = 1;
+    // better if use circular_for()
+    double x1 = poly.end()->x0, y1 = poly.end()->y0;
+    for (const auto &p : poly)
+    {
+        double x2 = p.x0, y2 = p.y0;
+        double which_side = (x2 - x1) * (yp - y1) - (xp - x1) * (y2 - y1);
+        x1 = x2;
+        y1 = y2;
+
+        if (!first && last_sidedness * which_side < 0 ) {
+            return false;
+        }
+        last_sidedness = which_side;
+        first = false;
+    }
+    return true;
+}
+
 
 // followed by *.test.hpp

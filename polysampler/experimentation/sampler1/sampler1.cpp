@@ -380,6 +380,7 @@ void run_tests()
     test1_cpoly_intersection__two_points();
     test2_cpoly_intersection__two_points();
     test1_cpoly_intersection__produced();
+    test1_insideness();
 }
 
 int main()
