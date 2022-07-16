@@ -378,12 +378,14 @@ void run_tests() {
     test2_convex_polygon_area();
     test1_cpoly_intersection__two_points();
     test2_cpoly_intersection__two_points();
+    test1_cpoly_intersection__produced();
 }
 
 int main()
 {
     run_tests();
-    return 0;
+
+    std::cout << "-------------------------" << std::endl;
 
     /*
     points_t points = // {{1,2}, {3,4}};

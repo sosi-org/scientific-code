@@ -12,3 +12,13 @@ typedef std::pair<double, double> pt2_t;
 // template<typename real>
 typedef std::vector<pt2_t> simple_hacky_polygp_t;
 
+
+//void debug_print(const auto& cout, const simple_hacky_polygp_t& poly ) {
+// template <typename COUT>
+// void debug_print(const COUT& cout, const simple_hacky_polygp_t& poly ) {
+void debug_print(const simple_hacky_polygp_t& poly ) {
+    std::cout << poly.size() << ":";
+    for(auto v : poly) {
+        std::cout << "(" << v.first << "," << v.second << ") ";
+    }
+}
