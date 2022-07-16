@@ -338,11 +338,22 @@ bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const pt
         x1 = x2;
         y1 = y2;
 
+        if(build.debug) {
+            std::cout << "which_side:" << which_side;
+        }
+
         if (!first && last_sidedness * which_side < 0 ) {
+            if(build.debug) {
+                std::cout << "false." << std::endl;
+            }
+
             return false;
         }
         last_sidedness = which_side;
         first = false;
+    }
+    if(build.debug) {
+        std::cout << "true." << std::endl;
     }
     return true;
 }
