@@ -129,33 +129,33 @@ inline real convex_polygon_area2(const simple_hacky_polygp_t &poly1)
         // C++23:
         // std::cout << "area(2):  " if consteval (verbose);
         // if constexpr (verbose) {
-    if (verbose)
-    std::cout << "area(2):  ";
-    real last_x = poly1[poly1.size() - 1].first;
-    real last_y = poly1[poly1.size() - 1].second;
-
-    for (const pt2_t &pt : poly1)
-    {
-        real x = pt.first;
-        real y = pt.second;
         if (verbose)
-        std::cout << x << "," << y << ". " << std::endl;
+            std::cout << "area(2):  ";
+        real last_x = poly1[poly1.size() - 1].first;
+        real last_y = poly1[poly1.size() - 1].second;
 
-        real xyp = last_x * y;
-        real xyn = last_y * x;
+        for (const pt2_t &pt : poly1)
+        {
+            real x = pt.first;
+            real y = pt.second;
+            if (verbose)
+                std::cout << x << "," << y << ". " << std::endl;
 
+            real xyp = last_x * y;
+            real xyn = last_y * x;
+
+            if (verbose)
+                std::cout << "xy+= " << xyp << "-" << xyn << ". " << std::endl;
+
+            area += xyp - xyn;
+            if (verbose)
+                std::cout << "area:" << area << std::endl;
+
+            last_x = x;
+            last_y = y;
+        }
         if (verbose)
-        std::cout << "xy+= " << xyp << "-" << xyn << ". " << std::endl;
-
-        area += xyp - xyn;
-        if (verbose)
-        std::cout << "area:" << area << std::endl;
-
-        last_x = x;
-        last_y = y;
-    }
-    if (verbose)
-    std::cout << std::endl;
+            std::cout << std::endl;
     }
     return area / 2.0;
 }
@@ -251,10 +251,10 @@ void test1_cpoly_intersection__two_points_parametrised(double x0, double y0, dou
     cr.debug_print();
     std::cout << std::endl;
 
-    double a1= convex_polygon_area<double>(poly1);
-    double a2= convex_polygon_area<double>(poly2);
-    //double a1= convex_polygon_area(poly1);
-    std::cout << "areas:" <<  a1 << "," << a2 << std::endl;
+    double a1 = convex_polygon_area<double>(poly1);
+    double a2 = convex_polygon_area<double>(poly2);
+    // double a1= convex_polygon_area(poly1);
+    std::cout << "areas:" << a1 << "," << a2 << std::endl;
 }
 
 void test1_cpoly_intersection__two_points()
@@ -265,7 +265,7 @@ void test1_cpoly_intersection__two_points()
     double xm = 0.5, ym = 0.5;
     double x2 = 2, y2 = 2;
 
-    test1_cpoly_intersection__two_points_parametrised(x0,y0, x1,y1,  xm,ym, x2,y2);
+    test1_cpoly_intersection__two_points_parametrised(x0, y0, x1, y1, xm, ym, x2, y2);
 }
 
 void test2_cpoly_intersection__two_points()
@@ -276,7 +276,7 @@ void test2_cpoly_intersection__two_points()
     double xm = 1, ym = 1;
     double x2 = 2, y2 = 2;
 
-    test1_cpoly_intersection__two_points_parametrised(x0,y0, x1,y1,  xm,ym, x2,y2);
+    test1_cpoly_intersection__two_points_parametrised(x0, y0, x1, y1, xm, ym, x2, y2);
 }
 
 /*
