@@ -43,11 +43,11 @@ void dummy1()
     simple_hacky_polygp_t square = testutil_simply_polygon(simple_hacky_polygp_t{{0, 0}, {1, 0}, {1, 1}, {0, 1}});
 }
 
-fixedsize_side_metadata_t testhelper_polyg(const simple_hacky_polygp_t &shp)
+fixedsize_polygon_with_side_metadata_t testhelper_polyg(const simple_hacky_polygp_t &shp)
 {
     // based on: test1_convex_polygon_area
     full_tesselation square1 = testutil_tessellation_from_single_polygon(shp);
-    fixedsize_side_metadata_t poly = t2patch(square1.trigulation[0], square1.points);
+    fixedsize_polygon_with_side_metadata_t poly = t2patch(square1.trigulation[0], square1.points);
     return poly;
 }
 

@@ -16,9 +16,9 @@ export typedef std::vector<side_point_t> vertiex_indices_t; // vertices; // with
 // polygon:
 
 // std::array<side_meta_data_t>
-// typedef std::unique_ptr<side_meta_data_t[]> fixedsize_side_metadata_t;
-export typedef std::vector<side_meta_data_t> fixedsize_side_metadata_t;
+// typedef std::unique_ptr<side_meta_data_t[]> fixedsize_polygon_with_side_metadata_t;
+export typedef std::vector<side_meta_data_t> fixedsize_polygon_with_side_metadata_t;
 
-// fixedsize_side_metadata_t = polygon
+// fixedsize_polygon_with_side_metadata_t = polygon
 
-// todo: rename: fixedsize_side_metadata_t ->? polyg_fixedsize_side_metadata_t
+// todo: rename: fixedsize_polygon_with_side_metadata_t ->? polyg_fixedsize_side_metadata_t

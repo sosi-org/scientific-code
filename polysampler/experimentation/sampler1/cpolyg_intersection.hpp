@@ -15,7 +15,7 @@ todo: add new augmented points, and add indices (?)
 no: you just need the area
 */
 template <typename real>
-inline simple_hacky_polygp_t cpoly_intersection(const fixedsize_side_metadata_t &poly1, const fixedsize_side_metadata_t &poly2)
+inline simple_hacky_polygp_t cpoly_intersection(const fixedsize_polygon_with_side_metadata_t &poly1, const fixedsize_polygon_with_side_metadata_t &poly2)
 {
     return simple_hacky_polygp_t();
 }
@@ -50,7 +50,7 @@ struct collision_of_polyg
 };
 // collision
 template <typename real>
-inline collision_of_polyg cpoly_intersection__two_points(const fixedsize_side_metadata_t &poly1, const fixedsize_side_metadata_t &poly2)
+inline collision_of_polyg cpoly_intersection__two_points(const fixedsize_polygon_with_side_metadata_t &poly1, const fixedsize_polygon_with_side_metadata_t &poly2)
 {
 
     // C++20

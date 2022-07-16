@@ -5,11 +5,11 @@
 /*
 // std::vector<point_t>
 template <typename real>
-inline collision_of_polyg cpoly_intersection__two_points(const fixedsize_side_metadata_t &poly1, const fixedsize_side_metadata_t &poly2);
+inline collision_of_polyg cpoly_intersection__two_points(const fixedsize_polygon_with_side_metadata_t &poly1, const fixedsize_polygon_with_side_metadata_t &poly2);
 */
 
 template <typename real>
-inline real convex_polygon_area(const fixedsize_side_metadata_t &poly1)
+inline real convex_polygon_area(const fixedsize_polygon_with_side_metadata_t &poly1)
 {
     real area = 0;
     for (const side_meta_data_t &side : poly1)

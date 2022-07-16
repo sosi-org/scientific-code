@@ -93,7 +93,7 @@ import polyg;
     Lifecycle:
         * empty but with allocated capacity
         * accumulating vector<>
-        * fixedsize_side_metadata_t
+        * fixedsize_polygon_with_side_metadata_t
 
 */
 // almost like an accumulator, or rec_stat channel.
@@ -102,7 +102,7 @@ struct patch_t
     const points_t &coords_ref; // points_ref, rename -> points_coords_ref, coords_ref
     // const std::vector<side_point_t> &points_indices_ref;
 
-    fixedsize_side_metadata_t side_meta_data; // for output
+    fixedsize_polygon_with_side_metadata_t side_meta_data; // for output
 
     /* accumulated sides: while being built */
     // std::vector<int>::size_type side_counter;
@@ -148,9 +148,9 @@ struct patch_t
         // todo: clip away from the area/shape
     }
 
-    // const fixedsize_side_metadata_t& finish()
+    // const fixedsize_polygon_with_side_metadata_t& finish()
 
-    fixedsize_side_metadata_t finish()
+    fixedsize_polygon_with_side_metadata_t finish()
     {
         std::cout << std::endl;
         // return side_meta_data; // move?
@@ -161,18 +161,18 @@ struct patch_t
         // compile-time size? I want const size, not compile-time size.
         // return std::array<side_meta_data_t,>(this->side_meta_data);
 
-        // typedef std::unique_ptr<side_meta_data_t[]> fixedsize_side_metadata_t;
+        // typedef std::unique_ptr<side_meta_data_t[]> fixedsize_polygon_with_side_metadata_t;
 
         // make_unique_for_overwrite
         // return std::make_unique<side_meta_data_t []> ( this->side_counter );
 
         // problem: how to copy?
-        // return fixedsize_side_metadata_t(0);
-        // return fixedsize_side_metadata_t(this->side_meta_data.begin(), this->side_meta_data.end());
-        // return fixedsize_side_metadata_t(side_meta_data.size());
+        // return fixedsize_polygon_with_side_metadata_t(0);
+        // return fixedsize_polygon_with_side_metadata_t(this->side_meta_data.begin(), this->side_meta_data.end());
+        // return fixedsize_polygon_with_side_metadata_t(side_meta_data.size());
 
         // std::unique_ptr<side_meta_data_t []>
-        // fixedsize_side_metadata_t fixedsize(side_meta_data.size());
+        // fixedsize_polygon_with_side_metadata_t fixedsize(side_meta_data.size());
         // std::unique_ptr<side_meta_data_t> fixedsize [side_meta_data.size()];
         /*
         std::generate(
@@ -182,11 +182,11 @@ struct patch_t
         );
         */
         /*
-         fixedsize_side_metadata_t fixedsize(side_meta_data.size());
+         fixedsize_polygon_with_side_metadata_t fixedsize(side_meta_data.size());
          std::copy(side_meta_data.begin(), side_meta_data.end(), fixedsize.get());
          return fixedsize;
          */
-        // return fixedsize_side_metadata_t(0);
+        // return fixedsize_polygon_with_side_metadata_t(0);
         return side_meta_data;
     }
 };
@@ -218,7 +218,7 @@ void circular_for(IT _begin, IT _end, auto callback_pair)
 
 // receive: points
 // simple_polygi_t: polygon of integer vertices ("normalised")
-fixedsize_side_metadata_t t2patch(const simple_polygi_t &polyg, const points_t &points)
+fixedsize_polygon_with_side_metadata_t t2patch(const simple_polygi_t &polyg, const points_t &points)
 {
 
     patch_t patch{points, polyg.size()};
@@ -226,7 +226,7 @@ fixedsize_side_metadata_t t2patch(const simple_polygi_t &polyg, const points_t &
     // lambda capture list:  [patch_t&patch]  -> [&patch]
     auto callback_pair = [&patch]<typename IT>(const IT &from_it, const IT &to_it)
     {
-        // todo: move to a seaparate fixedsize_side_metadata_t element
+        // todo: move to a seaparate fixedsize_polygon_with_side_metadata_t element
         //       as opposed to storing it inside the `patch` itself.
         patch.augment_side(*from_it, *to_it);
         // cout << *from_i << ',' << *next_it <<' ';
@@ -250,9 +250,9 @@ intersect_lines(const side_meta_data_t &side1, const side_meta_data_t &side2);
 // sepaate function for each?
 void augment_tesselation_polygons(const tesselation_t &trigulation, const points_t &points)
 {
-    // fixedsize_side_metadata_t *x0;
-    std::vector<fixedsize_side_metadata_t> r;
-    /* -> fixedsize_side_metadata_t*/
+    // fixedsize_polygon_with_side_metadata_t *x0;
+    std::vector<fixedsize_polygon_with_side_metadata_t> r;
+    /* -> fixedsize_polygon_with_side_metadata_t*/
     traverse_tesselation(
         trigulation, points, [&points](const auto &polyg)
         { return t2patch(polyg, points); },
@@ -286,7 +286,7 @@ void augment_tesselation_polygons(const tesselation_t &trigulation, const points
 
 // todo: move to side_meta_data_t.hpp
 
-void intersect_polys(fixedsize_side_metadata_t poly1, fixedsize_side_metadata_t poly2)
+void intersect_polys(fixedsize_polygon_with_side_metadata_t poly1, fixedsize_polygon_with_side_metadata_t poly2)
 {
     for (const side_meta_data_t &side_ : poly1)
     {

@@ -9,10 +9,10 @@
 void test1_cpoly_intersection__two_points_parametrised(double x0, double y0, double x1, double y1, double xm, double ym, double x2, double y2)
 {
 
-    fixedsize_side_metadata_t poly1 = testhelper_polyg(simple_hacky_polygp_t{
+    fixedsize_polygon_with_side_metadata_t poly1 = testhelper_polyg(simple_hacky_polygp_t{
         {x0, y0}, {x1, y0}, {x1, y1}, {x0, y1}});
 
-    fixedsize_side_metadata_t poly2 = testhelper_polyg(simple_hacky_polygp_t{
+    fixedsize_polygon_with_side_metadata_t poly2 = testhelper_polyg(simple_hacky_polygp_t{
         {xm, ym}, {x2, ym}, {x2, y2}, {xm, y2}});
 
     collision_of_polyg cr = cpoly_intersection__two_points<double>(poly1, poly2);
@@ -50,13 +50,13 @@ void test2_cpoly_intersection__two_points()
 /*
 map:
 
-simple polygon -> fixedsize_side_metadata_t
+simple polygon -> fixedsize_polygon_with_side_metadata_t
 // simple polygon = simple_polygi_t
 
 map:
 
 
-cpoly_intersection(fixedsize_side_metadata_t, fixedsize_side_metadata_t);
+cpoly_intersection(fixedsize_polygon_with_side_metadata_t, fixedsize_polygon_with_side_metadata_t);
 cpoly_intersection(simple_poly, simple_poly);
 
 // how to relate ot tesselation?

@@ -55,11 +55,11 @@ void traverse_tesselation(const tesselation_t &trigulation, const points_t &poin
         // Take each polygon from the tesselation
         const auto &polyg = *plg_it;
 
-        // fixedsize_side_metadata_t r;
+        // fixedsize_polygon_with_side_metadata_t r;
         resultt r = process_polyg_callback(polyg);
         // process_polyg_callback(polyg);
         //  if you want to keep them:
-        //  fixedsize_side_metadata_t q = patch.finish();
+        //  fixedsize_polygon_with_side_metadata_t q = patch.finish();
         accum.push_back(r);
     }
     // return accum;
