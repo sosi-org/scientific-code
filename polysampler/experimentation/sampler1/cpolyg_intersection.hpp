@@ -259,6 +259,7 @@ void test1_cpoly_intersection__two_points_parametrised(double x0, double y0, dou
 
 void test1_cpoly_intersection__two_points()
 {
+    // good overlap
     double x0 = 0, y0 = 0;
     double x1 = 1, y1 = 1;
     double xm = 0.5, ym = 0.5;
@@ -269,9 +270,10 @@ void test1_cpoly_intersection__two_points()
 
 void test2_cpoly_intersection__two_points()
 {
+    // no overlap
     double x0 = 0, y0 = 0;
-    double x1 = 1, y1 = 1;
-    double xm = 0.5, ym = 0.5;
+    double x1 = 0.5, y1 = 0.5;
+    double xm = 1, ym = 1;
     double x2 = 2, y2 = 2;
 
     test1_cpoly_intersection__two_points_parametrised(x0,y0, x1,y1,  xm,ym, x2,y2);
