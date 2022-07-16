@@ -4,6 +4,7 @@
 // keep global and multi-purpose ones here in this file
 
 #include <cassert>
+#include <iostream>
 
 // rename: make_simple_hacky_polygp
 //  template <typename real>
@@ -50,3 +51,43 @@ fixedsize_side_metadata_t testhelper_polyg(const simple_hacky_polygp_t &shp)
     fixedsize_side_metadata_t poly = t2patch(square1.trigulation[0], square1.points);
     return poly;
 }
+
+#include <cmath>
+
+// C++20
+
+template <typename real>
+    // requires !std::Integral<T>
+    //requires std::is_integral<real>::value // error: 'real' does not refer to a value
+    requires (!std::integral<real>)
+void
+    assert_equality_real(real actual_value, real expected_value)
+{
+    constexpr real ε = 0.00000000001;
+    if (std::abs(actual_value - expected_value) < ε)
+    {
+        std::cout << "passed. (" << actual_value << " expected.to.be ~ " << expected_value << ")" << std::endl;
+    }
+    else
+    {
+        std::cout << "failure: expected (actual value) " << actual_value << " to almost-equal " << expected_value << "(expected value)" << std::endl;
+    }
+}
+
+template <typename T>
+//requires std::Integral<T>
+    requires std::integral<T>
+void assert_equality_i(T actual_value, T expected_value)
+{
+    if (actual_value == expected_value)
+    {
+        std::cout << "passed. (" << actual_value << " expected.to.be " << expected_value << ")" << std::endl;
+    }
+    else
+    {
+        std::cout << "failure: expected (actual value) " << actual_value << " to almost-equal " << expected_value << "(expected value)" << std::endl;
+    }
+}
+
+template <class T>
+concept Integral = std::is_integral<T>::value;
