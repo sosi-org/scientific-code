@@ -115,7 +115,13 @@ The type:
 
 */
 
-enum class erasing_mod_t {no_erase, erase_between, erase_outside, erase_auto} ;
+enum class erasing_mod_t
+{
+    no_erase,
+    erase_between,
+    erase_outside,
+    erase_auto
+};
 
 // can be executed in next vectorized round
 // asymmetric: always use the first poly as basis.
@@ -207,10 +213,11 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
             }
             std::cout << std::endl;
         }
-        if (mode == erasing_mod_t::erase_auto) {
+        if (mode == erasing_mod_t::erase_auto)
+        {
             // get a point in between
             side_index_int_t midpoint_index =
-                (new_point_indices[0] + new_point_indices[1])/2;
+                (new_point_indices[0] + new_point_indices[1]) / 2;
             // see below for proof
             assert(new_point_indices[0] + 1 <= new_point_indices[1] - 1);
 
@@ -239,24 +246,30 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
             Q.E.D
             */
 
-            //note: strict inequality (unequal)
-            assert (midpoint_index > new_point_indices[0]);
-            assert (midpoint_index < new_point_indices[1]);
+            // note: strict inequality (unequal)
+            assert(midpoint_index > new_point_indices[0]);
+            assert(midpoint_index < new_point_indices[1]);
 
             const auto &midpoint = rpoly[midpoint_index];
             // now what?
             // too slow
             // also erasing and insering in the vector is too much waster of CPU
             bool is_inside = is_inside_poly(poly2, midpoint);
-            if (is_inside) {
+            if (is_inside)
+            {
                 // keep midpoint
                 mode = erasing_mod_t::erase_outside;
-            } else {
+            }
+            else
+            {
                 mode = erasing_mod_t::erase_between;
             }
         }
-        if (mode == erasing_mod_t::no_erase) {
-        } else {
+        if (mode == erasing_mod_t::no_erase)
+        {
+        }
+        else
+        {
             // note: assert(side_1[0] < side_1[1]);
             assert(new_point_indices[0] < new_point_indices[1]);
             assert(new_point_indices[0] + 1 <= new_point_indices[1] - 1); // becauwe we increased the second one
@@ -323,13 +336,14 @@ bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const pt
 {
     // https://stackoverflow.com/a/2922778/4374258
 
-    if(build.debug) {
+    if (build.debug)
+    {
         std::cout << "which_side:";
     }
 
     constexpr real ε2 = 0.0000001;
 
-    const point_t point{.x = point_.first, .y=point_.second};
+    const point_t point{.x = point_.first, .y = point_.second};
     const auto xp = point.x;
     const auto yp = point.y;
 
@@ -344,12 +358,15 @@ bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const pt
         x1 = x2;
         y1 = y2;
 
-        if(build.debug) {
+        if (build.debug)
+        {
             std::cout << which_side << ", ";
         }
 
-        if (!first && last_sidedness * which_side < ε2 ) {
-            if(build.debug) {
+        if (!first && last_sidedness * which_side < ε2)
+        {
+            if (build.debug)
+            {
                 std::cout << "false." << std::endl;
             }
 
@@ -358,11 +375,11 @@ bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const pt
         last_sidedness = which_side;
         first = false;
     }
-    if(build.debug) {
+    if (build.debug)
+    {
         std::cout << "true." << std::endl;
     }
     return true;
 }
-
 
 // followed by *.test.hpp

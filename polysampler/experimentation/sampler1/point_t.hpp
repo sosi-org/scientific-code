@@ -31,9 +31,9 @@ public:
     }
 }; // point_t;
 
-
 // todo: move to a master file
 
-export constexpr struct {
+export constexpr struct
+{
     bool debug = true;
 } build;
