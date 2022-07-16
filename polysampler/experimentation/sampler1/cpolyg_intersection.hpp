@@ -66,7 +66,7 @@ inline collision_of_polyg cpoly_intersection__two_points(const fixedsize_side_me
 
     // C++20
     collision_of_polyg result{.count = 0};
-    // result.count = 0;
+
     size_t ctr = 0;
 
     for (side_index_int_t s1 = 0; s1 < poly1.size(); ++s1)
@@ -228,17 +228,21 @@ void dummy1()
     simple_hacky_polygp_t square = testutil_simply_polygon(simple_hacky_polygp_t{{0, 0}, {1, 0}, {1, 1}, {0, 1}});
 }
 
+fixedsize_side_metadata_t testhelper_polyg(const simple_hacky_polygp_t &shp)
+{
+    // based on: test1_convex_polygon_area
+    full_tesselation square1 = testutil_tessellation_from_single_polygon(shp);
+    fixedsize_side_metadata_t poly = t2patch(square1.trigulation[0], square1.points);
+    return poly;
+}
+
 void test1_cpoly_intersection__two_points()
 {
-
-    // based on: test1_convex_polygon_area
-    full_tesselation square1 = testutil_tessellation_from_single_polygon(simple_hacky_polygp_t{
+    fixedsize_side_metadata_t poly1 = testhelper_polyg(simple_hacky_polygp_t{
         {0, 0}, {1, 0}, {1, 1}, {0, 1}});
-    fixedsize_side_metadata_t poly1 = t2patch(square1.trigulation[0], square1.points);
 
-    full_tesselation square2 = testutil_tessellation_from_single_polygon(simple_hacky_polygp_t{
+    fixedsize_side_metadata_t poly2 = testhelper_polyg(simple_hacky_polygp_t{
         {0.5, 0.5}, {2, 0.5}, {2, 2}, {0.5, 2}});
-    fixedsize_side_metadata_t poly2 = t2patch(square2.trigulation[0], square2.points);
 
     collision_of_polyg cr = cpoly_intersection__two_points<double>(poly1, poly2);
     cr.debug_print();
