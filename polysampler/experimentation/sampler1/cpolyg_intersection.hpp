@@ -109,6 +109,7 @@ simple_hacky_polygp_t to_simple_hacky_polygp_t(const fixedsize_polygon_with_side
 bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const pt2_t &point);
 
 // erase_inside
+// delete [a,...,b], a<b
 void erase_between(simple_hacky_polygp_t &rpoly, side_index_int_t new_point_indices[2])
 {
     size_t before_size = rpoly.size();
@@ -132,6 +133,7 @@ void erase_between(simple_hacky_polygp_t &rpoly, side_index_int_t new_point_indi
     assert(before_size - rpoly.size() == to - from + 1);
 }
 
+// delete [..., a, b, ...], a<b
 void erase_outwards(simple_hacky_polygp_t &rpoly, side_index_int_t new_point_indices[2])
 {
     size_t before_size = rpoly.size();
@@ -195,7 +197,7 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
         // side_index_int_t side_1[2], side_2[2];
         // take second polygon
 
-        side_index_int_t new_point_indices[2];
+        side_index_int_t new_point_indices1[2];
 
         for (int collidx = 0; collidx < TWO; collidx++)
         {
@@ -229,7 +231,7 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
             // std::vector::insert(position1, pt2_t{new_point.x, new_point.y} );
             rpoly.insert(position1, pt2_t{new_point.x, new_point.y});
 
-            new_point_indices[collidx] = i1next;
+            new_point_indices1[collidx] = i1next;
 
             // It is between i1 and i1+1?
             for (int i = collidx + 1; i < TWO; i++)
@@ -238,6 +240,7 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
                 if (collision.side_1[i] >= i1next) // if on the right side (shifted part) in the vector<>
                     collision.side_1[i]++;
                 /*
+                //not changed
                 // in fact side_2 will not be used
                 if (collision.side_2[i] >= i1next)
                     collision.side_2[i]++;
@@ -252,16 +255,16 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
         }
         // challenge: which side to keep?
         // collision.side_1[0],collision.side_1[1]
-        // new_point_indices[0], [1]
+        // new_point_indices1[0], [1]
         // slow method
 
         if (build.debug)
         {
-            if (new_point_indices[1] < new_point_indices[0])
+            if (new_point_indices1[1] < new_point_indices1[0])
             {
-                std::cout << "smaller" << new_point_indices[0] << "<" << new_point_indices[1] << std::endl;
+                std::cout << "smaller" << new_point_indices1[0] << "<" << new_point_indices1[1] << std::endl;
             }
-            for (int i = new_point_indices[0]; i < new_point_indices[1]; i++)
+            for (int i = new_point_indices1[0]; i < new_point_indices1[1]; i++)
             {
                 std::cout << i << "";
             }
@@ -271,15 +274,15 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
         {
             // get a point in between
             side_index_int_t midpoint_index =
-                (new_point_indices[0] + new_point_indices[1]) / 2;
+                (new_point_indices1[0] + new_point_indices1[1]) / 2;
             // see below for proof
-            assert(new_point_indices[0] + 1 <= new_point_indices[1] - 1);
+            assert(new_point_indices1[0] + 1 <= new_point_indices1[1] - 1);
 
             /*
             Proof:
 
-            new_point_indices[0] + 1 <= new_point_indices[1] - 1
-            // n := new_point_indices
+            new_point_indices1[0] + 1 <= new_point_indices1[1] - 1
+            // n := new_point_indices1
             n[0] + 1 <= n[1] - 1
             n[0] + 2 <= n[1]
             n[0] + 2 + δ == n[1], ∃ δ >= 0
@@ -287,7 +290,7 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
             n[0] + ⌊(2 + δ)/2⌋ == (n[1] +n[0])/2 , ∃δ≥0
             n[0] + 1 + ⌊δ/2⌋ == midpoint_index ,  ∃δ≥0
             n[0] < midpoint_index
-            new_point_indices[0] < midpoint_index
+            new_point_indices1[0] < midpoint_index
             Q.E.D
 
 
@@ -296,13 +299,13 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
             (n[0] + n[1])/2 + (2 + δ)/2 == n[1]*2/2  , ∃ δ ≥ 0
             midpoint_index + 1 + ⌊δ/2⌋ == n[1]  , ∃ δ ≥ 0
             midpoint_index < n[1]
-            midpoint_index < new_point_indices[1]
+            midpoint_index < new_point_indices1[1]
             Q.E.D
             */
 
             // note: strict inequality (unequal)
-            assert(midpoint_index > new_point_indices[0]);
-            assert(midpoint_index < new_point_indices[1]);
+            assert(midpoint_index > new_point_indices1[0]);
+            assert(midpoint_index < new_point_indices1[1]);
 
             const auto &midpoint = rpoly[midpoint_index];
             // now what?
@@ -325,15 +328,15 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
         else
         {
             // note: assert(side_1[0] < side_1[1]);
-            assert(new_point_indices[0] < new_point_indices[1]);
-            assert(new_point_indices[0] + 1 <= new_point_indices[1] - 1); // becauwe we increased the second one
+            assert(new_point_indices1[0] < new_point_indices1[1]);
+            assert(new_point_indices1[0] + 1 <= new_point_indices1[1] - 1); // becauwe we increased the second one
             if (mode == erasing_mod_t::erase_between)
             {
-                erase_between(rpoly, new_point_indices);
+                erase_between(rpoly, new_point_indices1);
             }
             else if (mode == erasing_mod_t::erase_outside)
             {
-                erase_outwards(rpoly, new_point_indices);
+                erase_outwards(rpoly, new_point_indices1);
             }
         }
         return rpoly;
