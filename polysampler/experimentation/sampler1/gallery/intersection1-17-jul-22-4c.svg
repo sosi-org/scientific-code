@@ -7,11 +7,11 @@
     </defs>
 
 
-    <polygon points=" 1.156487,0.517909 1.522314,1.508770 0.486489,1.170762 0.482868,0.487984" style="fill:url(#hash4_4b);stroke:blue;stroke-width:0.005" opacity="1" />
+    <polygon points=" 0.020256,-0.002979 0.983569,0.028371 1.528178,1.513739 -0.013565,1.016888" style="fill:yellow;stroke:blue;stroke-width:0.005" opacity="0.400000" />
 
-    <polygon points=" 0.023676,-0.019331 0.992579,0.024727 1.515919,1.518726 0.008783,1.003710" style="fill:yellow;stroke:blue;stroke-width:0.005" opacity="0.400000" />
+    <polygon points=" 0.490452,0.524961 2.024126,0.516538 1.990745,2.022484 0.515704,1.997787" style="fill:yellow;stroke:blue;stroke-width:0.005" opacity="0.400000" />
 
-    <polygon points=" 0.484419,0.508418 2.022324,0.523746 2.016576,1.979283 0.507364,2.005147" style="fill:yellow;stroke:blue;stroke-width:0.005" opacity="0.400000" />
+    <polygon points=" 1.194728,0.480662 1.497684,1.504403 0.515420,1.145720 0.492719,0.523489" style="fill:url(#hash4_4b);stroke:blue;stroke-width:0.005" opacity="0.400000" />
 
 
     <circle cx="0.000000" cy="0.000000" r="0.05" fill="red" />

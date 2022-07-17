@@ -19,8 +19,9 @@ To cleanup the build:
 ```
 ### Gallery
 Intersection of two boxes:
-[commit](https://github.com/sosi-org/scientific-code/tree/d304871b762190e121be019de415f0eca1426ba0)
+[commit](https://github.com/sosi-org/scientific-code/tree/d304871b762190e121be019de415f0eca1426ba0),
+[commit](https://github.com/sosi-org/scientific-code/tree/d93736d3001ce90d4cbf36ec0c97671016f28297).
 
 ![x](./gallery/intersection1_17j22-3.svg)
-![x](./gallery/intersection1-17-jul-22-4b.svg)
+![x](./gallery/intersection1-17-jul-22-4c.svg)
 
