@@ -179,3 +179,42 @@ void save_svg_file(const string &file_name, const auto &trigulation, const auto 
 
     file.close();
 }
+
+// todo: rename spelling: tessellation
+// todo: rename spelling: triangulation
+
+// generic: turn any function into this
+class svg_saver
+{
+    // enum class state {active, done};
+
+    full_tesselation ft;
+    std::vector<side_meta_data_t> helper_lines;
+    std::vector<point_t> helper_points;
+
+    public:
+    svg_saver& set_tessellation(const full_tesselation &t)
+    {
+        this->ft = t;
+        return *this;
+    }
+    svg_saver& set_helper_points(const std::vector<point_t> &helper_points)
+    {
+        this->helper_points = helper_points;
+        return *this;
+    }
+
+    svg_saver& set_helper_lines(const std::vector<side_meta_data_t> &helper_lines)
+    {
+        this->helper_lines = helper_lines;
+        return *this;
+    }
+    void write(std::string file_name)
+    {
+
+        save_svg_file(file_name,
+                      ft.trigulation, ft.points,
+                      this->helper_points,
+                      this->helper_lines);
+    }
+};
