@@ -1,0 +1,16 @@
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg height="5cm" width="5cm" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-1 -1 4 4">
+
+    <polygon points=" 0.987597,0.502629 1.024921,0.973073 0.475161,0.973243 0.470548,0.498690" style="fill:yellow;stroke:blue;stroke-width:0.005" opacity="0.400000" />
+
+    <polygon points=" -0.024341,0.001809 1.028221,0.004496 1.005284,0.988162 -0.020089,1.012737" style="fill:yellow;stroke:blue;stroke-width:0.005" opacity="0.400000" />
+
+    <polygon points=" 0.499829,0.510887 2.022967,0.493245 1.996889,1.994640 0.479631,1.982303" style="fill:yellow;stroke:blue;stroke-width:0.005" opacity="0.400000" />
+
+    <circle cx="0.000000" cy="0.000000" r="0.05" fill="red" />
+
+    <polyline points=" 0.000000,0.000000 2.000000,0.000000" style="stroke:grey;stroke-width:0.01" />
+
+    <polyline points=" 0.000000,0.000000 0.000000,2.000000" style="stroke:grey;stroke-width:0.01" />
+    Sorry, your browser does not support inline SVG.
+</svg>
