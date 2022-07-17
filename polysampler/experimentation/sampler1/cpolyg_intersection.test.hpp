@@ -1,6 +1,7 @@
 // no "pragma once"
 
 #include <cassert>
+#include <unordered_set>
 
 #include "./cpolyg_intersection.hpp"
 #include "./test_helpers.hpp"
@@ -127,6 +128,7 @@ void test1_cpoly_intersection__produced()
         ft.points,
         helper_points,
         std::vector<side_meta_data_t>{},
+        std::unordered_set<int>{},
         svg_utils<double>::svgctx_t{});
 
     svg_saver{}
@@ -138,9 +140,9 @@ void test1_cpoly_intersection__produced()
        // .add_tessellation_from_single_polygon(result_poly)
        // .add_tessellation_from_single_polygon(result_poly2)
        // .add_tessellation_from_single_polygon(result_poly3)
-        .add_tessellation_from_single_polygon(result_poly4)
         .add_tessellation_from_single_polygon(to_simple_hacky_polygp_t(poly1))
         .add_tessellation_from_single_polygon(to_simple_hacky_polygp_t(poly2))
+        .add_tessellation_from_single_polygon(result_poly4, true)
         .set_opacity(0.4)
         .write("./intersection1_.svg");
 }

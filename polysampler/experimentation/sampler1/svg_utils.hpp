@@ -25,6 +25,7 @@ using std::string;
 // import std.iostream;
 // import std.fstream;
 // import <std.fstream>;
+#include <unordered_set>
 
 #include <random>
 std::random_device rdev;
@@ -47,7 +48,7 @@ public:
     };
 
     // static std::string multi_polygon(total_point_seq)
-    static std::string tessellation(const svgctx_t &svgctx, const tesselation_t &trigulation, const points_t &vertex_coords)
+    static std::string tessellation_svg(const svgctx_t &svgctx, const tesselation_t &trigulation, const points_t &vertex_coords, const std::unordered_set<int> &marked_polys)
     {
 
         // todo: const vertex_coords
@@ -90,15 +91,15 @@ public:
             )XYZ",
             R"XYZ(
                 <polygon points="$$POINTS$$" style="fill:url(#hash4_4b);stroke:blue;stroke-width:$STROKE_WIDTH" opacity="$POLY_OPACITY" />
-            )XYZ"
-        };
+            )XYZ"};
 
-        int pi = 1;
         string polyss{};
-        for (const auto &point_seq_str : total_point_seq)
+        for (int ctr = 0; const auto &point_seq_str : total_point_seq)
         {
-            polyss += std::regex_replace(polygon_template[pi], std::regex("\\$\\$POINTS\\$\\$"), point_seq_str);
-            pi = 0;
+            bool is_marked = marked_polys.find(ctr) != marked_polys.end();
+            int pati = is_marked ? 1 : 0;
+            polyss += std::regex_replace(polygon_template[pati], std::regex("\\$\\$POINTS\\$\\$"), point_seq_str);
+            ctr++;
         }
         polyss = std::regex_replace(polyss, std::regex("\\$POLY_OPACITY"), std::to_string(svgctx.face_opacity));
         return polyss;
@@ -130,12 +131,12 @@ public:
         return s;
     }
 
-    static string generate_svg(const tesselation_t &trigulation, const points_t &vertex_coords, const std::vector<point_t> extra_points, const std::vector<side_meta_data_t> &helper_lines, const svg_utils::svgctx_t &svgctx)
+    static string generate_svg(const tesselation_t &trigulation, const points_t &vertex_coords, const std::vector<point_t> extra_points, const std::vector<side_meta_data_t> &helper_lines, const std::unordered_set<int> &marked_polys, const svg_utils::svgctx_t &svgctx)
     {
 
         // const svg_utils::svgctx_t svgctx;
 
-        const string polyss = tessellation(svgctx, trigulation, vertex_coords);
+        const string polyss = tessellation_svg(svgctx, trigulation, vertex_coords, marked_polys);
 
         string helper_points = "";
         for (point_t p : extra_points)
@@ -188,13 +189,14 @@ public:
 void save_svg_file(const string &file_name, const auto &trigulation, const auto &points,
                    const std::vector<point_t> &helper_points,
                    const std::vector<side_meta_data_t> &helper_lines,
+                   const std::unordered_set<int> &marked_polys,
                    const svg_utils<double>::svgctx_t &svgctx)
 {
     std::wofstream file;
     file.open(file_name.c_str());
 
     // will it be efficient?
-    string contents = svg_utils<double>::generate_svg(trigulation, points, helper_points, helper_lines, svgctx);
+    string contents = svg_utils<double>::generate_svg(trigulation, points, helper_points, helper_lines, marked_polys, svgctx);
     std::cout << contents << std::endl;
 
     file << contents.c_str();
@@ -216,6 +218,7 @@ class svg_saver
     full_tesselation ft;
     std::vector<side_meta_data_t> helper_lines;
     std::vector<point_t> helper_points;
+    std::unordered_set<int> marked_polys; // face (polyg) index in tessellation `ft`
 
     svg_utils<double>::svgctx_t svgctx;
 
@@ -226,7 +229,7 @@ public:
         return *this;
     }
 
-    svg_saver &add_tessellation_from_single_polygon(simple_hacky_polygp_t2 coords)
+    svg_saver &add_tessellation_from_single_polygon(simple_hacky_polygp_t2 coords, bool mark=false)
     {
         // based on: testutil_tessellation_from_single_polygon()
         simple_polygi_t pgi;
@@ -242,6 +245,11 @@ public:
             ++next_vi;
         }
         this->ft.trigulation.push_back(pgi);
+        if (mark)
+        {
+            int face_idx = this->ft.trigulation.size() - 1;
+            this->marked_polys.insert(face_idx);
+        }
 
         return *this;
     }
@@ -279,6 +287,7 @@ public:
                       ft.trigulation, ft.points,
                       this->helper_points,
                       this->helper_lines,
+                      this->marked_polys,
                       this->svgctx);
     }
 };
