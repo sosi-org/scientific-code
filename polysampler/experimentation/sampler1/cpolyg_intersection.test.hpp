@@ -177,4 +177,11 @@ void test1_insideness()
 
     bool ins2 = is_inside_poly(poly, pt2_t{1.5, 0.5});
     assert_equality_i(ins2, false);
+
+    svg_saver{}
+        .add_helper_point(point_t{point.first, point.second})
+        //.add_helper_line(side_meta_data_t{point_t{0, 0}, point_t{0, 2}})
+        .add_tessellation_from_single_polygon(to_simple_hacky_polygp_t(poly))
+        .set_opacity(0.4)
+        .write("./insideness-1.svg");
 }
