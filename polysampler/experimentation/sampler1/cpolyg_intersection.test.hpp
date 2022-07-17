@@ -127,10 +127,10 @@ void test1_cpoly_intersection__produced()
         helper_points,
         std::vector<side_meta_data_t>{});
 
-    svg_saver s;
-    s.set_tessellation(ft);
-    s.set_helper_points(helper_points);
-    s.write("./intersection1_.svg");
+    svg_saver{}
+        .set_tessellation(ft)
+        .set_helper_points(helper_points)
+        .write("./intersection1_.svg");
 }
 /*
 map:
