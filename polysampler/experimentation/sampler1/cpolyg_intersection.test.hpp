@@ -116,6 +116,16 @@ void test1_cpoly_intersection__produced()
     std::cout << "Full collision poly  (erase auto):";
     debug_print(result_poly4);
     std::cout << std::endl;
+
+    // fixedsize_polygon_with_side_metadata_t p1 = testhelper_polyg(result_poly4);
+    full_tesselation ft = testutil_tessellation_from_single_polygon(result_poly4);
+    std::vector<point_t> helper_points{};
+    save_svg_file(
+        "./intersection1.svg",
+        ft.trigulation,
+        ft.points,
+        helper_points,
+        std::vector<side_meta_data_t>{});
 }
 /*
 map:

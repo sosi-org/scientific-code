@@ -341,7 +341,7 @@ bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const pt
         std::cout << "which_side:";
     }
 
-    constexpr real ε2 = 0.0000001;
+    constexpr double ε2 = 0.0000001;
 
     const point_t point{.x = point_.first, .y = point_.second};
     const auto xp = point.x;
