@@ -30,6 +30,7 @@ full_tesselation testutil_tessellation_from_single_polygon(simple_hacky_polygp_t
         point_t pnt{c.first, c.second};
         pnp.points.push_back(pnt);
         // i = pnp.points.size()-1;
+        assert(i == pnp.points.size()-1);
         pgi.push_back(i);
         ++i;
     }

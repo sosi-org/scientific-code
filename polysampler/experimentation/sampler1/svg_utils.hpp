@@ -114,10 +114,10 @@ public:
         return s;
     }
 
-    static string generate_svg(const tesselation_t &trigulation, const points_t &vertex_coords, const std::vector<point_t> extra_points, const std::vector<side_meta_data_t> &helper_lines)
+    static string generate_svg(const tesselation_t &trigulation, const points_t &vertex_coords, const std::vector<point_t> extra_points, const std::vector<side_meta_data_t> &helper_lines, const svg_utils::svgctx_t& svgctx)
     {
 
-        const svg_utils::svgctx_t svgctx;
+        // const svg_utils::svgctx_t svgctx;
 
         const string polyss = tessellation(svgctx, trigulation, vertex_coords);
 
@@ -166,19 +166,23 @@ public:
 // export
 void save_svg_file(const string &file_name, const auto &trigulation, const auto &points,
                    const std::vector<point_t> &helper_points,
-                   const std::vector<side_meta_data_t> &helper_lines)
+                   const std::vector<side_meta_data_t> &helper_lines,
+                   const svg_utils<double>::svgctx_t &svgctx)
 {
     std::wofstream file;
     file.open(file_name.c_str());
 
     // will it be efficient?
-    string contents = svg_utils<double>::generate_svg(trigulation, points, helper_points, helper_lines);
+    string contents = svg_utils<double>::generate_svg(trigulation, points, helper_points, helper_lines, svgctx);
     std::cout << contents << std::endl;
 
     file << contents.c_str();
 
     file.close();
 }
+
+// todo: remove this definition and used instead: simple_hacky_polygp_t
+typedef std::vector<std::pair<double, double>> simple_hacky_polygp_t2;
 
 // todo: rename spelling: tessellation
 // todo: rename spelling: triangulation
@@ -192,12 +196,35 @@ class svg_saver
     std::vector<side_meta_data_t> helper_lines;
     std::vector<point_t> helper_points;
 
+    svg_utils<double>::svgctx_t svgctx;
+
 public:
     svg_saver &set_tessellation(const full_tesselation &t)
     {
         this->ft = t;
         return *this;
     }
+
+    svg_saver &add_tessellation_from_single_polygon(simple_hacky_polygp_t2 coords)
+    {
+        // based on: testutil_tessellation_from_single_polygon()
+        simple_polygi_t pgi;
+
+        side_point_t next_vi = this->ft.points.size();
+
+        for (const auto &c : coords)
+        {
+            this->ft.points.push_back(point_t{c.first, c.second});
+            std::cout << next_vi << "?==" << this->ft.points.size() << "-1" << std::endl;
+            assert(next_vi == this->ft.points.size() - 1);
+            pgi.push_back(next_vi);
+            ++next_vi;
+        }
+        this->ft.trigulation.push_back(pgi);
+
+        return *this;
+    }
+
     svg_saver &set_helper_points(const std::vector<point_t> &helper_points)
     {
         this->helper_points = helper_points;
@@ -225,6 +252,7 @@ public:
         save_svg_file(file_name,
                       ft.trigulation, ft.points,
                       this->helper_points,
-                      this->helper_lines);
+                      this->helper_lines,
+                      this->svgctx);
     }
 };

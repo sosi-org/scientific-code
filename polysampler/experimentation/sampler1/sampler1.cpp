@@ -428,7 +428,7 @@ int main()
     auto [hpoints, hlines] =
         generate_helper_annots<double>(example2.trigulation, example2.points); // for debugging
 
-    save_svg_file("./output.svg", example2.trigulation, example2.points, hpoints, hlines);
+    save_svg_file("./output.svg", example2.trigulation, example2.points, hpoints, hlines, svg_utils<double>::svgctx_t{});
 
     return 0;
 }

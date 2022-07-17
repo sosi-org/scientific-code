@@ -125,14 +125,21 @@ void test1_cpoly_intersection__produced()
         ft.trigulation,
         ft.points,
         helper_points,
-        std::vector<side_meta_data_t>{});
+        std::vector<side_meta_data_t>{},
+        svg_utils<double>::svgctx_t{});
 
     svg_saver{}
-        .set_tessellation(ft)
+        // .set_tessellation(ft)
         .set_helper_points(helper_points)
         .add_helper_point(point_t{0, 0})
         .add_helper_line(side_meta_data_t{point_t{0, 0}, point_t{2, 0}})
         .add_helper_line(side_meta_data_t{point_t{0, 0}, point_t{0, 2}})
+        .add_tessellation_from_single_polygon(result_poly)
+        .add_tessellation_from_single_polygon(result_poly2)
+        .add_tessellation_from_single_polygon(result_poly3)
+        .add_tessellation_from_single_polygon(result_poly4)
+        .add_tessellation_from_single_polygon(to_simple_hacky_polygp_t(poly1))
+        .add_tessellation_from_single_polygon(to_simple_hacky_polygp_t(poly2))
         .write("./intersection1_.svg");
 }
 /*
