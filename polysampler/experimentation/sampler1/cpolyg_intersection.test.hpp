@@ -193,7 +193,7 @@ void test1_insideness()
 
         pt2_t point{dist(rngmt), dist(rngmt)};
         bool ins1 = is_inside_poly(poly, point);
-        if (!ins1) {
+        if (ins1) {
             ss.add_helper_point(point_t{point.first, point.second});
         }
         std::cout << "" << ins1 << " ";

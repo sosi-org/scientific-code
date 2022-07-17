@@ -350,7 +350,7 @@ bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const pt
     bool first = true;
     double last_sidedness = 1;
     // better if use circular_for()
-    double x1 = poly.end()->x0, y1 = poly.end()->y0;
+    double x1 = (poly.end()-1)->x0, y1 = (poly.end()-1)->y0;
     for (const auto &p : poly)
     {
         double x2 = p.x0, y2 = p.y0;
@@ -363,7 +363,7 @@ bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const pt
             std::cout << which_side << ", ";
         }
 
-        if (!first && last_sidedness * which_side < ε2)
+        if (!first && last_sidedness * which_side < -ε2)
         {
             if (build.debug)
             {
