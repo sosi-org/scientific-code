@@ -294,10 +294,11 @@ void intersect_polys(fixedsize_polygon_with_side_metadata_t poly1, fixedsize_pol
         std::cout << "( o:" << side_.x0 << "," << side_.y0 << "d:" << side_.dx << "," << side_.dy << ") ";
     }
 }
-
+/*
 #include <random>
 std::random_device rdev;
 std::mt19937 rngmt(rdev());
+*/
 std::uniform_real_distribution<double> dist(-1 - 2, 2 + 2); // distribution in range [-1.0, 2.0]
 // from https://stackoverflow.com/a/13445752/4374258
 // https://stackoverflow.com/a/19666713/4374258

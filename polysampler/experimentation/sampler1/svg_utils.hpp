@@ -26,6 +26,11 @@ using std::string;
 // import std.fstream;
 // import <std.fstream>;
 
+#include <random>
+std::random_device rdev;
+std::mt19937 rngmt(rdev());
+std::uniform_real_distribution<double> noise(-0.03, 0.03 );
+
 // export
 template <typename real>
 class svg_utils
@@ -66,8 +71,8 @@ public:
             // point_seq = point_seq + " " + std::to_string(xi[i][0]) + "," + std::to_string(xi[i][1]);
             //std::cout << from_vert;
             const point_t & point = vertex_coords[*from_vert];
-            real x = point.x * svgctx.scale + svgctx.offsetx;
-            real y = point.y * svgctx.scale + svgctx.offsety;
+            real x = point.x * svgctx.scale + svgctx.offsetx + noise(rngmt);
+            real y = point.y * svgctx.scale + svgctx.offsety+ noise(rngmt);
             point_seq = point_seq + " " + std::to_string(x) + "," + std::to_string(y);
             std::cout << " " + std::to_string(x) + "," + std::to_string(y);
         });
@@ -108,6 +113,7 @@ public:
             <polyline points=" $X1,$Y1 $X2,$Y2" style="stroke:grey;stroke-width:0.01" />
         )XYZ";
 
+        // + noise(rngmt)
         string s = helperline_template;
         s = std::regex_replace(s, std::regex("\\$X1"), std::to_string(line_seg.x0));
         s = std::regex_replace(s, std::regex("\\$Y1"), std::to_string(line_seg.y0));

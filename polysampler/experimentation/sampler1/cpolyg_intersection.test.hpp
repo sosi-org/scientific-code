@@ -172,15 +172,16 @@ void test1_insideness()
 
     // point_t point{.x= 0.5, .y=0.5};
     // pt2_t point{.first= 0.5, .second=0.5};
-    pt2_t point{0.5, 0.5};
+    point_t point{0.5, 0.5};
     bool ins1 = is_inside_poly(poly, point);
     assert_equality_i(ins1, true);
 
-    bool ins2 = is_inside_poly(poly, pt2_t{1.5, 0.5});
+    bool ins2 = is_inside_poly(poly, point_t{1.5, 0.5});
     assert_equality_i(ins2, false);
 
     auto ss = svg_saver{}
-        .add_helper_point(point_t{point.first, point.second})
+        //.add_helper_point(point_t{point.first, point.second})
+        .add_helper_point(point)
         //.add_helper_line(side_meta_data_t{point_t{0, 0}, point_t{0, 2}})
         .add_tessellation_from_single_polygon(to_simple_hacky_polygp_t(poly))
         .set_opacity(0.4);
@@ -191,10 +192,11 @@ void test1_insideness()
     std::cout << "random-points:";
     for(int i=0;i<100;i++) {
 
-        pt2_t point{dist(rngmt), dist(rngmt)};
+        point_t point{dist(rngmt), dist(rngmt)};
         bool ins1 = is_inside_poly(poly, point);
         if (ins1) {
-            ss.add_helper_point(point_t{point.first, point.second});
+            // ss.add_helper_point(point_t{point.first, point.second});
+            ss.add_helper_point(point);
         }
         std::cout << "" << ins1 << " ";
     }

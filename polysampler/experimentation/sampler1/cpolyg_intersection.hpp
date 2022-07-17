@@ -106,11 +106,11 @@ simple_hacky_polygp_t to_simple_hacky_polygp_t(const fixedsize_polygon_with_side
 }
 
 // declaration only
-bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const pt2_t &point);
+bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const point_t &);
 
 // erase_inside
 // delete [a,...,b], a<b
-void erase_between(simple_hacky_polygp_t &rpoly, side_index_int_t new_point_indices[2])
+side_index_int_t erase_between(simple_hacky_polygp_t &rpoly, side_index_int_t new_point_indices[2])
 {
     size_t before_size = rpoly.size();
     side_index_int_t from = new_point_indices[0] + 1;
@@ -131,10 +131,12 @@ void erase_between(simple_hacky_polygp_t &rpoly, side_index_int_t new_point_indi
         // debug:6-4==4-2-1
     }
     assert(before_size - rpoly.size() == to - from + 1);
+    // next insert index
+    return from;
 }
 
 // delete [..., a, b, ...], a<b
-void erase_outwards(simple_hacky_polygp_t &rpoly, side_index_int_t new_point_indices[2])
+side_index_int_t erase_outwards(simple_hacky_polygp_t &rpoly, side_index_int_t new_point_indices[2])
 {
     size_t before_size = rpoly.size();
     side_index_int_t frombegin_to = new_point_indices[0] - 1;
@@ -162,6 +164,8 @@ void erase_outwards(simple_hacky_polygp_t &rpoly, side_index_int_t new_point_ind
     assert(
         rpoly.size() ==
         new_point_indices[1] - new_point_indices[0] + 1);
+    // next insert index
+    return rpoly.size();
 }
 
 /*
@@ -198,6 +202,7 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
         // take second polygon
 
         side_index_int_t new_point_indices1[2];
+        side_index_int_t new_point_indices2[2];
 
         for (int collidx = 0; collidx < TWO; collidx++)
         {
@@ -232,6 +237,7 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
             rpoly.insert(position1, pt2_t{new_point.x, new_point.y});
 
             new_point_indices1[collidx] = i1next;
+            new_point_indices2[collidx] = i2; // mirrors the collision.side_2
 
             // It is between i1 and i1+1?
             for (int i = collidx + 1; i < TWO; i++)
@@ -253,6 +259,22 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
                 std::cout << std::endl;
             }
         }
+
+        // for poly2:
+        if (new_point_indices2[0] > new_point_indices2[1])
+        {
+            auto swap_temp = new_point_indices2[0];
+            new_point_indices2[0] = new_point_indices2[1];
+            new_point_indices2[1] = swap_temp;
+        }
+        assert(new_point_indices2[0] < new_point_indices2[1]);
+        // lines: (new_point_indices2[0], new_point_indices2[0]+1) , (new_point_indices2[1],new_point_indices2[1]+1)
+        side_index_int_t a = new_point_indices2[0], b = new_point_indices2[0] + 1, c = new_point_indices2[1], d = new_point_indices2[1] + 1;
+        // inner_range: new_point_indices2[0]+1 , new_point_indices2[1]
+        // either: (b,c)  or (d,a) circular
+        side_index_int_t midpoint2 = (b + c) / 2;
+
+        // in poly1:
         // challenge: which side to keep?
         // collision.side_1[0],collision.side_1[1]
         // new_point_indices1[0], [1]
@@ -270,6 +292,9 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
             }
             std::cout << std::endl;
         }
+
+        simple_hacky_polygp_t rpoly2;
+
         if (mode == erasing_mod_t::erase_auto)
         {
             // get a point in between
@@ -311,7 +336,7 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
             // now what?
             // too slow
             // also erasing and insering in the vector is too much waster of CPU
-            bool is_inside = is_inside_poly(poly2, midpoint);
+            bool is_inside = is_inside_poly(poly2, point_t{.x = midpoint.first, .y = midpoint.second});
             if (is_inside)
             {
                 // keep midpoint
@@ -320,6 +345,31 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
             else
             {
                 mode = erasing_mod_t::erase_between;
+            }
+
+            /*
+            side_index_int_t midpoint_index2 =
+                (new_point_indices2[0] + new_point_indices2[1]) / 2;
+            assert(new_point_indices2[0] < new_point_indices2[1]);
+            */
+
+            //such waste of CPU.
+            simple_hacky_polygp_t poly2t = to_simple_hacky_polygp_t(poly2);
+
+            point_t mp2{.x = poly2[midpoint2].x0, .y = poly2[midpoint2].y0};
+            // a point of poly2 is inside poly1
+            bool is_inside2 = is_inside_poly(poly1, mp2);
+            if (is_inside2)
+            { // midpoint of poly2 is inside poly1
+                // pluck [b,c] - inclusive
+                rpoly2 = simple_hacky_polygp_t{poly2t.begin() + b, poly2t.begin() + c + 1};  // inclusive (b) and (c)
+            }
+            else
+            {
+                // pluck ]a,d[ - inclusive
+                rpoly2 = simple_hacky_polygp_t{poly2t.begin() + d, poly2t.end()}; // inclusive (d)
+                // rpoly2.insert(poly2t.begin(), poly2t.begin() + a + 1); // inclusive (a)
+                rpoly2.insert(/*to:*/ rpoly2.end(), /*from:*/ poly2t.begin(), poly2t.begin() + a + 1); // inclusive (a)
             }
         }
         if (mode == erasing_mod_t::no_erase)
@@ -332,11 +382,13 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
             assert(new_point_indices1[0] + 1 <= new_point_indices1[1] - 1); // becauwe we increased the second one
             if (mode == erasing_mod_t::erase_between)
             {
-                erase_between(rpoly, new_point_indices1);
+                side_index_int_t nexti = erase_between(rpoly, new_point_indices1);
+                rpoly.insert( rpoly.begin() + nexti,  rpoly2.begin(),rpoly2.end() );
             }
             else if (mode == erasing_mod_t::erase_outside)
             {
-                erase_outwards(rpoly, new_point_indices1);
+                side_index_int_t nexti = erase_outwards(rpoly, new_point_indices1);
+                rpoly.insert( rpoly.begin() + nexti,  rpoly2.begin(),rpoly2.end() );
             }
         }
         return rpoly;
@@ -346,9 +398,12 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
     return simple_hacky_polygp_t{};
 }
 
-bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const pt2_t &point_)
+// , const pt2_t &point_
+//     const point_t point{.x = point_.first, .y = point_.second};
+bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const point_t &point)
 {
-    // https://stackoverflow.com/a/2922778/4374258
+    // https://stackoverflow.com/a/2922778/4374258  // no
+    // https://math.stackexchange.com/a/4183060/236070
 
     if (build.debug)
     {
@@ -357,7 +412,6 @@ bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const pt
 
     constexpr double ε2 = 0.0000001;
 
-    const point_t point{.x = point_.first, .y = point_.second};
     const auto xp = point.x;
     const auto yp = point.y;
 
