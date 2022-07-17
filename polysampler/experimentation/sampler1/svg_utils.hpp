@@ -192,26 +192,36 @@ class svg_saver
     std::vector<side_meta_data_t> helper_lines;
     std::vector<point_t> helper_points;
 
-    public:
-    svg_saver& set_tessellation(const full_tesselation &t)
+public:
+    svg_saver &set_tessellation(const full_tesselation &t)
     {
         this->ft = t;
         return *this;
     }
-    svg_saver& set_helper_points(const std::vector<point_t> &helper_points)
+    svg_saver &set_helper_points(const std::vector<point_t> &helper_points)
     {
         this->helper_points = helper_points;
         return *this;
     }
+    svg_saver &add_helper_point(const point_t &helper_point)
+    {
+        this->helper_points.push_back(helper_point);
+        return *this;
+    }
 
-    svg_saver& set_helper_lines(const std::vector<side_meta_data_t> &helper_lines)
+    svg_saver &set_helper_lines(const std::vector<side_meta_data_t> &helper_lines)
     {
         this->helper_lines = helper_lines;
         return *this;
     }
+    svg_saver &add_helper_line(const side_meta_data_t &helper_line)
+    {
+        this->helper_lines.push_back(helper_line);
+        return *this;
+    }
+
     void write(std::string file_name)
     {
-
         save_svg_file(file_name,
                       ft.trigulation, ft.points,
                       this->helper_points,

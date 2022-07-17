@@ -130,6 +130,9 @@ void test1_cpoly_intersection__produced()
     svg_saver{}
         .set_tessellation(ft)
         .set_helper_points(helper_points)
+        .add_helper_point(point_t{0, 0})
+        .add_helper_line(side_meta_data_t{point_t{0, 0}, point_t{2, 0}})
+        .add_helper_line(side_meta_data_t{point_t{0, 0}, point_t{0, 2}})
         .write("./intersection1_.svg");
 }
 /*
