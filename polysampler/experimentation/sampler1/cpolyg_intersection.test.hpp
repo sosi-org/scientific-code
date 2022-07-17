@@ -160,6 +160,7 @@ cpoly_intersection(simple_poly, simple_poly);
 
 */
 
+#include <random>
 void test1_insideness()
 {
     // good overlap
@@ -178,10 +179,25 @@ void test1_insideness()
     bool ins2 = is_inside_poly(poly, pt2_t{1.5, 0.5});
     assert_equality_i(ins2, false);
 
-    svg_saver{}
+    auto ss = svg_saver{}
         .add_helper_point(point_t{point.first, point.second})
         //.add_helper_line(side_meta_data_t{point_t{0, 0}, point_t{0, 2}})
         .add_tessellation_from_single_polygon(to_simple_hacky_polygp_t(poly))
-        .set_opacity(0.4)
-        .write("./insideness-1.svg");
+        .set_opacity(0.4);
+
+    std::random_device rdev;
+    std::mt19937 rngmt(rdev());
+    std::uniform_real_distribution<double> dist(-1 , 2 );
+    std::cout << "random-points:";
+    for(int i=0;i<100;i++) {
+
+        pt2_t point{dist(rngmt), dist(rngmt)};
+        bool ins1 = is_inside_poly(poly, point);
+        if (!ins1) {
+            ss.add_helper_point(point_t{point.first, point.second});
+        }
+        std::cout << "" << ins1 << " ";
+    }
+    std::cout << std::endl;
+    ss.write("./insideness-1.svg");
 }
