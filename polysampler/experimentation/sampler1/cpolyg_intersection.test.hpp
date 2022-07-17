@@ -140,6 +140,7 @@ void test1_cpoly_intersection__produced()
         .add_tessellation_from_single_polygon(result_poly4)
         .add_tessellation_from_single_polygon(to_simple_hacky_polygp_t(poly1))
         .add_tessellation_from_single_polygon(to_simple_hacky_polygp_t(poly2))
+        .set_opacity(0.4)
         .write("./intersection1_.svg");
 }
 /*

@@ -38,6 +38,7 @@ public:
         string width = "5cm", height = "5cm";
         string view_box = "-1 -1 4 4";
         string stroke_width = "0.04";
+        double face_opacity = 1;
     };
 
     // static std::string multi_polygon(total_point_seq)
@@ -79,13 +80,14 @@ public:
             total_point_seq);
 
         const string polygon_template = R"XYZ(
-            <polygon points="$$POINTS$$" style="fill:yellow;stroke:blue;stroke-width:$STROKE_WIDTH" opacity="1" />
+            <polygon points="$$POINTS$$" style="fill:yellow;stroke:blue;stroke-width:$STROKE_WIDTH" opacity="$POLY_OPACITY" />
         )XYZ";
         string polyss{};
         for (const auto &point_seq_str : total_point_seq)
         {
             polyss += std::regex_replace(polygon_template, std::regex("\\$\\$POINTS\\$\\$"), point_seq_str);
         }
+        polyss = std::regex_replace(polyss, std::regex("\\$POLY_OPACITY"), std::to_string(svgctx.face_opacity));
         return polyss;
     }
 
@@ -114,7 +116,7 @@ public:
         return s;
     }
 
-    static string generate_svg(const tesselation_t &trigulation, const points_t &vertex_coords, const std::vector<point_t> extra_points, const std::vector<side_meta_data_t> &helper_lines, const svg_utils::svgctx_t& svgctx)
+    static string generate_svg(const tesselation_t &trigulation, const points_t &vertex_coords, const std::vector<point_t> extra_points, const std::vector<side_meta_data_t> &helper_lines, const svg_utils::svgctx_t &svgctx)
     {
 
         // const svg_utils::svgctx_t svgctx;
@@ -244,6 +246,11 @@ public:
     svg_saver &add_helper_line(const side_meta_data_t &helper_line)
     {
         this->helper_lines.push_back(helper_line);
+        return *this;
+    }
+    svg_saver &set_opacity(const double opacity)
+    {
+        this->svgctx.face_opacity = opacity;
         return *this;
     }
 
