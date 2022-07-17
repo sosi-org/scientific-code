@@ -1,0 +1,24 @@
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg height="5cm" width="5cm" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-1 -1 4 4">
+    <defs>
+        <pattern id="hash4_4b" width="0.08" height="0.08" patternUnits="userSpaceOnUse" patternTransform="rotate(60)">
+            <rect width="0.04" height="0.08" transform="translate(0,0)" fill="red"></rect>
+        </pattern>
+    </defs>
+
+
+    <polygon points=" 1.156487,0.517909 1.522314,1.508770 0.486489,1.170762 0.482868,0.487984" style="fill:url(#hash4_4b);stroke:blue;stroke-width:0.005" opacity="1" />
+
+    <polygon points=" 0.023676,-0.019331 0.992579,0.024727 1.515919,1.518726 0.008783,1.003710" style="fill:yellow;stroke:blue;stroke-width:0.005" opacity="0.400000" />
+
+    <polygon points=" 0.484419,0.508418 2.022324,0.523746 2.016576,1.979283 0.507364,2.005147" style="fill:yellow;stroke:blue;stroke-width:0.005" opacity="0.400000" />
+
+
+    <circle cx="0.000000" cy="0.000000" r="0.05" fill="red" />
+
+
+    <polyline points=" 0.000000,0.000000 2.000000,0.000000" style="stroke:grey;stroke-width:0.01" />
+
+    <polyline points=" 0.000000,0.000000 0.000000,2.000000" style="stroke:grey;stroke-width:0.01" />
+    Sorry, your browser does not support inline SVG.
+</svg>

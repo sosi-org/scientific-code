@@ -29,7 +29,7 @@ using std::string;
 #include <random>
 std::random_device rdev;
 std::mt19937 rngmt(rdev());
-std::uniform_real_distribution<double> noise(-0.03, 0.03 );
+std::uniform_real_distribution<double> noise(-0.03, 0.03);
 
 // export
 template <typename real>
@@ -84,13 +84,21 @@ public:
         return point_seq; },
             total_point_seq);
 
-        const string polygon_template = R"XYZ(
-            <polygon points="$$POINTS$$" style="fill:yellow;stroke:blue;stroke-width:$STROKE_WIDTH" opacity="$POLY_OPACITY" />
-        )XYZ";
+        const string polygon_template[] = {
+            R"XYZ(
+                <polygon points="$$POINTS$$" style="fill:yellow;stroke:blue;stroke-width:$STROKE_WIDTH" opacity="$POLY_OPACITY" />
+            )XYZ",
+            R"XYZ(
+                <polygon points="$$POINTS$$" style="fill:url(#hash4_4b);stroke:blue;stroke-width:$STROKE_WIDTH" opacity="$POLY_OPACITY" />
+            )XYZ"
+        };
+
+        int pi = 1;
         string polyss{};
         for (const auto &point_seq_str : total_point_seq)
         {
-            polyss += std::regex_replace(polygon_template, std::regex("\\$\\$POINTS\\$\\$"), point_seq_str);
+            polyss += std::regex_replace(polygon_template[pi], std::regex("\\$\\$POINTS\\$\\$"), point_seq_str);
+            pi = 0;
         }
         polyss = std::regex_replace(polyss, std::regex("\\$POLY_OPACITY"), std::to_string(svgctx.face_opacity));
         return polyss;
@@ -147,6 +155,11 @@ public:
                 xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
                 viewBox="$VIEWBOX"
                 >
+                <defs>
+                    <pattern id="hash4_4b" width="0.08" height="0.08" patternUnits="userSpaceOnUse" patternTransform="rotate(60)">
+                        <rect width="0.04" height="0.08" transform="translate(0,0)" fill="red"></rect>
+                    </pattern>
+                </defs>
 
                 $$POLYG$$
 
