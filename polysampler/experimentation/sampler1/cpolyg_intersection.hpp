@@ -108,6 +108,60 @@ simple_hacky_polygp_t to_simple_hacky_polygp_t(const fixedsize_polygon_with_side
 // declaration only
 bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const pt2_t &point);
 
+// erase_inside
+void erase_between(simple_hacky_polygp_t &rpoly, side_index_int_t new_point_indices[2])
+{
+    size_t before_size = rpoly.size();
+    side_index_int_t from = new_point_indices[0] + 1;
+    side_index_int_t to = new_point_indices[1] - 1;
+    assert(from <= to); // proved
+    rpoly.erase(rpoly.begin() + from, rpoly.begin() + to + 1);
+    if (build.debug)
+    {
+        std::cout << "debugA:"
+                  << before_size << "-"
+                  << rpoly.size()
+                  << "=="
+                  << to
+                  << "-" << from
+                  << "+1"
+                  << std::endl;
+        // (0,0) (1,0) *(1,0.5) (1,1) *(0.5,1) (0,1)
+        // debug:6-4==4-2-1
+    }
+    assert(before_size - rpoly.size() == to - from + 1);
+}
+
+void erase_outwards(simple_hacky_polygp_t &rpoly, side_index_int_t new_point_indices[2])
+{
+    size_t before_size = rpoly.size();
+    side_index_int_t frombegin_to = new_point_indices[0] - 1;
+    side_index_int_t from_toend = new_point_indices[1] + 1;
+    assert(frombegin_to < from_toend); // how to prove?
+    // in worst case, there is one node in the angle
+    rpoly.erase(rpoly.begin() + from_toend, rpoly.end());         // not inclusive for from_toend
+    rpoly.erase(rpoly.begin(), rpoly.begin() + frombegin_to + 1); // not inclusive for frombegin_to
+    if (build.debug)
+    {
+        std::cout << "debugB:"
+                  //<< before_size << "-"
+                  << rpoly.size()
+                  << "=="
+                  << new_point_indices[1]        // 4
+                  << "-" << new_point_indices[0] // 2
+                  << "+1"
+                  << std::endl;
+        // (0,0) (1,0) *(1,0.5) (1,1) *(0.5,1) (0,1)
+        // debug:6-4==4-2-1
+
+        // in progress:6:(0,0) (1,0) (1,0.5) (1,1) (0.5,1) (0,1)
+        // debugB:6-5==4-2-1
+    }
+    assert(
+        rpoly.size() ==
+        new_point_indices[1] - new_point_indices[0] + 1);
+}
+
 /*
 The type:
  `fixedsize_polygon_with_side_metadata_t`
@@ -275,54 +329,11 @@ cpoly_intersection__complete_poly(const fixedsize_polygon_with_side_metadata_t &
             assert(new_point_indices[0] + 1 <= new_point_indices[1] - 1); // becauwe we increased the second one
             if (mode == erasing_mod_t::erase_between)
             {
-                size_t before_size = rpoly.size();
-                side_index_int_t from = new_point_indices[0] + 1;
-                side_index_int_t to = new_point_indices[1] - 1;
-                assert(from <= to); // proved
-                rpoly.erase(rpoly.begin() + from, rpoly.begin() + to + 1);
-                if (build.debug)
-                {
-                    std::cout << "debugA:"
-                              << before_size << "-"
-                              << rpoly.size()
-                              << "=="
-                              << to
-                              << "-" << from
-                              << "+1"
-                              << std::endl;
-                    // (0,0) (1,0) *(1,0.5) (1,1) *(0.5,1) (0,1)
-                    // debug:6-4==4-2-1
-                }
-                assert(before_size - rpoly.size() == to - from + 1);
+                erase_between(rpoly, new_point_indices);
             }
             else if (mode == erasing_mod_t::erase_outside)
             {
-                size_t before_size = rpoly.size();
-                side_index_int_t frombegin_to = new_point_indices[0] - 1;
-                side_index_int_t from_toend = new_point_indices[1] + 1;
-                assert(frombegin_to < from_toend); // how to prove?
-                // in worst case, there is one node in the angle
-                rpoly.erase(rpoly.begin() + from_toend, rpoly.end());         // not inclusive for from_toend
-                rpoly.erase(rpoly.begin(), rpoly.begin() + frombegin_to + 1); // not inclusive for frombegin_to
-                if (build.debug)
-                {
-                    std::cout << "debugB:"
-                              //<< before_size << "-"
-                              << rpoly.size()
-                              << "=="
-                              << new_point_indices[1]        // 4
-                              << "-" << new_point_indices[0] // 2
-                              << "+1"
-                              << std::endl;
-                    // (0,0) (1,0) *(1,0.5) (1,1) *(0.5,1) (0,1)
-                    // debug:6-4==4-2-1
-
-                    // in progress:6:(0,0) (1,0) (1,0.5) (1,1) (0.5,1) (0,1)
-                    // debugB:6-5==4-2-1
-                }
-                assert(
-                    rpoly.size() ==
-                    new_point_indices[1] - new_point_indices[0] + 1);
+                erase_outwards(rpoly, new_point_indices);
             }
         }
         return rpoly;
@@ -350,7 +361,7 @@ bool is_inside_poly(const fixedsize_polygon_with_side_metadata_t &poly, const pt
     bool first = true;
     double last_sidedness = 1;
     // better if use circular_for()
-    double x1 = (poly.end()-1)->x0, y1 = (poly.end()-1)->y0;
+    double x1 = (poly.end() - 1)->x0, y1 = (poly.end() - 1)->y0;
     for (const auto &p : poly)
     {
         double x2 = p.x0, y2 = p.y0;
