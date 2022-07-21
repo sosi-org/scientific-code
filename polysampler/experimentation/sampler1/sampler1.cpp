@@ -16,7 +16,7 @@ typedef model::d2::point_xy point;
 */
 
 #include <vector>
-
+#include <unordered_set>
 // #include <string>
 
 #include <cassert>

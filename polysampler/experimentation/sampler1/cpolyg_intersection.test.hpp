@@ -144,7 +144,7 @@ void test1_cpoly_intersection__produced()
         .add_tessellation_from_single_polygon(to_simple_hacky_polygp_t(poly2))
         .add_tessellation_from_single_polygon(result_poly4, true)
         .set_opacity(0.4)
-        .write("./intersection1_.svg");
+        .write("./intersection2.svg");
 }
 /*
 map:
