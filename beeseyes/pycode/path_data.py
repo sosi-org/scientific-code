@@ -70,10 +70,8 @@ def load_trajectory_data(filename_xls):
   *  e.g. 'direction', 'RWSmoothed', 'fTime'
 """
 def load_trajectory_cached(filename):
-    # CACHE_FILE = my_folders.get_output_path('traj-cache')  # traj.cache.npz
-    cache_exists, cachefile_fullname = my_folders.get_cache_file('traj-cache.npz')
-    #cachefile_fullname = CACHE_FILE + '.npz'
-    if cache_exists: # (os.path.exists(cachefile_fullname)):
+    cachefile_fullname, cache_exists = my_folders.get_cache_file('traj-cache.npz')
+    if cache_exists:
        print('Cache file found. Ignoring the .xslx file. To refresh the cache, delete ' + cachefile_fullname)
        bee_traj = np.load(cachefile_fullname)
        #print('>>bee_traj', bee_traj) # numpy.lib.npyio.NpzFile object

@@ -4,7 +4,7 @@ import scipy.io
 from time import sleep
 
 import my_folders
-BEES_DATA_FILE = my_folders.get_data_path('doi_10.5061_dryad.23rj4pm__v1/DataForPlots.mat')
+BEES_DATA_FILE = my_folders.get_bees_data_path('doi_10.5061_dryad.23rj4pm__v1/DataForPlots.mat')
 
 def explore_data():
 

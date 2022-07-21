@@ -7,7 +7,7 @@ def base_folder():
     CURRENT_PATH = str(pathlib.Path(__file__).parent.parent.resolve())
     return CURRENT_PATH
 
-# Setup of experiment
+# Setup of experiment: bees path, random dot, experiment stimuli (photo)
 def get_setup_path(file_basename):
     return base_folder() + '/data/Setup/' + file_basename
 
@@ -15,8 +15,8 @@ def get_setup_path(file_basename):
 def get_art_path(file_basename):
     return base_folder() + '/art/' + file_basename
 
-# Files given directly by Hadi
-def get_data_path(file_basename):
+# Bees eyes measured data
+def get_bees_data_path(file_basename):
     return base_folder() + '/data/hadi/' + file_basename
 
 def folder_for_sure(foldername):
@@ -31,7 +31,7 @@ def get_cache_file(file_basename):
     # CACHE_FILE = my_folders.get_output_path(file_basename) # without extension
     cachefile_fullname = get_output_path(file_basename)
     exists = os.path.exists(cachefile_fullname) # bool
-    return exists, cachefile_fullname
+    return cachefile_fullname, exists
 
 """
             Data files catalogue:
