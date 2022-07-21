@@ -1,6 +1,7 @@
 import numpy as np
 import os
 from openpyxl import load_workbook
+import my_folders
 
 def load_xls(filename_xls, columnset):
     wb = load_workbook(filename_xls, read_only=True)
@@ -69,9 +70,10 @@ def load_trajectory_data(filename_xls):
   *  e.g. 'direction', 'RWSmoothed', 'fTime'
 """
 def load_trajectory_cached(filename):
-    CACHE_FILE = './traj-cache'  # traj.cache.npz
-    cachefile_fullname = CACHE_FILE + '.npz'
-    if (os.path.exists(cachefile_fullname)):
+    # CACHE_FILE = my_folders.get_output_path('traj-cache')  # traj.cache.npz
+    cache_exists, cachefile_fullname = my_folders.get_cache_file('traj-cache.npz')
+    #cachefile_fullname = CACHE_FILE + '.npz'
+    if cache_exists: # (os.path.exists(cachefile_fullname)):
        print('Cache file found. Ignoring the .xslx file. To refresh the cache, delete ' + cachefile_fullname)
        bee_traj = np.load(cachefile_fullname)
        #print('>>bee_traj', bee_traj) # numpy.lib.npyio.NpzFile object
@@ -92,7 +94,7 @@ def load_trajectory_cached(filename):
     else:
        print('Cache file not found. Creating it.')
        bee_traj = load_trajectory_data(filename)
-       np.savez(CACHE_FILE, **bee_traj)
+       np.savez(cachefile_fullname, **bee_traj)
        # savez_compressed versus savez
        # 275 KB  275540 19 May 16:42 cache-traj.npz
        # 157 KB   157831 19 May 16:43 cache-traj.npz
@@ -101,7 +103,6 @@ def load_trajectory_cached(filename):
 
 
 if __name__ == "__main__":
-    import my_folders
     POSITIONS_XLS = my_folders.get_setup_path('beepath.xlsx')
 
     load_trajectory_data(POSITIONS_XLS)

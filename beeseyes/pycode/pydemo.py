@@ -1738,8 +1738,8 @@ def cast_and_visualise(
                                , blit=False
                                #, progress_callback = lambda i, n: print(f'Saving frame {i} of {n}')
                                )
-    #anim.save('beeAnim.mpeg')
-    anim.save('beeAnim.gif', writer='imagemagick')
+    #anim.save(my_folders.get_output_path('beeAnim.mpeg'))
+    anim.save(my_folders.get_output_path('beeAnim.gif'), writer='imagemagick')
     # ffmpeg, codec=s, writer='imagemagick' for gif
     # Also see: Animation.to_html5_video
     print('saved animation', flush=True)

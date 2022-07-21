@@ -1,4 +1,5 @@
 import pathlib
+import os
 
 def base_folder():
     # old path:
@@ -8,7 +9,7 @@ def base_folder():
 
 # Setup of experiment
 def get_setup_path(file_basename):
-    return base_folder() + '/Setup/' + file_basename
+    return base_folder() + '/data/Setup/' + file_basename
 
 # Image files from public domain
 def get_art_path(file_basename):
@@ -16,7 +17,21 @@ def get_art_path(file_basename):
 
 # Files given directly by Hadi
 def get_data_path(file_basename):
-    return base_folder() + '/hadi/' + file_basename
+    return base_folder() + '/data/hadi/' + file_basename
+
+def folder_for_sure(foldername):
+    if not os.path.exists(foldername):
+        os.makedirs(foldername)
+
+def get_output_path(file_basename):
+    folder_for_sure(base_folder() + '/output')
+    return base_folder() + '/output/' + file_basename
+
+def get_cache_file(file_basename):
+    # CACHE_FILE = my_folders.get_output_path(file_basename) # without extension
+    cachefile_fullname = get_output_path(file_basename)
+    exists = os.path.exists(cachefile_fullname) # bool
+    return exists, cachefile_fullname
 
 """
             Data files catalogue:
