@@ -1685,6 +1685,7 @@ def cast_and_visualise(
     NUM_FRAMES = 1
     # NUM_FRAMES = 5
     #NUM_FRAMES = 20
+    NUM_FRAMES = 20
 
     # Animation
     from matplotlib.animation import FuncAnimation

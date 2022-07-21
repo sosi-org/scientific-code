@@ -2,8 +2,7 @@ import pathlib
 import os
 
 def base_folder():
-    # old path:
-    # CURRENT_PATH = '/Users/a9858770/cs/scientific-code/beeseyes'
+    # 'scientific-code/beeseyes'
     CURRENT_PATH = str(pathlib.Path(__file__).parent.parent.resolve())
     return CURRENT_PATH
 
@@ -15,7 +14,7 @@ def get_setup_path(file_basename):
 def get_art_path(file_basename):
     return base_folder() + '/art/' + file_basename
 
-# Bees eyes measured data
+# Bees eyes measured data from published data
 def get_bees_data_path(file_basename):
     return base_folder() + '/data/hadi/' + file_basename
 
@@ -28,7 +27,6 @@ def get_output_path(file_basename):
     return base_folder() + '/output/' + file_basename
 
 def get_cache_file(file_basename):
-    # CACHE_FILE = my_folders.get_output_path(file_basename) # without extension
     cachefile_fullname = get_output_path(file_basename)
     exists = os.path.exists(cachefile_fullname) # bool
     return cachefile_fullname, exists
