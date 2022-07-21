@@ -301,7 +301,7 @@ MAKE_HAPPEN "$VENV_PACKAGES/shapely/__init__.py" || {
   pip install shapely
 }
 
-echo "venv is at $REPO_ROOT/$VENV_NAME/bin/activate"
+echo "venv is at $REPO_ROOT/temp/$VENV_NAME/bin/activate"
 
 ######################################################
 # End of instllations
