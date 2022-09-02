@@ -1,6 +1,11 @@
+import numpy as np
+from optics.geom_helpers import tuple3_to_np
 
 '''
-in fact, Bee Eye
+BeeHead: in fact, Bee Eye
+Orientation of the look of the Bee
+The camera
+The head direction
 '''
 class BeeHead:
     def __init__(self):

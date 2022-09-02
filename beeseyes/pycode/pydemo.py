@@ -298,29 +298,7 @@ def ray_cast(
 
    return (a,b),t
 
-
-def tuple3_to_np(pxyz):
-   x,y,z = pxyz
-   return np.array([x,y,z], dtype=float)[None, :]
-
-def normalise_np(pxyz):
-   return pxyz * 1.0 / (np.linalg.norm(pxyz, axis=0, keepdims=True) + 0.0000001)
-
-def rotation_matrix(bee):
-   # right hand
-   U = tuple3_to_np(bee['u'])
-   # top
-   V = tuple3_to_np(bee['v'])
-   U = normalise_np(U)
-   # straight ahead: into the plane
-   W = -np.cross(U, V)
-   W = normalise_np(W)
-   # again re-create the "top" direction
-   V = np.cross(U, W)
-   V = normalise_np(V)
-   # return np.eye(3)
-   # [U,V,W] concat as rows
-   return np.concatenate((U,V,W), axis=0)
+from optics.geom_helpers import tuple3_to_np
 
 def visualise_plane(ax3d, plane, color):
     # visulaise the plane in 3d
@@ -427,8 +405,8 @@ Coordinate system:
 """
 
 
-from plane import Plane
-from bee_look import BeeHead
+from optics.plane import Plane
+from optics.bee_look import BeeHead
 
 # Uses Voronoi
 def old_demo():
