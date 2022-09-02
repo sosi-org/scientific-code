@@ -2,10 +2,16 @@ from typing import Tuple
 from typing import Tuple
 from scipy.spatial import Voronoi, voronoi_plot_2d
 import numpy as np
+# todo: remove
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 from scipy.spatial.transform import Rotation
 import math
+
+from cte import _PIXELS, _CM
+from cte import DIM3
+from cte import UNIT_LEN_CM, UNIT_LEN_MM, UNIT_LEN_CM
+from cte import CAST_CLIP_FULL, CAST_CLIP_NONE, CAST_CLIP_FRONT
 
 import my_folders
 import image_loader
@@ -13,61 +19,12 @@ import image_loader
 
 
 from bee_eye_data import ommatidia_polygons, ommatidia_polygons_fast_representation
-from bee_eye_data import ax3dCreate, visualise_quiver
+# from bee_eye_data import ax3dCreate, visualise_quiver
 from bee_eye_data import make_midpoints, make_deviations, my_index
 
-PRODUCTION_FIGS = True
 
-HEX6 = 6
-DIM3 = 3
-
-#0.00125 , 0.01/2/4
-AREA_THRESHOLD = 0.02*10
-
-#0.2
-SD_THRESHOLD=0.03
-
-AREA_THRESHOLD = 0.02*10 *100000+1000
-SD_THRESHOLD=0.03 * 10000+1000
-
-
-# for ray_cast()
-CAST_CLIP_NONE = 'none'
-CAST_CLIP_FRONT = 't>0'
-CAST_CLIP_FULL = 'full'
-
-
-UNIT_LEN_CM = image_loader.UNIT_LEN_CM
-UNIT_LEN_MM = image_loader.UNIT_LEN_MM
-
-# for TEXTURE_DPI_INFO
-_PIXELS = 'PIXELS'
-_CM = 'CM'
-
-BLUE_FLOWER = my_folders.get_art_path("256px-Bachelor's_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpeg")
-BLUE_FLOWER_DPI_INFO = {_PIXELS: 200, _CM: 10.0}
-
-
-NEW_FLOWER = my_folders.get_setup_path('flower-sept.png')
-
-
-#NEW_FLOWER_DPI_INFO = {_PIXELS: 1268, _CM: 5.0}
-NEW_FLOWER_DPI_INFO = {_PIXELS: 1268, _CM: 3.5}
-
-
-# 4 x 2 stimuli on a pink background
-EIGHT_PANEL = my_folders.get_setup_path('IMG_2872.MOV.BkCorrectedPerspCroppedColourContrast.png')
-
-# pink texture
-PINK_WALLPAPER = my_folders.get_setup_path('pinkRandomDots.png')
-# choose:
-TEXTURES_FILES = [EIGHT_PANEL, PINK_WALLPAPER]
-TEXTURES_FILES = [NEW_FLOWER, NEW_FLOWER]
-TEXTURE_DPI_INFO = NEW_FLOWER_DPI_INFO
-
-
-POSITIONS_XLS = my_folders.get_setup_path('beepath.xlsx')
-
+from visualise.visualise_3d_situation import visualise_3d_situation_eye
+import sceneconfig
 
 
 def focus_3d(ax3d, focus, zoom_size):
@@ -222,126 +179,8 @@ def one_hexagonal_rays(pindex, hexa_verts_table, points_xyz, normals_xyz):
     return (rays_origins, rays_dirs)
 
 
-'''
-     Based on `derive_formulas.py`
 
-     Uncasted are returned as NaN
-'''
-def ray_cast(
-              U : tuple[float, float, float],
-              V : tuple[float, float, float],
-              C0 :tuple[float, float, float],
-              D,
-              O,
-              clip #clip:bool=True
-            ):
-   n = D.shape[0]
-   assert D.shape == (n,3)
-   assert O.shape == (n,3)
-   assert len(C0) == 3
-   assert len(U) == 3
-   assert len(V) == 3
-
-   # vectorised
-   dx,dy,dz = D[:,0], D[:,1], D[:,2]
-   ox,oy,oz = O[:,0], O[:,1], O[:,2]
-
-   # simple value
-   ux,uy,uz = float(U[0]),  float(U[1]), float(U[2])
-   vx,vy,vz = float(V[0]),  float(V[1]), float(V[2])
-   x0,y0,z0 = float(C0[0]), float(C0[1]), float(C0[2])
-
-   # solution: u,v
-   denom =  dx*uy*vz - dx*uz*vy - dy*ux*vz + dy*uz*vx + dz*ux*vy - dz*uy*vx
-   a = (dx*oy*vz - dx*oz*vy + dx*vy*z0 - dx*vz*y0 - dy*ox*vz + dy*oz*vx - dy*vx*z0 + dy*vz*x0 + dz*ox*vy - dz*oy*vx + dz*vx*y0 - dz*vy*x0) / denom
-   b = (-dx*oy*uz + dx*oz*uy - dx*uy*z0 + dx*uz*y0 + dy*ox*uz - dy*oz*ux + dy*ux*z0 - dy*uz*x0 - dz*ox*uy + dz*oy*ux - dz*ux*y0 + dz*uy*x0) / denom
-   t = (-ox*uy*vz + ox*uz*vy + oy*ux*vz - oy*uz*vx - oz*ux*vy + oz*uy*vx + ux*vy*z0 - ux*vz*y0 - uy*vx*z0 + uy*vz*x0 + uz*vx*y0 - uz*vy*x0) / denom
-
-   if clip == CAST_CLIP_FULL:
-       MIN_A = -1.9
-       MIN_B = -1.9
-       MAX_A = +2.9
-       MAX_B = +2.9
-
-       if False:
-        MIN_A = 0.0
-        MIN_B = 0.0
-        MAX_A = +1.0
-        MAX_B = +1.0
-
-       w = np.logical_and(t > 0,   a > MIN_A)
-       w = np.logical_and(w,   b > MIN_B)
-       w = np.logical_and(w,   a < MAX_A)
-       w = np.logical_and(w,   b < MAX_B)
-       #a = a[w]
-       #b = b[w]
-       #t = t[w]
-       not_w = np.logical_not(w)
-       a[not_w] = np.NaN
-       b[not_w] = np.NaN
-       t[not_w] = np.NaN
-   elif clip == CAST_CLIP_FRONT:
-       w = t > 0
-       not_w = np.logical_not(w)
-       a[not_w] = np.NaN
-       b[not_w] = np.NaN
-       t[not_w] = np.NaN
-   elif clip == CAST_CLIP_NONE:
-       pass
-   else:
-       raise
-
-   #plane = UV*ab + C0
-   #ray = O + t * D
-   #plane - ray == 0
-   #castedPoints = O + D * t
-
-   return (a,b),t
-
-from optics.geom_helpers import tuple3_to_np
-
-def visualise_plane(ax3d, plane, color):
-    # visulaise the plane in 3d
-    NU = 10
-    NV = 10
-    [pu,pv] = np.meshgrid(np.linspace(0, 1, NU),np.linspace(0, 1, NV))
-    pu = pu.ravel()
-    pv = pv.ravel()
-    U = tuple3_to_np(plane.U)
-    V = tuple3_to_np(plane.V)
-    C0 = tuple3_to_np(plane.C0)
-    ax3d.scatter(
-     pu*U[:,0]+pv*V[:,0] + C0[:,0],
-     pu*U[:,1]+pv*V[:,1] + C0[:,1],
-     pu*U[:,2]+pv*V[:,2] + C0[:,2],
-     marker='.', color=color)
-
-def visuaise_3d(rays_origins, rays_dirs, points_xyz, plane):
-    SZ=8.0*1.2 * 3
-    ax3d = plt.figure().add_subplot(projection='3d', autoscale_on=False,
-       xlim=(0, +SZ), ylim=(0, +SZ), zlim=(-SZ/2.0, +SZ/2.0))
-    # ax3d = Axes3D(fig)
-    # ax = fig.gca(projection='3d')
-    #ax3d.set_aspect('equal')
-    #ax3d.set_aspect(1)
-
-    # only a single hex being casted
-    qv = ax3d.quiver( \
-     rays_origins[:,0],rays_origins[:,1],rays_origins[:,2], \
-     rays_dirs[:,0],rays_dirs[:,1],rays_dirs[:,2], \
-     pivot='tail', length=1.0, normalize=True, color='r'
-    )
-    '''
-    ax3.quiverkey(qv, 0.9, 0.9, 1, r'$xxxx$', labelpos='E',
-               coordinates='figure')
-    '''
-
-    # All ommatidia
-    ax3d.scatter(points_xyz[:,0],points_xyz[:,1],points_xyz[:,2], marker='.')
-
-    visualise_plane(ax3d, plane, color='g')
-
-
+#from optics.geom_helpers import tuple3_to_np
 def demo_lattice_eyes(EYE_SIZE):
     #N = 7 * 7
     #NW = 8
@@ -389,14 +228,6 @@ def getActualOmmatidiumRays(eye_points, rays_dirs, bee_R, bee_pos, bee_eye_spher
 
 # clip:bool=True
 
-def raycastRaysOnPlane(O, D, plane, clip, return_casted_points=False):
-   (u,v),t = ray_cast(plane.U, plane.V, plane.C0, D,O, clip=clip)
-   if return_casted_points:
-      assert t.shape == D.shape[:1]
-      casted_points = O + D * t[:, None]
-      return (u,v), casted_points
-   else:
-      return (u,v)
 
 """
 Coordinate system:
@@ -439,14 +270,14 @@ def old_demo():
     eye_size_cm = 1.0 * UNIT_LEN_CM
 
     O,D = getActualOmmatidiumRays(eye_points, normals_xyz, beeHead.R, beeHead.pos, eye_size_cm)
-    (u,v) = raycastRaysOnPlane(O,D, plane, clip=CAST_CLIP_FULL)
+    (u,v) = plane.raycastRaysOnPlane(O,D, clip=CAST_CLIP_FULL)
 
 
     rays_origins_transformed, rays_dirs_transformed = getActualOmmatidiumRays(rays_origins_e, rays_dirs, beeHead.R, beeHead.pos, eye_size_cm)
-    (u6,v6) = raycastRaysOnPlane(
+    (u6,v6) = plane.raycastRaysOnPlane(
       rays_origins_transformed, rays_dirs_transformed,
-      plane, clip=CAST_CLIP_FULL)
-    visuaise_3d(rays_origins_transformed, rays_dirs_transformed, O, plane)
+      clip=CAST_CLIP_FULL)
+    visualise_3d(rays_origins_transformed, rays_dirs_transformed, O, plane)
 
 
     axes2 = plt.figure()
@@ -641,7 +472,7 @@ def aaaaa():
     print(corner_points.shape, normals_at_corners.shape)
 
 
-    which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=SD_THRESHOLD, AREA_THRESHOLD=AREA_THRESHOLD, MAX_SIDES=14)
+    which_facets = make_whichfacets(corner_points, sv_regions, areas, SD_THRESHOLD=sceneconfig.SD_THRESHOLD, AREA_THRESHOLD=sceneconfig.AREA_THRESHOLD, MAX_SIDES=14)
 
     #selected_regions = select_regions(sv_regions, areas, corner_points, MAX_SIDES=14)
     selected_regions =  select_regions(sv_regions, which_facets)
@@ -653,40 +484,6 @@ def aaaaa():
 
     return (corner_points, normals_at_corners), (center_points, normals_at_center_points), (ommatidia_few_corners_normals, ommatidia_few_corners), selected_regions, selected_center_points, which_facets, (all_centers,all_normals_at_center_points)
 
-def visualise_3d_situation(corner_points, normals_at_corners, ommatidia_few_corners, ommatidia_few_corners_normals, center_points, normals_at_center_points, beeHead, planes):
-    '''
-    3D visualise texture plane (grid)
-    and eye
-    '''
-    p0 = beeHead.pos
-    print('p0.shape',p0.shape)
-
-    def rot(vectos):
-        return np.dot(beeHead.R, vectos.T).T
-
-    # Eye
-    #ax3d = ax3dCreate(SZ=28.8)
-    ax3d = ax3dCreate(SZ=None)
-    # rename `corner_points` to `*corners`
-    visualise_quiver(ax3d, rot(corner_points) + p0, rot(normals_at_corners), color='r')  # corners
-    visualise_quiver(ax3d, rot(center_points) + p0, rot(normals_at_center_points), color='b') # centers
-
-    general_direction = np.mean(center_points, 0)[None,:]
-    visualise_quiver(ax3d, rot(general_direction) + p0, rot(general_direction), color='k') # centers
-
-    # All planes
-    if True:
-      for i in range(len(planes)):
-        visualise_plane(ax3d, planes[i], color='tab:pink')
-
-
-    # adding Visualisation of few points in 3D
-    assert ommatidia_few_corners_normals.shape == ommatidia_few_corners.shape
-    visualise_quiver(ax3d, rot(ommatidia_few_corners) + p0, ommatidia_few_corners_normals * 0.01, color='m')
-    #plt.show()
-    #exit()
-    return ax3d
-
 
 def array_minmax(x):
     mn = np.min(x)
@@ -695,91 +492,7 @@ def array_minmax(x):
     (mn,mx) = ((mn-md)*1.2+md, (mx-md)*1.2+md)
     return (mn, mx)
 
-def visualise_3d_situation_eye(selected_center_points, regions_rgb, beeHead, title, ax3d_reuse=None, set_lims=True, flip_axes=False):
-    assert selected_center_points.shape[0] == regions_rgb.shape[0]
-    assert selected_center_points.shape[1] == 3
-    assert regions_rgb.shape[1] == 4
-    # todo: rename `regions_rgb` to `regions_rgba`
 
-    # shed the NaNs
-    isnan1 = np.isnan(selected_center_points[:,0])
-    isnan2 = np.isnan(regions_rgb[:,0])
-    isnonan = np.logical_not(np.logical_or(isnan1, isnan2))
-
-
-    selected_center_points = selected_center_points[isnonan, :]
-    regions_rgb = regions_rgb[isnonan, :]
-    assert selected_center_points.shape[0] > 0, 'at least one non-NaN point'
-
-
-    if beeHead is not None:
-      p0 = beeHead.pos
-
-      def rot(vectors):
-          return np.dot(beeHead.R, vectors.T).T
-
-      X = rot(selected_center_points) + p0
-
-    else:
-      X = selected_center_points
-
-    # A permutation: Which actual (in coords) should dbe shown on axes3d's firast axis?
-    _X, _Y, _Z = 0, 1, 2
-    if flip_axes:
-        assert ax3d_reuse is None
-        _X, _Y, _Z = 0, 2, 1 # Show your Ys oon axes3d Z, Zs on Y, Xs on X
-    ax3d = None
-    if ax3d_reuse is None:
-        #ax3d = ax3dCreate(SZ=28.8)   # redundant setlim
-        ax3d = ax3dCreate(SZ=None)
-    else:
-        ax3d = ax3d_reuse
-
-    #print()
-    #print(X.shape)
-    #print(regions_rgb.shape)
-    #print('^^')
-    h = \
-    ax3d.scatter(X[:,_X], X[:,_Y], X[:,_Z], facecolors=regions_rgb,
-                 #marker='.',
-                 #s=(30.0*3) ** 2
-                 #s=None
-                 #s=(2.0) ** 2
-                 s=(4.0) ** 2
-                 )
-    #print('ok')
-
-    if PRODUCTION_FIGS:
-      # ax3d.set_aspect("equal")
-      #h.s=20
-      #h.markersize = 20
-      #h.s=100.0
-      pass
-
-    if set_lims:
-      assert  ax3d_reuse is None, 'must set `set_lims=False` when `ax3d_reuse` is used'
-
-    if ax3d_reuse is None:
-        if set_lims:
-            ax3d.set_xlim(*array_minmax(X[:,_X]))
-            ax3d.set_ylim(*array_minmax(X[:,_Y]))
-            ax3d.set_zlim(*array_minmax(X[:,_Z]))
-        set_axis_label(ax3d, _X, 'X')
-        set_axis_label(ax3d, _Y, 'Y')
-        set_axis_label(ax3d, _Z, 'Z')
-        ax3d.set_title(title)
-
-    return ax3d
-
-def set_axis_label(ax3d, xyz_index, label_text):
-  if xyz_index == 0:
-    ax3d.set_xlabel(label_text)
-  elif xyz_index == 1:
-    ax3d.set_ylabel(label_text)
-  elif xyz_index == 2:
-    ax3d.set_zlabel(label_text)
-  else:
-    raise
 
 def visualise_uv(u,v, u_few, v_few, texture, uv_rgba=None, title=None, fig=None):
     # (u,v) visualisation on plane (pixels)
@@ -983,9 +696,8 @@ def project_colors(all_centers, all_normals, beeHead, plane, plane_texture, clip
     print('@@beeHead.eye_size_cm', beeHead.eye_size_cm)
 
     #for i in range(len(planes)):
-    (u,v),casted_points = raycastRaysOnPlane(
+    (u,v),casted_points = plane.raycastRaysOnPlane(
       O,D,
-      plane,
       clip=clip,
       return_casted_points=True)
 
@@ -1015,6 +727,7 @@ def project_colors(all_centers, all_normals, beeHead, plane, plane_texture, clip
     #return all_centers, uv_rgba, casted_points
     return O, uv_rgba, casted_points, uv
 
+from sceneconfig import PRODUCTION_FIGS
 
 def anim_frame(
       textures, planes,
@@ -1072,10 +785,10 @@ def anim_frame(
 
     print('@@beeHead.eye_size_cm', beeHead.eye_size_cm)
 
+    print('@planes[0]', planes[0])
     #for i in range(len(planes)):
-    (u,v),casted_points = raycastRaysOnPlane(
+    (u,v),casted_points = planes[0].raycastRaysOnPlane(
       O,D,
-      planes[0],
       clip=clip,
       return_casted_points=True)
 
@@ -1096,9 +809,8 @@ def anim_frame(
        ommatidia_few_corners, ommatidia_few_corners_normals,
        beeHead.R, beeHead.pos, beeHead.eye_size_cm)
     # A few other points too
-    (u_few,v_few) = raycastRaysOnPlane(
+    (u_few,v_few) = planes[0].raycastRaysOnPlane(
        O_few,D_few,
-       planes[0],
        clip=CAST_CLIP_NONE)
 
 
@@ -1265,6 +977,8 @@ def anim_frame(
 
 from trajectory import trajectory_provider
 
+# uses trajectory
+
 def cast_and_visualise(
       corner_points, normals_at_corners,
       center_points, normals_at_center_points,
@@ -1307,7 +1021,7 @@ def cast_and_visualise(
 
     #(M, bee_head_pos, bee_direction) = trajectory_provider()
     #(M, bee_path, bee_directions, frame_times) = trajectory_provider()
-    (bee_path, bee_directions, frame_times) = trajectory_provider(POSITIONS_XLS)
+    (bee_path, bee_directions, frame_times) = trajectory_provider(sceneconfig.POSITIONS_XLS)
 
 
     #######################################
@@ -1393,7 +1107,9 @@ def cast_and_visualise(
     #FOCUS = ([0, 0, 0], 15.)
     #FOCUS = ([0, 0, 0], 5.)
     #clip=CAST_CLIP_NONE
-    clip=CAST_CLIP_FULL
+    #clip=CAST_CLIP_FULL
+
+    from sceneconfig import TEXTURES_FILES, TEXTURE_DPI_INFO
 
     # After meeting with Hadi (14 Sept)
     bee_direction = np.array([-0.01,  -0.01,  1.0])
@@ -1463,6 +1179,8 @@ def cast_and_visualise(
 
     print('bee_path>>', bee_path)
     # Visualisations
+
+    from visualise.visualise_3d_situation import visualise_3d_situation
 
     # 3D Visualisation of environment
     ax3d = \

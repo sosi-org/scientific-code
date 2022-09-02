@@ -566,35 +566,6 @@ def ommatidia_polygons_fast_representation(sv_vertices, sv_regions, maxsides, de
    #return regions_fast, regions_side_count, polyg
    return polyg, regions_side_count
 
-# SZ=8.0*1.2 * 3 == 28,8
-def ax3dCreate(SZ=28.8):
-   ax3d = None
-   if SZ is None:
-      ax3d = plt.figure() \
-       .add_subplot(projection='3d', autoscale_on=True)
-   else:
-      ax3d = plt.figure() \
-       .add_subplot(
-         projection='3d', autoscale_on=True,
-         #xlim=(0, +SZ), ylim=(0, +SZ), zlim=(-SZ/2.0, +SZ/2.0)
-         #xlim=(0.7, 1.0),  ylim=(-0.3, 0.15),zlim=(-0.2, 0.25)
-         xlim=(0, +SZ), ylim=(0, +SZ), zlim=(-SZ/2.0, +SZ/2.0)
-      )
-   ax3d.set_xlabel('x')
-   ax3d.set_ylabel('y')
-   ax3d.set_zlabel('z')
-   return ax3d
-
-def visualise_quiver(ax3d, X, N, color='b'):
-
-   assert X.shape == N.shape
-   assert X.shape[0] == N.shape[0]
-
-   qv = ax3d.quiver( \
-     X[:,0], X[:,1], X[:,2], \
-     N[:,0],N[:,1],N[:,2], \
-     pivot='tail', length=0.1/10, normalize=True, color=color
-    )
 
 '''
 calculting norms at corners of hexagonals by interpolation (normals_at_corners)
