@@ -1,4 +1,5 @@
-from visualise_plane import visualise_plane
+import matplotlib.pyplot as plt
+from .visualise_plane import visualise_plane
 
 def visualise_3d(rays_origins, rays_dirs, points_xyz, plane):
     SZ=8.0*1.2 * 3

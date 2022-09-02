@@ -1,6 +1,9 @@
 import numpy as np
 from optics.geom_helpers import tuple3_to_np
 
+# Old usage used Rotation:
+# from scipy.spatial.transform import Rotation
+
 '''
 BeeHead: in fact, Bee Eye
 Orientation of the look of the Bee

@@ -325,6 +325,8 @@ echo "
 # todo: fetch this script from my repo, make it public, and push via a separate repo
 cd $ORIG_FOLDER
 python pydemo.py
+# python old_demo.py
+
 
 echo 'fine'
 exit
