@@ -15,7 +15,7 @@ from cte import CAST_CLIP_FULL, CAST_CLIP_NONE, CAST_CLIP_FRONT
 import my_folders
 import image_loader
 
-
+from visualise.visualise_uv import visualise_uv
 
 from bee_eye_data import ommatidia_polygons, ommatidia_polygons_fast_representation
 # from bee_eye_data import ax3dCreate, visualise_quiver
@@ -25,6 +25,7 @@ from bee_eye_data import make_midpoints, make_deviations, my_index
 from visualise.visualise_3d_situation import visualise_3d_situation_eye
 import sceneconfig
 
+from visualise.visualise_map_spherical_to_planar import visualise_map_spherical_to_planar
 
 def focus_3d(ax3d, focus, zoom_size):
   ax3d.set_zlim(focus[2]-zoom_size, focus[2]+zoom_size)
@@ -117,12 +118,13 @@ def make_whichfacets(sv_vertices, sv_regions, areas, SD_THRESHOLD, AREA_THRESHOL
 
     return which_facets
 
+"""
 def concat_lists(sv_regions_sel):
     c = []
     for i in range(len(sv_regions_sel)):
         c.extend(sv_regions_sel[i])
     return c
-
+"""
 
 #def select_regions(sv_regions, areas, corner_points, MAX_SIDES):
 def select_regions(sv_regions, which_facets):
@@ -252,111 +254,10 @@ def array_minmax(x):
 
 
 
-def visualise_uv(u,v, u_few, v_few, texture, uv_rgba=None, title=None, fig=None):
-    # (u,v) visualisation on plane (pixels)
-    if fig is None:
-        fig = plt.figure()
-    ax = fig.add_subplot(111)
-    tt = texture
-    # tt = np.transpose(texture, axes=(1,0,2))
-    plt.imshow(tt, extent=(0.0,1.0,0.0,1.0), alpha=0.6) #, origin='lower')
-    #plt.plot(u, v, '.', facecolors=uv_rgba)
-    plt.scatter(v, 1-u, marker='.', facecolors=uv_rgba)
-    if (u_few is not None) and (v_few is not None):
-       plt.plot(v_few, 1-u_few, 'o', color='r')
-    #plt.plot(u6,v6, 'r.')
-    plt.xlabel('u')
-    plt.ylabel('v')
-    '''
-    ax.set_xlim(0,1.0)
-    ax.set_ylim(0,1.0)
-    if title is not None:
-        ax.set_title(title)
-    '''
-
-    # https://stackoverflow.com/questions/12444716/how-do-i-set-the-figure-title-and-axes-labels-font-size-in-matplotlib
-    return ax
-
-def asSpherical(xyz):
-    #takes list xyz (single coord)
-    x       = xyz[:,0]
-    y       = xyz[:,1]
-    z       = xyz[:,2]
-    r       =  np.sqrt(x*x + y*y + z*z)
-    #theta   =  acos(z/r)*180/ pi #to degrees
-    #phi     =  atan2(y,x)*180/ pi
-    theta   =  np.arccos(z/r)  # radians
-    phi     =  np.arctan2(y,x)
-    print('theta' , theta.shape)
-    print('phi' ,phi.shape)
-    return [r, theta ,phi]
-
-def transform_thetapi(xyz):
-    [_, theta, phi] = asSpherical(xyz)
-    # (phi,theta) = (theta,phi) # swap (theta, phi)
-    thetaphi = np.concatenate(((theta)[:,None], phi[:,None]), axis=1)
-    return thetaphi, (r'$\theta$', r'$\phi$')
 
 # visualise_uv_map
 
-# I think: It is visualising on a (2d) sphere using polar coords
-def visualise_map_spherical_to_planar(center_points, uv_rgba=None, transform2planar=transform_thetapi):
-    #traansform_planar, map3to2
-    #traansform_planar = center_points
-    planar2d, axeslabels = transform2planar(center_points)
-    print('planar2d', planar2d)
-
-    fig = plt.figure()
-    ax2d = fig.add_axes([0,0,1,1])
-    def transf2d(p2d) -> tuple[float,float]:
-        return p2d[:,0] * 180/np.pi * np.cos(p2d[:,1]), p2d[:,1] * 180/np.pi
-
-    points = transf2d(planar2d)
-    ax2d.scatter(*points, facecolors=uv_rgba, marker='.')
-    #ax2d.scatter(*transf2d(planar2d), marker='.')
-
-    xr = [-np.pi, np.pi]
-    yr = [-np.pi, np.pi]
-    xa = np.arange(xr[0], xr[1], np.pi/5 - 0.0001)
-    ya = np.arange(xr[0], xr[1], np.pi/5 - 0.0001)
-
-    for i in range(len(ya)):
-        y0 = ya[i]
-        c = np.arange(xr[0], xr[1], 0.01)
-        horiz = np.concatenate((c[:,None], (c*0 + y0)[:,None]), axis=1)
-        ax2d.plot(*transf2d(horiz),'--', linewidth=0.2, color='k')
-        # grid_row =
-
-    for i in range(len(xa)):
-        x0 = xa[i]
-        c = np.arange(yr[0], yr[1], 0.01)
-        horiz = np.concatenate(((c*0+ x0)[:,None], c[:,None]), axis=1)
-        ax2d.plot(*transf2d(horiz),'--', linewidth=0.2, color='k')
-
-    '''
-    ax2d.axhline(y=0, color='k')
-    ax2d.axvline(x=0, color='k')
-    '''
-
-    ax2d.spines['left'].set_position('zero')
-    #ax2d.spines['right'].set_color('none')
-    ax2d.yaxis.tick_left()
-    ax2d.spines['bottom'].set_position('zero')
-    #ax2d.spines['top'].set_color('none')
-    ax2d.xaxis.tick_bottom()
-
-    #ax2d.axis([0,6,0,6])
-
-    #ax2d.set_xlim(*array_minmax(points[0]))
-    #ax2d.set_ylim(*array_minmax(points[1]))
-    ax2d.set_xlim(-180, +180)
-    ax2d.set_ylim(-180, +180)
-    ax2d.set_xlabel(axeslabels[0], fontsize=15, verticalalignment='bottom', x=0.1)
-    ax2d.set_ylabel(axeslabels[1], fontsize=15, verticalalignment='bottom', y=0.9)
-    # ax2d.tight_layout() # Doesn't work
-    return ax2d
-
-import sampling
+from sampling import sampling
 
 def histogram_of_sides(regions):
    sides_l = []
