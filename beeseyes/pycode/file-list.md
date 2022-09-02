@@ -2,8 +2,10 @@
 
 Finalised:
 * `my_folders.py` -- a nice unified way to load data in one place ("data provider")
-* `derive_formulas.py` -- sympy data to derive mathematicsl formula
 * `image_loader.py`
+* `optics/derive_formulas.py` -- sympy data to derive mathematicsl formula
+* `optics/plane.py` -- class `Plane`
+* `optics/bee_look.py` -- orientation of the eye of the bee. `BeeHead` class
 
 Needs change:
 * `pydemo.py`
