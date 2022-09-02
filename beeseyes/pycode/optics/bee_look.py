@@ -38,7 +38,17 @@ class BeeHead:
         assert self.pos.dtype == np.dtype(float)
         assert self.pos.shape == (1,3)
 
+
     def set_direction(self, dirc, eye_size_cm):
+        """
+        dirc: bee_direction
+        eye_size_cm: eye_sphere_size_cm
+        The size of the unit sphere is multiplied by this `eyeSphereSize`
+        beeHead.R will be the matrix
+
+        note:
+        `M` and `head_transformation` are later ignored
+        """
         #bee_R = Rotation.from_rotvec(dirc, 180, degrees=True).as_matrix()
         #self.R = bee_R
         #assert self.R.dtype == np.dtype(float)

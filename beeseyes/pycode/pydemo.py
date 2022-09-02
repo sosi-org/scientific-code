@@ -10,7 +10,7 @@ import math
 import my_folders
 import image_loader
 
-from path_data import load_trajectory_cached
+
 
 from bee_eye_data import ommatidia_polygons, ommatidia_polygons_fast_representation
 from bee_eye_data import ax3dCreate, visualise_quiver
@@ -1035,11 +1035,8 @@ def anim_frame(
     #head_transformation = -M*10 *1000 # -M*10 is adhoc
     #beeHead = BeeHead(head_transformation)
     beeHead = BeeHead()
-    # `M` and `head_transformation` are later ignored
 
-    # The size of the unit sphere is multiplied by this `eyeSphereSize`
     beeHead.set_eye_position(bee_head_pos)
-    # todo: set_direction() not implemented
     beeHead.set_direction(bee_direction, eye_sphere_size_cm)
 
     # eye_size_cm = 1.0 * UNIT_LEN_CM
@@ -1266,51 +1263,7 @@ def anim_frame(
 
     return (beeHead, regions_rgba, anim_frame_artist)
 
-def trajectory_provider():
-
-    bee_traj = load_trajectory_cached(POSITIONS_XLS)
-
-    def trajectory_transformation():
-        '''
-        Affine transormation for correcting the mismtch between the units in Excel file and assumed orientation of the plane.
-        Do do, apply the reverse of this to the plane only.
-        The plane's dimentions are correct. But its orientation.
-        Todo:
-          Just rescale (nd not rotate) the trajectory data.
-          But apply the reverse of this transform to the plane.
-        '''
-        maxy = np.array([7,+372,272])[None,:]
-        M = np.eye(3)
-        # '''
-        M = M * 0
-        # M[to,from]
-        _X = 0
-        _Y = 1
-        _Z = 2
-        M[_X ,_X] = 1.0
-        M[_Y ,_Z] = -1.0
-        M[_Z ,_Y] = -1.0 # should be negative
-
-        # z,x -> (y,x)
-        # z,x,y -> (y,x,z)
-        # x,y,z -> (x,z,y)
-        M = M / 10.0
-
-        return M, maxy
-
-    # Apply a linear transformation on bee trajectory
-    M, maxy = trajectory_transformation()
-
-    print(bee_traj._RWSmoothed)
-    #print('bee_traj', bee_traj)
-    frame_times = bee_traj['fTime']
-    bee_path = np.dot( bee_traj['RWSmoothed'] - maxy, M.T) + np.array([0,0,0])[None,:]
-    bee_directions = bee_traj['direction']
-
-    #return (M, bee_head_pos, bee_direction)
-    #return (M, bee_path, bee_directions, frame_times)
-    return (bee_path, bee_directions, frame_times)
-
+from trajectory import trajectory_provider
 
 def cast_and_visualise(
       corner_points, normals_at_corners,
@@ -1354,7 +1307,7 @@ def cast_and_visualise(
 
     #(M, bee_head_pos, bee_direction) = trajectory_provider()
     #(M, bee_path, bee_directions, frame_times) = trajectory_provider()
-    (bee_path, bee_directions, frame_times) = trajectory_provider()
+    (bee_path, bee_directions, frame_times) = trajectory_provider(POSITIONS_XLS)
 
 
     #######################################
