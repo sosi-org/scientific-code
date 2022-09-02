@@ -1448,9 +1448,10 @@ def cast_and_visualise(
     #bee_head_pos = np.array([2.5,  2.5, -1.5]) * UNIT_LEN_CM
     #  (4.46 x 3.5) (cm)
     bee_head_pos = np.array([2.2,  1.75, -1.5]) * UNIT_LEN_CM
-    bee_head_pos = np.array([2.2-1.5,  1.75,  -1.0]) * UNIT_LEN_CM
+    #bee_head_pos = np.array([2.2-1.5,  1.75,  -1.0]) * UNIT_LEN_CM # chosen, but not looking good?
     # +DOWN, +RIGHT
-    FOCUS = (bee_head_pos, 5.)
+    #FOCUS = (bee_head_pos, 5.)
+    FOCUS = (bee_head_pos, 0.2)
     eye_sphere_size_cm = 2.0 * UNIT_LEN_MM
     clip=CAST_CLIP_FULL
 
@@ -1553,7 +1554,7 @@ def cast_and_visualise(
     NUM_FRAMES = 1
     # NUM_FRAMES = 5
     #NUM_FRAMES = 20
-    NUM_FRAMES = 20
+    #NUM_FRAMES = 20
 
     # Animation
     from matplotlib.animation import FuncAnimation
