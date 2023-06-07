@@ -33,7 +33,7 @@ pip install numpy
 pip install matplotlib
 # pip install cppyy
 # pip install pygame
-# pip install sympy
+pip install sympy
 pip install scipy
 pip install scikit-image
 pip install opencv-python
