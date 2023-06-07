@@ -131,13 +131,14 @@ for form_i, form in enumerate(various_forms):
     #eq = Equation(plane - ray, 0) # Does not work. Obviously.
     eq = Equation(eq0, zero0)
 
-    # sympy.pprint(eq)
+    print('Equation to solve:')
     sympy.pprint(eq, use_unicode=True)
 
     desired_vars = (uu,vv,ww, t)
+    print('To solve for', (uu,vv,ww, t))
     # Solve!
-    solutions = solve(eq, desired_vars,force=True, manual=True, set=True)
-    solution = solve(eq, desired_vars,force=True, manual=True)
+    solutions = solve(eq, desired_vars, force=True, manual=True, set=True)
+    solution = solve(eq, desired_vars, force=True, manual=True)
 
     print('Num solutions: ', len(solution))
     for solition_id in range(len(solution)):
@@ -157,6 +158,8 @@ for form_i, form in enumerate(various_forms):
 
         d1 = gcd(sol_uu, sol_vv)  # Did not work with `sol_t` (in Flat Plane)
         d2 = gcd(d1, sol_ww)
+        print('d1 = ', d1)
+        print('d2 = ', d2)
         d = d1
         print('gcd = ', 1/d)
 
