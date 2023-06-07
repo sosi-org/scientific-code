@@ -129,7 +129,12 @@ for form_i, form in enumerate(various_forms):
 
     zero0 =  Matrix([0,0,0])
     #eq = Equation(plane - ray, 0) # Does not work. Obviously.
-    eq = Equation(eq0, zero0)
+    # eq = Equation(eq0, zero0)
+    # Unike the old one, we have two equaiotns: Since the plat plane is not enough (one equation), but we increase diention,a dn the constain it.
+    # ieq = constrain
+    # exeq - ray = higher-dimension repr + clams
+    eq = Equation((exeq - ray, ieq), zero0)
+    # Later on, add Symplectic: add to 36, and add constraints.
 
     print('Equation to solve:')
     sympy.pprint(eq, use_unicode=True)
@@ -167,6 +172,7 @@ for form_i, form in enumerate(various_forms):
         print('a =', sol_uu * denom  , '/', denom)
         print('b =', sol_vv * denom  , '/', denom)
         print('t =', sol_t * denom  , '/', denom)
+    print('--------------------')
 
 exit()
 
