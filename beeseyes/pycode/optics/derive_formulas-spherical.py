@@ -178,6 +178,7 @@ for form_i, form in enumerate(various_forms):
         print('b =', sol_vv * denom  , '/', denom)
         print('t =', sol_t * denom  , '/', denom)
     print('--------------------')
+    # It is slow. How to save the result when done?
 
 exit()
 
