@@ -1,7 +1,5 @@
 import sympy
 
-# forked from the flat version: https://github.com/sosi-org/scientific-code/blob/1ccc52068242da0ba2f6c444b1c09a6c40741d5f/beeseyes/pycode/optics/derive_formulas.py#L2
-
 # This program generates automatic c-code for gradient of
 #implicit objects with complicated formulas. It generates the gradient automatically.
 
@@ -15,26 +13,84 @@ sympy.init_printing()
 # Plane:
 ux, uy, uz = symbols('ux uy uz', real=true)
 vx, vy, vz = symbols('vx vy vz', real=true)
-#wx, wy, wz = symbols('wx wy wz', real=true)
+wx, wy, wz = symbols('wx wy wz', real=true)
 x0, y0, z0 = symbols('x0 y0 z0', real=true)
 
 
-a, b = symbols('a b', real=true)
+a, b, c = symbols('a b c', real=true)
 
-# Plane: Corner
+various_forms = []
+# Part 1: UVW coordinates
+
+# Sphere parameters:
+# Center
 C0 = Matrix([x0,y0,z0])
 # Plane: side vectors
 U = Matrix([ux,uy,uz])
 V = Matrix([vx,vy,vz])
-#W = Matrix([wx,wy,wz])
-UV = Matrix([U.T, V.T]).T
+W = Matrix([wx,wy,wz])
+# UV = Matrix([U.T, V.T]).T
+UVW = Matrix([U.T, V.T, W.T]).T
+
+# I wish I had SDF. That would be automatically geodesic.
+
 
 # Local cordinates:
-ab = Matrix([a,b])
+# todo: rename: uvw
+abc = Matrix([a,b,c])
 
-plane = UV*ab + C0
+point_in_sphere_uvw1 = UVW * abc + C0
+# point_in_sphere_uvw2 = norm(UVW * abc) - 1 #  = 0
+# pair them together?
+# No, it's just one equation:
+# implicit
+ellipsoid_surface_eq = a*a+b*b+c*c - 1
+ellipsoid_surface_expl = point_in_sphere_uvw1
 
-sympy.pprint(plane)
+# sympy.pprint(point_in_sphere_uvw1)
+sympy.pprint(ellipsoid_surface_eq)
+# But this is not what we need
+
+
+variables = (a,b,c)
+parameters = (U,V,W,C0)
+eq = ellipsoid_surface_eq
+# world_variables = (x,y,z) # no such thing
+
+various_forms.append({
+    'vars': variables, # local vars
+    # 'x,y,z': world_variables, # local vars ---> 'expl-eq'
+    'params': parameters,
+    'impl-eq': eq,
+    'expl-eq': ellipsoid_surface_expl,
+})
+
+# Part 2: Polar coordinates
+# Formulation 2:
+
+φ,θ,r = symbols('φ θ r', real=true)
+x = r * sin(φ) * cos(θ) + x0
+y = r * sin(φ) * sin(θ) + y0
+z = r * cos(φ) + z0
+print('-------')
+sympy.pprint(x)
+sympy.pprint(y)
+sympy.pprint(z)
+
+# Implicit
+polar_sphere_eq = x*x + y*y + z*z - r*r
+
+various_forms.append({
+    'vars': (φ,θ,r),
+    'params': (C0),
+    'impl-eq': polar_sphere_eq,
+    'expl-eq': Matrix([x,y,z]),
+})
+
+# various_forms.append(polar_sphere_eq)
+
+# ------------------------------
+# Now  ray (to cross with each):
 
 # Ray:
 ox, oy, oz = symbols('ox oy oz', real=true)
@@ -51,9 +107,21 @@ ray = O + t * D
 print(ray)
 sympy.pprint(ray)
 
+# -------------------------
+# Now cross ray with each:
 
-eq0 = plane - ray
-sympy.pprint(eq0)
+for form_i, form in enumerate(various_forms):
+    vars = form['vars']
+    params = form['params']
+    # Implicit equation for each: f(...) = 0
+    # eq = form['eq']
+    ieq = form['impl-eq']
+    # Explicit equation for each: (x,y,z) := ...
+    exeq = form['expl-eq']
+    eq0 = exeq - ray
+    print('equation == 0 :')
+    sympy.pprint(eq0)
+exit()
 '''
 ⎡a⋅ux + b⋅vx - dx⋅t - ox⎤
 ⎢                       ⎥
