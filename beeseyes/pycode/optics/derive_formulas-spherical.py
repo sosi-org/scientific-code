@@ -133,17 +133,22 @@ for form_i, form in enumerate(various_forms):
     # Unike the old one, we have two equaiotns: Since the plat plane is not enough (one equation), but we increase diention,a dn the constain it.
     # ieq = constrain
     # exeq - ray = higher-dimension repr + clams
-    eq = Equation((exeq - ray, ieq), zero0)
+    # eq = Equation((exeq - ray, ieq), zero0)
+    eq1 = Equation(exeq - ray, zero0)
+    eq2 = Equation(ieq, 0)
+    # 3 (higher-dim) + 1 (scalar)
     # Later on, add Symplectic: add to 36, and add constraints.
 
-    print('Equation to solve:')
-    sympy.pprint(eq, use_unicode=True)
+    print('Equation2 to solve:')
+    sympy.pprint(eq1, use_unicode=True)
+    sympy.pprint(eq2, use_unicode=True)
 
     desired_vars = (uu,vv,ww, t)
     print('To solve for', (uu,vv,ww, t))
     # Solve!
-    solutions = solve(eq, desired_vars, force=True, manual=True, set=True)
-    solution = solve(eq, desired_vars, force=True, manual=True)
+    if False:
+      solutions = solve((eq1,eq2), desired_vars, force=True, manual=True, set=True)
+    solution = solve((eq1,eq2), desired_vars, force=True, manual=True)
 
     print('Num solutions: ', len(solution))
     for solition_id in range(len(solution)):
