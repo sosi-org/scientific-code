@@ -137,6 +137,8 @@ def surface_sphere_polar_simple():
     }
 
 # A model has a constaint, but also "joint" iing it with another model will make the other mode (ray) a second constaint
+
+
 def surface_sphere_polar_simpler_pauli():
     # complex-number case (Pauli matrix?)
     # sphere (1) at 0
@@ -162,6 +164,8 @@ def surface_sphere_polar_simpler_pauli():
     }
 
 # The insightful unit sphere:
+
+
 def surface_simple_unit_sphere1():
     # complex-number case (Pauli matrix?)
     # sphere (1) at 0
@@ -169,7 +173,7 @@ def surface_simple_unit_sphere1():
     xx, yy, zz = symbols('xx yy zz', real=true)
     # Insightful:
     # no need for paramsm in fact (new vision: from representation theory)
-    # This means, we also can add optional (internal param) in between, but not really needed.
+    #  This means, we also can add optional (internal param) in between, but not really needed.
 
     # Implicit
     unit_sphere_eq = xx*xx + yy*yy + zz*zz - 1
@@ -200,6 +204,8 @@ various_forms.append(surface_sphere_polar_simpler_pauli())
 chosen_forms = [surface_simple_unit_sphere1()]
 
 # ------------------------------
+
+
 def make_ray():
     # Now  ray (to cross with each):
 
@@ -234,6 +240,7 @@ def make_ray():
 
 # -------------------------
 # Now cross ray with each:
+
 
 ray_thing = make_ray()
 
