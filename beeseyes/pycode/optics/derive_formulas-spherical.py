@@ -63,6 +63,7 @@ various_forms.append({
     'params': parameters,
     'impl-eq': eq,
     'expl-eq': ellipsoid_surface_expl,
+    'unknowns': (uu,vv,ww),
     'desired_vars': [uu,vv,ww],
 })
 
@@ -84,8 +85,12 @@ polar_sphere_eq = x*x + y*y + z*z - r*r
 various_forms.append({
     'vars': (φ,θ,r),
     'params': (C0),
+    # Implicit. Constraints. In fugure, it can be more than one
     'impl-eq': polar_sphere_eq,
+    # Explicit
+    # Explicit: Cartesian (x,y,z) (in host space: aug-dims representation) (vector3D)
     'expl-eq': Matrix([x,y,z]),
+    'unknowns': (φ,θ,r),
     'desired_vars': [φ,θ,r],
 })
 
@@ -109,29 +114,46 @@ ray = O + t * D
 print(ray)
 sympy.pprint(ray)
 
+ray_thing = {
+    'vars': (t),
+    'params': (O, D),
+    # No constraints
+    'impl-eq': (),
+    # Explicit: vector3D
+    'expl-eq': ray,
+    'unknowns': (t),
+    'desired_vars': [t],
+}
+
 # -------------------------
 # Now cross ray with each:
 
 chosen_forms = [various_forms[1]]
 for form_i, form in enumerate(chosen_forms):
-  # set of desired vars
-  desired_set = form['desired_vars']
-  desired_set += [t]
-  print('desired_set', desired_set)
+  # set of desired vars: desired_set, unkowns, fast_vars, vars, surface_vars
+  # May be any number of DoF: Local DoF. (Usually DoF equals to DoF of host space): (u,v,w) or (φ,θ,r)
+  surface_vars = form['desired_vars']
+  # Only (t,)  (DoF = 1)
+  ray_vars = ray_thing['desired_vars']
+  #desired_set_tuple = (*surface_vars, *ray_vars)
+  #print('desired_set', desired_set)
+  desired_vars_tuple = (*surface_vars, *ray_vars)
+  print('desired_vars_tuple', desired_vars_tuple)
 
-  for desiredv_j, desired_var in enumerate(desired_set):
+  #for desiredv_j, desired_var in enumerate(desired_set):
+  if True:
     vars = form['vars']
     params = form['params']
     # Implicit equation for each: f(...) = 0
     # eq = form['eq']
     ieq = form['impl-eq']
-    # Explicit equation for each: (x,y,z) := ...
+    # Explicit equation for each: (x,y,z) := ...  host_eq
     exeq = form['expl-eq']
-    eq0 = exeq - ray
+    rayeq = ray_thing['expl-eq']
+    eq0 = exeq - rayeq
     print('equation == 0 :')
     sympy.pprint(eq0)
-    # one element only
-    desired_vars_tuple = (desired_var,)
+    # desired_vars_tuple = (desired_var,)
 
 
     # Equation
@@ -157,12 +179,17 @@ for form_i, form in enumerate(chosen_forms):
 
     # desired_vars = (uu,vv,ww, t)
     # If I don't take all, it wil consider the other desired variables as knowns
+    # all unkonwns need to be in one place
     # uknowns = ,
-    print('To solve for', desired_vars_tuple)
+    print('To solve eq. set for', desired_vars_tuple)
+    if False:
+      # fake the solution:
+      solution = [desired_vars_tuple]
     # Solve!
     if False:
       solutions = solve((eq1,eq2), desired_vars_tuple, force=True, manual=True, set=True)
     solution = solve((eq1,eq2), desired_vars_tuple, force=True, manual=True)
+
 
     print('Num solutions: ', len(solution))
     solutions = []
@@ -179,17 +206,18 @@ for form_i, form in enumerate(chosen_forms):
         # sol_abt = solution[solition_id]
         """
         for j in range(num_desired_vars):
-           varname = str(desired_vars_tuple[j])
-        sol_v = solution[solition_id][j]
+          varname = str(desired_vars_tuple[j])
+          # Algebraic (symbolic) solution
+          sol_v = solution[solition_id][j]
 
-        """
-        print('raw: sol_u =', sol_uu )
-        print('raw: sol_v =', sol_vv )
-        print('raw: sol_w =', sol_ww )
-        print('raw: sol_t =', sol_t )
-        """
-        print(f'raw: sol_{varname} =', sol_v )
-        solutions += [sol_v]
+          """
+          print('raw: sol_u =', sol_uu )
+          print('raw: sol_v =', sol_vv )
+          print('raw: sol_w =', sol_ww )
+          print('raw: sol_t =', sol_t )
+          """
+          print(f'raw: sol_{varname} =', sol_v )
+          solutions += [sol_v]
     print('Calculating gcd, for speed')
     if False:
         d1 = gcd(sol_uu, sol_vv)  # Did not work with `sol_t` (in Flat Plane)
