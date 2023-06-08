@@ -245,15 +245,14 @@ def make_ray():
 # Now cross ray with each:
 
 
-
 def transform_using_gcd(soltions_tuple):
     # todo: GCD of all but not 't' is desired
     # Maybe: ((u2,v2,w2),t2), gcd = transform_using_gcd(...).
     #   (u2,v2,t2), gcd =.
     #   gcd each group: [((u2,v2,w2),gcd_uvw), ((u2,v2,w2,t2),gcd_uvwt) ] = transform_using_gcd([(u2,v2,w2),gcd_uvw), (u2,v2,w2,t2)])
-    #soltuple = tuple(solutions)
-    #soltuple_gcd, gcd = transform_using_gcd(tuple(solutions))
-    #soltuple_gcd, gcd = transform_using_gcd(soltuple)
+    # soltuple = tuple(solutions)
+    # soltuple_gcd, gcd = transform_using_gcd(tuple(solutions))
+    # soltuple_gcd, gcd = transform_using_gcd(soltuple)
     # transform_using_gcd(tuple(solutions), t)
     if False:
         # Did not work with `sol_t` (in Flat Plane)
@@ -347,7 +346,7 @@ for form_i, form in enumerate(chosen_forms):
             solutions = solve((eq1, eq2), desired_vars_tuple,
                               force=True, manual=True, set=True)
             solution = solve((eq1, eq2), desired_vars_tuple,
-                         force=True, manual=True)
+                             force=True, manual=True)
             pass
 
         print('Num solutions: ', len(solution))
