@@ -340,16 +340,17 @@ for form_i, form in enumerate(chosen_forms):
         print('To solve eq. set for', desired_vars_tuple)
         if False:
             # fake the solution:
-            solution = [desired_vars_tuple]
+            pass
+        solution = [desired_vars_tuple]
         # Solve!
         if False:
             solutions = solve((eq1, eq2), desired_vars_tuple,
                               force=True, manual=True, set=True)
-        solution = solve((eq1, eq2), desired_vars_tuple,
+            solution = solve((eq1, eq2), desired_vars_tuple,
                          force=True, manual=True)
+            pass
 
         print('Num solutions: ', len(solution))
-        solutions = []
         for solition_id in range(len(solution)):
             num_desired_vars = len(solution[solition_id])
             print("\n>>>>> Solution %d: has %d vars <<<<<" %
@@ -363,6 +364,8 @@ for form_i, form in enumerate(chosen_forms):
         sol_t = solution[solition_id][3]
         # sol_abt = solution[solition_id]
         """
+            # rename
+            solutions = []
             for j in range(num_desired_vars):
                 varname = str(desired_vars_tuple[j])
                 # Algebraic (symbolic) solution
@@ -377,15 +380,18 @@ for form_i, form in enumerate(chosen_forms):
                 print('')
                 print(f'raw: sol_{varname} =', sol_v)
                 solutions += [sol_v]
-        print('')
-        print('Calculating gcd, for speed')
 
-        # It is slow. How to save the result when done?
+            print('')
 
-        print('----', len(solutions), solutions)
-        soltuple_gcd, gcd = transform_using_gcd(tuple(solutions))
+            print('Calculating gcd, for speed')
 
-        # todo: save/replace LaTeX for mapltotlib
+            # It is slow. How to save the result when done?
+
+            print('----', len(solutions), solutions)
+            soltuple_gcd, gcd = transform_using_gcd(tuple(solutions))
+            print('')
+
+      # todo: save/replace LaTeX for mapltotlib
 
 exit()
 
