@@ -63,7 +63,7 @@ various_forms.append({
     'params': parameters,
     'impl-eq': eq,
     'expl-eq': ellipsoid_surface_expl,
-    'desired_vars': [(uu,vv,ww),],
+    'desired_vars': [uu,vv,ww],
 })
 
 # Part 2: Polar coordinates
@@ -86,7 +86,7 @@ various_forms.append({
     'params': (C0),
     'impl-eq': polar_sphere_eq,
     'expl-eq': Matrix([x,y,z]),
-    'desired_vars': [(φ,θ,r)],
+    'desired_vars': [φ,θ,r],
 })
 
 # various_forms.append(polar_sphere_eq)
@@ -116,10 +116,10 @@ chosen_forms = [various_forms[1]]
 for form_i, form in enumerate(chosen_forms):
   # set of desired vars
   desired_set = form['desired_vars']
-  desired_set += [(t,)]
+  desired_set += [t]
   print('desired_set', desired_set)
 
-  for desired_j, desired_vars in enumerate(desired_set):
+  for desiredv_j, desired_var in enumerate(desired_set):
     vars = form['vars']
     params = form['params']
     # Implicit equation for each: f(...) = 0
@@ -130,6 +130,8 @@ for form_i, form in enumerate(chosen_forms):
     eq0 = exeq - ray
     print('equation == 0 :')
     sympy.pprint(eq0)
+    # one element only
+    desired_vars_tuple = (desired_var,)
 
 
     # Equation
@@ -152,16 +154,22 @@ for form_i, form in enumerate(chosen_forms):
     sympy.pprint(eq1, use_unicode=True)
     sympy.pprint(eq2, use_unicode=True)
 
+
     # desired_vars = (uu,vv,ww, t)
-    print('To solve for', (uu,vv,ww, t))
+    # If I don't take all, it wil consider the other desired variables as knowns
+    # uknowns = ,
+    print('To solve for', desired_vars_tuple)
     # Solve!
     if False:
-      solutions = solve((eq1,eq2), desired_vars, force=True, manual=True, set=True)
-    solution = solve((eq1,eq2), desired_vars, force=True, manual=True)
+      solutions = solve((eq1,eq2), desired_vars_tuple, force=True, manual=True, set=True)
+    solution = solve((eq1,eq2), desired_vars_tuple, force=True, manual=True)
 
     print('Num solutions: ', len(solution))
+    solutions = []
     for solition_id in range(len(solution)):
-        print("Solution %d: has %d vars" % (solition_id, len(solution[solition_id])))
+        num_desired_vars = len(solution[solition_id])
+        print("Solution %d: has %d vars" % (solition_id, num_desired_vars))
+        """
         # sphere coords
         sol_uu = solution[solition_id][0]
         sol_vv = solution[solition_id][1]
@@ -169,12 +177,21 @@ for form_i, form in enumerate(chosen_forms):
         # ray coord(1)
         sol_t = solution[solition_id][3]
         # sol_abt = solution[solition_id]
+        """
+        for j in range(num_desired_vars):
+           varname = str(desired_vars_tuple[j])
+        sol_v = solution[solition_id][j]
 
+        """
         print('raw: sol_u =', sol_uu )
         print('raw: sol_v =', sol_vv )
         print('raw: sol_w =', sol_ww )
         print('raw: sol_t =', sol_t )
-
+        """
+        print(f'raw: sol_{varname} =', sol_v )
+        solutions += [sol_v]
+    print('Calculating gcd, for speed')
+    if False:
         d1 = gcd(sol_uu, sol_vv)  # Did not work with `sol_t` (in Flat Plane)
         d2 = gcd(d1, sol_ww)
         print('d1 = ', d1)
@@ -188,6 +205,8 @@ for form_i, form in enumerate(chosen_forms):
         print('t =', sol_t * denom  , '/', denom)
     print('--------------------')
     # It is slow. How to save the result when done?
+
+    # todo: save/replace LaTeX for mapltotlib
 
 exit()
 
