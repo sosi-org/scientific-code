@@ -313,7 +313,8 @@ for form_i, form in enumerate(chosen_forms):
         solutions = []
         for solition_id in range(len(solution)):
             num_desired_vars = len(solution[solition_id])
-            print("Solution %d: has %d vars" % (solition_id, num_desired_vars))
+            print("\n>>>>> Solution %d: has %d vars <<<<<" %
+                  (solition_id, num_desired_vars))
             """
         # sphere coords
         sol_uu = solution[solition_id][0]
@@ -334,8 +335,10 @@ for form_i, form in enumerate(chosen_forms):
           print('raw: sol_w =', sol_ww )
           print('raw: sol_t =', sol_t )
           """
+                print('')
                 print(f'raw: sol_{varname} =', sol_v)
                 solutions += [sol_v]
+        print('')
         print('Calculating gcd, for speed')
         if False:
             # Did not work with `sol_t` (in Flat Plane)
