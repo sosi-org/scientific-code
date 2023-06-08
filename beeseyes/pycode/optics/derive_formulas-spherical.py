@@ -63,6 +63,7 @@ various_forms.append({
     'params': parameters,
     'impl-eq': eq,
     'expl-eq': ellipsoid_surface_expl,
+    'desired_vars': [(uu,vv,ww),],
 })
 
 # Part 2: Polar coordinates
@@ -85,6 +86,7 @@ various_forms.append({
     'params': (C0),
     'impl-eq': polar_sphere_eq,
     'expl-eq': Matrix([x,y,z]),
+    'desired_vars': [(φ,θ,r)],
 })
 
 # various_forms.append(polar_sphere_eq)
@@ -110,7 +112,14 @@ sympy.pprint(ray)
 # -------------------------
 # Now cross ray with each:
 
-for form_i, form in enumerate(various_forms):
+chosen_forms = [various_forms[1]]
+for form_i, form in enumerate(chosen_forms):
+  # set of desired vars
+  desired_set = form['desired_vars']
+  desired_set += [(t,)]
+  print('desired_set', desired_set)
+
+  for desired_j, desired_vars in enumerate(desired_set):
     vars = form['vars']
     params = form['params']
     # Implicit equation for each: f(...) = 0
@@ -143,7 +152,7 @@ for form_i, form in enumerate(various_forms):
     sympy.pprint(eq1, use_unicode=True)
     sympy.pprint(eq2, use_unicode=True)
 
-    desired_vars = (uu,vv,ww, t)
+    # desired_vars = (uu,vv,ww, t)
     print('To solve for', (uu,vv,ww, t))
     # Solve!
     if False:
