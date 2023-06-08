@@ -65,6 +65,7 @@ def surface_ellipsoid():
     }
 
 
+# invalid
 def surface_sphere_polar():
     # Part 2: Polar coordinates
     # Formulation 2:
@@ -82,6 +83,7 @@ def surface_sphere_polar():
     sympy.pprint(z)
 
     # Implicit
+    # Oops, not needed: This r is not that r
     polar_sphere_eq = x*x + y*y + z*z - r*r
 
     return {
@@ -97,11 +99,51 @@ def surface_sphere_polar():
     }
 
 
+# simplified
+def surface_sphere_polar_simple():
+    # Part 3: Polar coordinates
+    # Formulation 3:
+    # sphere (1) at 0
+
+    φ, θ, r = symbols('φ θ r', real=true)
+
+    x = r * sin(φ) * cos(θ)
+    y = r * sin(φ) * sin(θ)
+    z = r * cos(φ)
+    print('-------')
+    sympy.pprint(x)
+    sympy.pprint(y)
+    sympy.pprint(z)
+
+    # Implicit
+    # No need perhaps
+    # This would be trivial (always hold. Hence, no gradiant?) (todo: check)
+    # Will set r to 1. Just that. (So, not trivial then)
+    polar_sphere_eq_ = x*x + y*y + z*z - 1
+    polar_sphere_eq = r*r - 1
+
+    return {
+        'vars': (φ, θ, r),
+        'params': (),
+        # Implicit. Constraints. In fugure, it can be more than one
+        'impl-eq': polar_sphere_eq,
+        # Explicit
+        # Explicit: Cartesian (x,y,z) (in host space: aug-dims representation) (vector3D)
+        'expl-eq': Matrix([x, y, z]),
+        'unknowns': (φ, θ, r),
+        'desired_vars': [φ, θ, r],
+    }
+
+
 various_forms = []
+
 various_forms.append(surface_ellipsoid())
-various_forms.append(surface_sphere_polar())
+# invalid:
+# various_forms.append(surface_sphere_polar())
+various_forms.append(surface_sphere_polar_simple())
 
 # various_forms.append(polar_sphere_eq)
+chosen_forms = [various_forms[1]]
 
 # ------------------------------
 # Now  ray (to cross with each):
@@ -135,7 +177,7 @@ ray_thing = {
 # -------------------------
 # Now cross ray with each:
 
-chosen_forms = [various_forms[1]]
+
 for form_i, form in enumerate(chosen_forms):
     # set of desired vars: desired_set, unkowns, fast_vars, vars, surface_vars
     # May be any number of DoF: Local DoF. (Usually DoF equals to DoF of host space): (u,v,w) or (φ,θ,r)
