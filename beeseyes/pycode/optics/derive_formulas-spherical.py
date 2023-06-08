@@ -417,6 +417,7 @@ for form_i, form in enumerate(chosen_forms):
             # Very useful for auto-diff, but on steroids
             # Separating (clive-age)
             # Shall I return (a,b) (in case of (1/b)), ro shall I return (a), (1/b)? IT seems the latter is good
+            # todo (as an ossibility, no really omperative): rename: transform_using_gcd -> make_efficient_factorize_compute or make_efficient_factorize_compute_using_gcd
 
             print('')
 
