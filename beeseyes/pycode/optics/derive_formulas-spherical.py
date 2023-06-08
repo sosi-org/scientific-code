@@ -245,6 +245,42 @@ def make_ray():
 # Now cross ray with each:
 
 
+
+def transform_using_gcd(soltions_tuple):
+    # todo: GCD of all but not 't' is desired
+    # Maybe: ((u2,v2,w2),t2), gcd = transform_using_gcd(...).
+    #   (u2,v2,t2), gcd =.
+    #   gcd each group: [((u2,v2,w2),gcd_uvw), ((u2,v2,w2,t2),gcd_uvwt) ] = transform_using_gcd([(u2,v2,w2),gcd_uvw), (u2,v2,w2,t2)])
+    #soltuple = tuple(solutions)
+    #soltuple_gcd, gcd = transform_using_gcd(tuple(solutions))
+    #soltuple_gcd, gcd = transform_using_gcd(soltuple)
+    # transform_using_gcd(tuple(solutions), t)
+    if False:
+        # Did not work with `sol_t` (in Flat Plane)
+        # Maybe no need to do it for `t`?
+        # Then for t, see if it cimplifies it, then use it.
+        d1 = gcd(sol_uu, sol_vv)
+        d2 = gcd(d1, sol_ww)
+        print('d1 = ', d1)
+        print('d2 = ', d2)
+        d = d1
+        print('gcd = ', 1/d)
+
+        denom = 1/d
+        print('a =', sol_uu * denom, '/', denom)
+        print('b =', sol_vv * denom, '/', denom)
+        print('t =', sol_t * denom, '/', denom)
+    print('--------------------')
+    assert len(soltions_tuple) == 4, "(u,v,w,t) or (x,y,z,t)"
+    # these are in the represeantion space
+    (u,v,w,t) = soltions_tuple
+    d1 = gcd(u, v) ; print(d1)
+    d2 = gcd(u, w) ; print(d2)
+    d3 = gcd(v, w) ; print(d3)
+    d4 = gcd(u, t) ; print(d4)
+
+
+
 ray_thing = make_ray()
 
 for form_i, form in enumerate(chosen_forms):
@@ -343,23 +379,11 @@ for form_i, form in enumerate(chosen_forms):
                 solutions += [sol_v]
         print('')
         print('Calculating gcd, for speed')
-        if False:
-            # Did not work with `sol_t` (in Flat Plane)
-            # Maybe no need to do it for `t`?
-            # Then for t, see if it cimplifies it, then use it.
-            d1 = gcd(sol_uu, sol_vv)
-            d2 = gcd(d1, sol_ww)
-            print('d1 = ', d1)
-            print('d2 = ', d2)
-            d = d1
-            print('gcd = ', 1/d)
 
-            denom = 1/d
-            print('a =', sol_uu * denom, '/', denom)
-            print('b =', sol_vv * denom, '/', denom)
-            print('t =', sol_t * denom, '/', denom)
-        print('--------------------')
         # It is slow. How to save the result when done?
+
+        print('----', len(solutions), solutions)
+        soltuple_gcd, gcd = transform_using_gcd(tuple(solutions))
 
         # todo: save/replace LaTeX for mapltotlib
 
