@@ -10,7 +10,7 @@ from sympy import *
 sympy.init_printing()
 
 
-def surface_sphere_polar():
+def surface_ellipsoid():
     # Plane:
     ux, uy, uz = symbols('ux uy uz', real=true)
     vx, vy, vz = symbols('vx vy vz', real=true)
@@ -65,10 +65,6 @@ def surface_sphere_polar():
     }
 
 
-various_forms = []
-various_forms.append(surface_sphere_polar())
-
-
 def surface_sphere_polar():
     # Part 2: Polar coordinates
     # Formulation 2:
@@ -101,6 +97,8 @@ def surface_sphere_polar():
     }
 
 
+various_forms = []
+various_forms.append(surface_ellipsoid())
 various_forms.append(surface_sphere_polar())
 
 # various_forms.append(polar_sphere_eq)
