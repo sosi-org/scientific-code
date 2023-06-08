@@ -337,17 +337,18 @@ for form_i, form in enumerate(chosen_forms):
         # all unkonwns need to be in one place
         # uknowns = ,
         print('To solve eq. set for', desired_vars_tuple)
-        if False:
+        FAKE = False
+        if FAKE:
             # fake the solution:
-            pass
-        solution = [desired_vars_tuple]
-        # Solve!
-        if False:
-            solutions = solve((eq1, eq2), desired_vars_tuple,
-                              force=True, manual=True, set=True)
+            solution = [desired_vars_tuple]
+        else:
+            # Actually Solve
+            if False:
+                solutions = solve((eq1, eq2), desired_vars_tuple,
+                                  force=True, manual=True, set=True)
+
             solution = solve((eq1, eq2), desired_vars_tuple,
                              force=True, manual=True)
-            pass
 
         print('Num solutions: ', len(solution))
         for solition_id in range(len(solution)):
