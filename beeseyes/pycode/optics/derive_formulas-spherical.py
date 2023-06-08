@@ -10,89 +10,98 @@ from sympy import *
 sympy.init_printing()
 
 
-# Plane:
-ux, uy, uz = symbols('ux uy uz', real=true)
-vx, vy, vz = symbols('vx vy vz', real=true)
-wx, wy, wz = symbols('wx wy wz', real=true)
-x0, y0, z0 = symbols('x0 y0 z0', real=true)
+def surface_sphere_polar():
+    # Plane:
+    ux, uy, uz = symbols('ux uy uz', real=true)
+    vx, vy, vz = symbols('vx vy vz', real=true)
+    wx, wy, wz = symbols('wx wy wz', real=true)
+    x0, y0, z0 = symbols('x0 y0 z0', real=true)
 
 
-uu, vv, ww = symbols('uu vv ww', real=true)
+    uu, vv, ww = symbols('uu vv ww', real=true)
+
+    # Part 1: UVW coordinates
+
+    # Sphere parameters:
+    # Center
+    C0 = Matrix([x0,y0,z0])
+    # Plane: side vectors
+    U = Matrix([ux,uy,uz])
+    V = Matrix([vx,vy,vz])
+    W = Matrix([wx,wy,wz])
+    # UV = Matrix([U.T, V.T]).T
+    UVW = Matrix([U.T, V.T, W.T]).T
+
+    # I wish I had SDF. That would be automatically geodesic.
+
+
+    # Local cordinates:
+    # todo: rename: uvw
+    abc = Matrix([uu, vv, ww])
+
+    point_in_sphere_uvw1 = UVW * abc + C0
+    # point_in_sphere_uvw2 = norm(UVW * abc) - 1 #  = 0
+    # pair them together?
+    # No, it's just one equation:
+    # implicit
+    ellipsoid_surface_eq = uu*uu + vv*vv + ww*ww - 1
+    ellipsoid_surface_expl = point_in_sphere_uvw1
+
+    # sympy.pprint(point_in_sphere_uvw1)
+    sympy.pprint(ellipsoid_surface_eq)
+    # But this is not what we need
+
+
+    variables = (uu,vv,ww)
+    parameters = (U,V,W,C0)
+    eq = ellipsoid_surface_eq
+    # world_variables = (x,y,z) # no such thing
+
+    return {
+        'vars': variables, # local vars
+        # 'x,y,z': world_variables, # local vars ---> 'expl-eq'
+        'params': parameters,
+        'impl-eq': eq,
+        'expl-eq': ellipsoid_surface_expl,
+        'unknowns': (uu,vv,ww),
+        'desired_vars': [uu,vv,ww],
+    }
 
 various_forms = []
-# Part 1: UVW coordinates
+various_forms.append(surface_sphere_polar())
 
-# Sphere parameters:
-# Center
-C0 = Matrix([x0,y0,z0])
-# Plane: side vectors
-U = Matrix([ux,uy,uz])
-V = Matrix([vx,vy,vz])
-W = Matrix([wx,wy,wz])
-# UV = Matrix([U.T, V.T]).T
-UVW = Matrix([U.T, V.T, W.T]).T
+def surface_sphere_polar():
+    # Part 2: Polar coordinates
+    # Formulation 2:
 
-# I wish I had SDF. That would be automatically geodesic.
+    φ,θ,r = symbols('φ θ r', real=true)
+    x0, y0, z0 = symbols('x0 y0 z0', real=true)
+    C0 = Matrix([x0,y0,z0])
 
+    x = r * sin(φ) * cos(θ) + x0
+    y = r * sin(φ) * sin(θ) + y0
+    z = r * cos(φ) + z0
+    print('-------')
+    sympy.pprint(x)
+    sympy.pprint(y)
+    sympy.pprint(z)
 
-# Local cordinates:
-# todo: rename: uvw
-abc = Matrix([uu, vv, ww])
+    # Implicit
+    polar_sphere_eq = x*x + y*y + z*z - r*r
 
-point_in_sphere_uvw1 = UVW * abc + C0
-# point_in_sphere_uvw2 = norm(UVW * abc) - 1 #  = 0
-# pair them together?
-# No, it's just one equation:
-# implicit
-ellipsoid_surface_eq = uu*uu + vv*vv + ww*ww - 1
-ellipsoid_surface_expl = point_in_sphere_uvw1
+    return {
+        'vars': (φ,θ,r),
+        'params': (C0),
+        # Implicit. Constraints. In fugure, it can be more than one
+        'impl-eq': polar_sphere_eq,
+        # Explicit
+        # Explicit: Cartesian (x,y,z) (in host space: aug-dims representation) (vector3D)
+        'expl-eq': Matrix([x,y,z]),
+        'unknowns': (φ,θ,r),
+        'desired_vars': [φ,θ,r],
+    }
 
-# sympy.pprint(point_in_sphere_uvw1)
-sympy.pprint(ellipsoid_surface_eq)
-# But this is not what we need
-
-
-variables = (uu,vv,ww)
-parameters = (U,V,W,C0)
-eq = ellipsoid_surface_eq
-# world_variables = (x,y,z) # no such thing
-
-various_forms.append({
-    'vars': variables, # local vars
-    # 'x,y,z': world_variables, # local vars ---> 'expl-eq'
-    'params': parameters,
-    'impl-eq': eq,
-    'expl-eq': ellipsoid_surface_expl,
-    'unknowns': (uu,vv,ww),
-    'desired_vars': [uu,vv,ww],
-})
-
-# Part 2: Polar coordinates
-# Formulation 2:
-
-φ,θ,r = symbols('φ θ r', real=true)
-x = r * sin(φ) * cos(θ) + x0
-y = r * sin(φ) * sin(θ) + y0
-z = r * cos(φ) + z0
-print('-------')
-sympy.pprint(x)
-sympy.pprint(y)
-sympy.pprint(z)
-
-# Implicit
-polar_sphere_eq = x*x + y*y + z*z - r*r
-
-various_forms.append({
-    'vars': (φ,θ,r),
-    'params': (C0),
-    # Implicit. Constraints. In fugure, it can be more than one
-    'impl-eq': polar_sphere_eq,
-    # Explicit
-    # Explicit: Cartesian (x,y,z) (in host space: aug-dims representation) (vector3D)
-    'expl-eq': Matrix([x,y,z]),
-    'unknowns': (φ,θ,r),
-    'desired_vars': [φ,θ,r],
-})
+various_forms.append(surface_sphere_polar())
 
 # various_forms.append(polar_sphere_eq)
 
