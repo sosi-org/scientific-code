@@ -428,6 +428,8 @@ for form_i, form in enumerate(chosen_forms):
 
             #In general, it is not multiple, but "substitute". In fact, a chain of them.
 
+            # ^ compute-efficient -> co-consider -> substitute -> nested / (local) frame: locality (separation of data sources)
+
             print('')
 
       # todo: save/replace LaTeX for mapltotlib
