@@ -291,7 +291,7 @@ def transform_using_gcd(soltions_tuple):
     assert d1 == d2 and d1 == d3 and d1 == d4
 
     gcd_d = d1
-    return (u*gcd_d, v*gcd_d, w*gcd_d, t*gcd_d)
+    return (u*gcd_d, v*gcd_d, w*gcd_d, t*gcd_d), gcd_d
 
 
 ray_thing = make_ray()
@@ -402,7 +402,22 @@ for form_i, form in enumerate(chosen_forms):
             # It is slow. How to save the result when done?
 
             print('----', len(solutions), solutions)
-            soltuple_gcd, gcd = transform_using_gcd(tuple(solutions))
+            soltuple_gcd, gcd1 = transform_using_gcd(tuple(solutions))
+
+            # a set of solutions (but not math-set)
+            print(soltuple_gcd)
+            ###################
+
+            print('')
+            for i in range(len(soltuple_gcd)):
+                print(soltuple_gcd[i], '       /     ', gcd1)
+
+            # Generalisation:
+            # "Make efficient": by separating parts (that are re-used) hence, re-use computed values
+            # Very useful for auto-diff, but on steroids
+            # Separating (clive-age)
+            # Shall I return (a,b) (in case of (1/b)), ro shall I return (a), (1/b)? IT seems the latter is good
+
             print('')
 
       # todo: save/replace LaTeX for mapltotlib
