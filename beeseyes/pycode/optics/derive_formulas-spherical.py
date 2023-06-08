@@ -122,6 +122,8 @@ def surface_sphere_polar_simple():
     polar_sphere_eq_ = x*x + y*y + z*z - 1
     polar_sphere_eq = r*r - 1
 
+    # r will be a function of t
+
     return {
         'vars': (φ, θ, r),
         'params': (),
@@ -134,6 +136,55 @@ def surface_sphere_polar_simple():
         'desired_vars': [φ, θ, r],
     }
 
+# A model has a constaint, but also "joint" iing it with another model will make the other mode (ray) a second constaint
+def surface_sphere_polar_simpler_pauli():
+    # complex-number case (Pauli matrix?)
+    # sphere (1) at 0
+
+    φ, θ, r = symbols('φ θ r', real=true)
+
+    x = r * sin(φ) * cos(θ)
+    y = r * sin(φ) * sin(θ)
+    z = r * cos(φ)
+
+    # Implicit
+    polar_sphere_eq = r*r - 1
+    # r will be a function of t
+
+    return {
+        'vars': (φ, θ, r),
+        'params': (),
+        'impl-eq': polar_sphere_eq,
+        # Explicit
+        'expl-eq': Matrix([x, y, z]),
+        'unknowns': (φ, θ, r),
+        'desired_vars': [φ, θ, r],
+    }
+
+# The insightful unit sphere:
+def surface_simple_unit_sphere1():
+    # complex-number case (Pauli matrix?)
+    # sphere (1) at 0
+
+    xx, yy, zz = symbols('xx yy zz', real=true)
+    # Insightful:
+    # no need for paramsm in fact (new vision: from representation theory)
+    # This means, we also can add optional (internal param) in between, but not really needed.
+
+    # Implicit
+    unit_sphere_eq = xx*xx + yy*yy + zz*zz - 1
+    # r will be a function of t
+
+    return {
+        'vars': (xx, yy, zz),
+        'params': (),
+        'impl-eq': unit_sphere_eq,
+        # Explicit
+        'expl-eq': Matrix([xx, yy, zz]),
+        'unknowns': (xx, yy, zz),
+        'desired_vars': [xx, yy, zz],
+    }
+
 
 various_forms = []
 
@@ -141,9 +192,12 @@ various_forms.append(surface_ellipsoid())
 # invalid:
 # various_forms.append(surface_sphere_polar())
 various_forms.append(surface_sphere_polar_simple())
+various_forms.append(surface_sphere_polar_simpler_pauli())
 
 # various_forms.append(polar_sphere_eq)
-chosen_forms = [various_forms[1]]
+# chosen_forms = [various_forms[2]]
+
+chosen_forms = [surface_simple_unit_sphere1()]
 
 # ------------------------------
 # Now  ray (to cross with each):
@@ -220,7 +274,7 @@ for form_i, form in enumerate(chosen_forms):
         # 3 (higher-dim) + 1 (scalar)
         # Later on, add Symplectic: add to 36, and add constraints.
 
-        print('Equation2 to solve:')
+        print('Equations (2) to solve:')
         sympy.pprint(eq1, use_unicode=True)
         sympy.pprint(eq2, use_unicode=True)
 
