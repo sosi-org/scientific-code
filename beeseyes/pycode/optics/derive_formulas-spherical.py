@@ -419,6 +419,15 @@ for form_i, form in enumerate(chosen_forms):
             # Shall I return (a,b) (in case of (1/b)), ro shall I return (a), (1/b)? IT seems the latter is good
             # todo (as an ossibility, no really omperative): rename: transform_using_gcd -> make_efficient_factorize_compute or make_efficient_factorize_compute_using_gcd
 
+            # Now we  have a set of compute-efficient solutions,
+            # for x,y,z
+            # But we better need some paratmers
+            # For taking visual represenation
+            # Separate, or indide?
+            #  separate: "joint" (put together) (co-consider)
+
+            #In general, it is not multiple, but "substitute". In fact, a chain of them.
+
             print('')
 
       # todo: save/replace LaTeX for mapltotlib
