@@ -174,6 +174,9 @@ def surface_simple_unit_sphere1():
     # Insightful:
     # no need for paramsm in fact (new vision: from representation theory)
     #  This means, we also can add optional (internal param) in between, but not really needed.
+    # Then afterways, we can have a two-way way to corespond the points x,y,z to params (φ, θ, r), but aftger computing.
+    #   Hence, the acnalytical formulas dont need to be interms of those parameters (simpler symbolical "solve"s, also simpler numerical and compute-code)
+    # That can be yet-another pluggable part (lego, interoperatble, joint-able, grip: "co-consider")
 
     # Implicit
     unit_sphere_eq = xx*xx + yy*yy + zz*zz - 1
@@ -342,6 +345,8 @@ for form_i, form in enumerate(chosen_forms):
         print('Calculating gcd, for speed')
         if False:
             # Did not work with `sol_t` (in Flat Plane)
+            # Maybe no need to do it for `t`?
+            # Then for t, see if it cimplifies it, then use it.
             d1 = gcd(sol_uu, sol_vv)
             d2 = gcd(d1, sol_ww)
             print('d1 = ', d1)
