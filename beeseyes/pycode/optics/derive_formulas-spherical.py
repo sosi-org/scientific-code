@@ -402,7 +402,7 @@ for form_i, form in enumerate(chosen_forms):
             # It is slow. How to save the result when done?
 
             print('----', len(solutions), solutions)
-            soltuple_gcd, gcd1 = transform_using_gcd(tuple(solutions))
+            soltuple_gcd, inv_gcd1 = transform_using_gcd(tuple(solutions))
 
             # a set of solutions (but not math-set)
             print(soltuple_gcd)
@@ -410,7 +410,7 @@ for form_i, form in enumerate(chosen_forms):
 
             print('')
             for i in range(len(soltuple_gcd)):
-                print(soltuple_gcd[i], '       /     ', gcd1)
+                print(soltuple_gcd[i], '       /     ', 1/inv_gcd1)
 
             # Generalisation:
             # "Make efficient": by separating parts (that are re-used) hence, re-use computed values
