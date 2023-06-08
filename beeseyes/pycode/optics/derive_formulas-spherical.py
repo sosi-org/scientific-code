@@ -200,37 +200,41 @@ various_forms.append(surface_sphere_polar_simpler_pauli())
 chosen_forms = [surface_simple_unit_sphere1()]
 
 # ------------------------------
-# Now  ray (to cross with each):
+def ray():
+    # Now  ray (to cross with each):
 
-#  Ray:
-ox, oy, oz = symbols('ox oy oz', real=true)
-dx, dy, dz = symbols('dx dy dz', real=true)
+    #  Ray:
+    ox, oy, oz = symbols('ox oy oz', real=true)
+    dx, dy, dz = symbols('dx dy dz', real=true)
 
-# Ray origin:
-O = Matrix([ox, oy, oz])
-# Ray direction:
-D = Matrix([dx, dy, dz])
-# Ray drive (t,l)
-t = symbols('t', real=true)
+    # Ray origin:
+    O = Matrix([ox, oy, oz])
+    # Ray direction:
+    D = Matrix([dx, dy, dz])
+    # Ray drive (t,l)
+    t = symbols('t', real=true)
 
-ray = O + t * D
-print(ray)
-sympy.pprint(ray)
+    ray = O + t * D
+    print(ray)
+    sympy.pprint(ray)
 
-ray_thing = {
-    'vars': (t),
-    'params': (O, D),
-    # No constraints
-    'impl-eq': (),
-    # Explicit: vector3D
-    'expl-eq': ray,
-    'unknowns': (t),
-    'desired_vars': [t],
-}
+    # wow, already
+    ray_thing = {
+        'vars': (t),
+        'params': (O, D),
+        # No constraints
+        'impl-eq': (),
+        # Explicit: vector3D
+        'expl-eq': ray,
+        'unknowns': (t),
+        'desired_vars': [t],
+    }
+    return ray_thing
 
 # -------------------------
 # Now cross ray with each:
 
+ray_thing = ray()
 
 for form_i, form in enumerate(chosen_forms):
     # set of desired vars: desired_set, unkowns, fast_vars, vars, surface_vars
@@ -252,6 +256,7 @@ for form_i, form in enumerate(chosen_forms):
         ieq = form['impl-eq']
         # Explicit equation for each: (x,y,z) := ...  host_eq
         exeq = form['expl-eq']
+        # todo: repeated code
         rayeq = ray_thing['expl-eq']
         eq0 = exeq - rayeq
         print('equation == 0 :')
@@ -269,7 +274,10 @@ for form_i, form in enumerate(chosen_forms):
         # ieq = constrain
         # exeq - ray = higher-dimension repr + clams
         # eq = Equation((exeq - ray, ieq), zero0)
-        eq1 = Equation(exeq - ray, zero0)
+
+        # todo: repeated code
+        rayeq = ray_thing['expl-eq']
+        eq1 = Equation(exeq - rayeq, zero0)
         eq2 = Equation(ieq, 0)
         # 3 (higher-dim) + 1 (scalar)
         # Later on, add Symplectic: add to 36, and add constraints.
