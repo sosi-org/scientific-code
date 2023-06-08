@@ -200,7 +200,7 @@ various_forms.append(surface_sphere_polar_simpler_pauli())
 chosen_forms = [surface_simple_unit_sphere1()]
 
 # ------------------------------
-def ray():
+def make_ray():
     # Now  ray (to cross with each):
 
     #  Ray:
@@ -214,6 +214,7 @@ def ray():
     # Ray drive (t,l)
     t = symbols('t', real=true)
 
+    # rename: rayeq ?
     ray = O + t * D
     print(ray)
     sympy.pprint(ray)
@@ -234,7 +235,7 @@ def ray():
 # -------------------------
 # Now cross ray with each:
 
-ray_thing = ray()
+ray_thing = make_ray()
 
 for form_i, form in enumerate(chosen_forms):
     # set of desired vars: desired_set, unkowns, fast_vars, vars, surface_vars
