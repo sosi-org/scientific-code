@@ -272,12 +272,26 @@ def transform_using_gcd(soltions_tuple):
     print('--------------------')
     assert len(soltions_tuple) == 4, "(u,v,w,t) or (x,y,z,t)"
     # these are in the represeantion space
-    (u,v,w,t) = soltions_tuple
-    d1 = gcd(u, v) ; print(d1)
-    d2 = gcd(u, w) ; print(d2)
-    d3 = gcd(v, w) ; print(d3)
-    d4 = gcd(u, t) ; print(d4)
+    (u, v, w, t) = soltions_tuple
+    d1 = gcd(u, v)
+    print(d1)
+    d2 = gcd(u, w)
+    print(d2)
+    d3 = gcd(v, w)
+    print(d3)
+    d4 = gcd(u, t)
+    print(d4)
 
+    # The gcd s turned out ot be the same.
+    # So custom tailor-made gcd is god enough
+
+    # If this (assert-as-if-condition), and not to constrain the future changes
+    # for other cases I haven't thought
+    # idea: assert can be apractical solution for nultiple purposes (limit changes, document, protect, reminder to change "this", etc: change THIS or cahgen THAT, or change unknown (invariance check : check somehwre, but since it's as-early-aspossible , we are hopeful that we can find it, even thought we have not separated the causes and have all constraints in one "invariant" together))
+    assert d1 == d2 and d1 == d3 and d1 == d4
+
+    gcd_d = d1
+    return (u*gcd_d, v*gcd_d, w*gcd_d, t*gcd_d)
 
 
 ray_thing = make_ray()
