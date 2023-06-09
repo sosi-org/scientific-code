@@ -64,9 +64,10 @@ def generate_efficient_code_laumbdify_numpy(denoms, gcd_divisor):
     return f
 
 
-def generate_efficient_code_c_for_ufunc(denoms, gcd_divisor):
+# numerator/ (denomerator=divisor)
+def generate_efficient_code_c_for_ufunc(numerators, gcd_divisor):
     """ `_c` to be used by generate_efficient_code_ufunc. """
-    print(denoms)
+    print(numerators)
 
 
 def generate_efficient_code_ufunc(denoms, gcd_divisor):
