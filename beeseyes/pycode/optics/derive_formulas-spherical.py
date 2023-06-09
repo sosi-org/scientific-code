@@ -297,7 +297,8 @@ def transform_using_gcd(soltions_tuple):
     assert d1 == d2 and d1 == d3 and d1 == d4
 
     gcd_d = d1
-    return (u*gcd_d, v*gcd_d, w*gcd_d, t*gcd_d), gcd_d
+    inv_gcd1 = 1/gcd_d
+    return (u*inv_gcd1, v*inv_gcd1, w*inv_gcd1, t*inv_gcd1), gcd_d
 
 
 ray_thing = make_ray()
