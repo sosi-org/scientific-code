@@ -6,7 +6,7 @@ import sympy
 
 from codegen import generate_efficient_code
 
-# todo: (forgot. What was it about?)
+#  todo: (forgot. What was it about?)
 #    todo: a file conainting one attachable shape (including ray: treated the same, uniformly: uniform attaching: jelo-avardan-e-bakhsh e meet konande: etesal. touch. co-consider), maybe retuns NamedTuple
 
 # from __future__ import division
@@ -442,7 +442,6 @@ for form_i, form in enumerate(chosen_forms):
             print('')
 
       # todo: save/replace LaTeX for mapltotlib
-
 
 
 exit()

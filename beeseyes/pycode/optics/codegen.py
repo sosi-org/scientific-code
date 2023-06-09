@@ -48,8 +48,6 @@ def generate_efficient_code_pure_c(denoms, gcd_divisor):
     print(c_code)
 
 
-
-
 def generate_efficient_code_laumbdify_numpy(denoms, gcd_divisor):
     # not tested
     import sympy as sp
@@ -65,18 +63,20 @@ def generate_efficient_code_laumbdify_numpy(denoms, gcd_divisor):
 
     return f
 
+
 def generate_efficient_code_c_for_ufunc(denoms, gcd_divisor):
-   """ `_c` to be used by generate_efficient_code_ufunc. """
-   print(denoms)
+    """ `_c` to be used by generate_efficient_code_ufunc. """
+    print(denoms)
+
 
 def generate_efficient_code_ufunc(denoms, gcd_divisor):
-  # generate C code
-  # a folder with ready-to compile code (using C-compiler)
-  # generated/flat_cam, generated/spherical_cam, generated/cylindrical_cam, cylinder_line (versus cylinder_point), cone_cam, implicit_cam (!), sdf_cam, GPU verions, etc.
-  generate_efficient_code_c_for_ufunc(denoms, gcd_divisor)
+    # generate C code
+    # a folder with ready-to compile code (using C-compiler)
+    # generated/flat_cam, generated/spherical_cam, generated/cylindrical_cam, cylinder_line (versus cylinder_point), cone_cam, implicit_cam (!), sdf_cam, GPU verions, etc.
+    generate_efficient_code_c_for_ufunc(denoms, gcd_divisor)
 
-  raise Exception()
-  return None
+    raise Exception()
+    return None
 
 
 generate_efficient_code = generate_efficient_code_ufunc
