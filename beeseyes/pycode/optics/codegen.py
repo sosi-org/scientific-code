@@ -17,6 +17,10 @@
 #       See `nl_cast_numpy` folder
 # In general, also an issue is to compute-factorise (using substitue, similar to autodiff)
 
+import sympy
+# from sympy.utilities.codegen import codegen
+import sympy.utilities.codegen
+
 def generate_efficient_code_pure_c(denoms, gcd_divisor):
     """
     But this is C code.
@@ -63,11 +67,19 @@ def generate_efficient_code_laumbdify_numpy(denoms, gcd_divisor):
 
     return f
 
-
 # numerator/ (denomerator=divisor)
+
 def generate_efficient_code_c_for_ufunc(numerators, gcd_divisor):
     """ `_c` to be used by generate_efficient_code_ufunc. """
     print(numerators)
+    for i in range(len(numerators)):
+        expr = numerators[i] / gcd_divisor
+        [(c_name, c_code), (h_name, c_header)] = sympy.utilities.codegen.codegen(
+            ("my_cast_func", expr), language="C", header=False, empty=False)
+        print(h_name)
+        print(c_header)
+        print(c_name)
+        print(c_code)
 
 
 def generate_efficient_code_ufunc(denoms, gcd_divisor):
