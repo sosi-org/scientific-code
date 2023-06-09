@@ -13,6 +13,9 @@
 #      This is important: multi-level, but non-black-box
 #
 # 4. Use numpy-able C code.
+#       Using ufunc
+#       See `nl_cast_numpy` folder
+# In general, also an issue is to compute-factorise (using substitue, similar to autodiff)
 
 def generate_efficient_code(denoms, gcd_divisor):
     """
@@ -44,3 +47,26 @@ def generate_efficient_code(denoms, gcd_divisor):
     c_code = c_code.replace("double", "REAL")
     print(c_code)
 
+
+
+
+def generate_efficient_code_laumbdify_numpy(denoms, gcd_divisor):
+
+    import sympy as sp
+    import numpy as np
+
+    x = sp.symbols('x')
+    expr = sp.sin(x)**2 + sp.cos(x)**2
+    f = sp.lambdify(x, expr, "numpy")  # Will use np.sin and np.cos
+    # todo: see scientific_code/fitzhue-nagamo for some nuances of `.lambdify`
+
+    # Do a little test
+    print(f(np.array([0, 1, 2])))
+
+    return f
+
+def generate_efficient_code_ufunc(denoms, gcd_divisor):
+  # generate C code
+  # a folder with ready-to compile code (using C-compiler)
+  # generated/flat_cam, generated/spherical_cam, generated/cylindrical_cam, cylinder_line (versus cylinder_point), cone_cam, implicit_cam (!), sdf_cam, GPU verions, etc.
+  pass
