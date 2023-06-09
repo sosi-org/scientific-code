@@ -6,7 +6,7 @@ import sympy
 
 from codegen import generate_efficient_code
 
-# todo: 
+# todo: (forgot. What was it about?)
 
 # from __future__ import division
 import sympy

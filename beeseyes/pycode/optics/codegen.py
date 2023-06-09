@@ -12,6 +12,7 @@
 #      It's a kind of explainability (but also short)
 #      This is important: multi-level, but non-black-box
 #
+# 4. Use numpy-able C code.
 
 def generate_efficient_code(denoms, gcd_divisor):
     """
