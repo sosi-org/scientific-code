@@ -437,10 +437,27 @@ for form_i, form in enumerate(chosen_forms):
 
             # ^ compute-efficient -> co-consider -> substitute -> nested / (local) frame: locality (separation of data sources)
 
-            generate_efficient_code(soltuple_gcd, inv_gcd1, desired_vars_tuple, params)
+            # join (not. fuse) ray params and surafce params
+            input_params = (*params, *ray_thing['params'])
+            lamb = generate_efficient_code(
+                soltuple_gcd, inv_gcd1, desired_vars_tuple, input_params)
             # later on: ({'θ': subs_θ_eq, 'φ': subs_θ_eq, where : sub_substitudes})
             # Similarly: (a*θ, {θ: sub}) for simple factorizing
-            print('')
+
+            print('numpy raycast function created')
+            # test it:
+            N0 = 500
+            import numpy
+            O = numpy.zeros((3, N0))
+            D = numpy.zeros((3, N0))
+            D1 = D / numpy.linalg.norm(D, ord=2, axis=1)[:, None]
+
+            print(input_params)
+            uvt = lamb(O, D)
+            print(uvt)
+            # todo: formalise boundaries etc
+
+            raise
 
       # todo: save/replace LaTeX for mapltotlib
 

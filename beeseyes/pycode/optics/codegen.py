@@ -52,24 +52,35 @@ def generate_efficient_code_pure_c(denoms, gcd_divisor):
     c_code = c_code.replace("double", "REAL")
     print(c_code)
 
+# def generate_raycaster(numerators, gcd_divisor, output_names, input_symbols):
+#     creates analytical_....
+#     which returns that expression
+#     and wraps it? but it is perhaps not necessary (manual? but all code generaiton needs ot be changeable (kind of revwresible hence, no manual modificaiton))
+
 
 def generate_efficient_code_laumbdify_numpy(numerators, gcd_divisor, output_names, input_symbols):
     # not tested
     import sympy as sp
     import numpy as np
 
+    # todo: swap order of (input_symbolsm output_names)
+
     print('input_symbols', input_symbols)
+    print('output_names', output_names)
+    print('numerators', numerators)
+    print('gcd_divisor', gcd_divisor)
 
     # x = sp.symbols('x')
     # expr = sp.sin(x)**2 + sp.cos(x)**2
     # Will use np.sin and np.cos
-    f = sp.lambdify(input_symbols, numerators, "numpy")
+    exprs = numerators
+    exprs = [n/gcd_divisor for n in numerators]
+    f = sp.lambdify(input_symbols, exprs, "numpy")
     # todo: see scientific_code/fitzhue-nagamo for some nuances of `.lambdify`
 
     # Do a little test
     # print(f(np.array([0, 1, 2])))
-    raise Exception('tbc')
-
+    # raise Exception('tbc')
     return f
 
 # numerator/ (denomerator=divisor)
