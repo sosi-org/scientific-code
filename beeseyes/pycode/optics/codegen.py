@@ -78,14 +78,16 @@ def generate_efficient_code_c_for_ufunc(numerators, gcd_divisor, output_names):
     # print(output_symbols)
 
     routines = []
+    all_func_names = []
     routines.append(('common_divisor', gcd_divisor))
     for i in range(len(numerators)):
         print(str(output_names[i]))
         expr = numerators[i] / gcd_divisor
         funcname = 'my_cast_func_' + str(output_names[i])
         routines.append((funcname, expr))
+        all_func_names.append(funcname)
         # my_cast_func
-        print(funcname)
+    print(all_func_names)
 
     [(c_name, c_code), (h_name, c_header)] = sympy.utilities.codegen.codegen(
         routines,
@@ -95,6 +97,19 @@ def generate_efficient_code_c_for_ufunc(numerators, gcd_divisor, output_names):
     print(c_header)
     print(c_name)
     print(c_code)
+    struct_type = f"""
+    struct output_type {{ { ";".join(f'float {name}' for name in all_func_names)} }};
+    """
+    print(struct_type)
+    struct_version = f"""
+      output_type joint() {{
+          `for i {{`
+                ..
+          `}}`
+      }}
+    """
+    print(struct_version)
+    exit()
 
 
 def generate_efficient_code_ufunc(numerators, gcd_divisor, output_names):
