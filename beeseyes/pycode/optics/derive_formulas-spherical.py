@@ -412,7 +412,7 @@ for form_i, form in enumerate(chosen_forms):
             soltuple_gcd, inv_gcd1 = transform_using_gcd(tuple(solutions))
 
             # a set of solutions (but not math-set)
-            print(soltuple_gcd)
+            print('soltuple_gcd', soltuple_gcd)
             ###################
 
             print('')
@@ -437,7 +437,7 @@ for form_i, form in enumerate(chosen_forms):
 
             # ^ compute-efficient -> co-consider -> substitute -> nested / (local) frame: locality (separation of data sources)
 
-            generate_efficient_code(soltuple_gcd, inv_gcd1)
+            generate_efficient_code(soltuple_gcd, inv_gcd1, desired_vars_tuple)
             # later on: ({'θ': subs_θ_eq, 'φ': subs_θ_eq, where : sub_substitudes})
             # Similarly: (a*θ, {θ: sub}) for simple factorizing
             print('')
