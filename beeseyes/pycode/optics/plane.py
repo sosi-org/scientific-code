@@ -1,4 +1,4 @@
-from .ray_cast import ray_cast
+from .ray_cast_flatcamera import ray_cast
 class Plane:
 
     def __init__(self, physical_size_u=30, physical_size_h=30, C0_pos=(0,0,0)):
