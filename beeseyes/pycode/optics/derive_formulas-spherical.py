@@ -437,7 +437,7 @@ for form_i, form in enumerate(chosen_forms):
 
             # ^ compute-efficient -> co-consider -> substitute -> nested / (local) frame: locality (separation of data sources)
 
-            generate_efficient_code(soltuple_gcd, inv_gcd1, desired_vars_tuple)
+            generate_efficient_code(soltuple_gcd, inv_gcd1, desired_vars_tuple, params)
             # later on: ({'θ': subs_θ_eq, 'φ': subs_θ_eq, where : sub_substitudes})
             # Similarly: (a*θ, {θ: sub}) for simple factorizing
             print('')

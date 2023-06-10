@@ -53,18 +53,22 @@ def generate_efficient_code_pure_c(denoms, gcd_divisor):
     print(c_code)
 
 
-def generate_efficient_code_laumbdify_numpy(denoms, gcd_divisor):
+def generate_efficient_code_laumbdify_numpy(numerators, gcd_divisor, output_names, input_symbols):
     # not tested
     import sympy as sp
     import numpy as np
 
-    x = sp.symbols('x')
-    expr = sp.sin(x)**2 + sp.cos(x)**2
-    f = sp.lambdify(x, expr, "numpy")  # Will use np.sin and np.cos
+    print('input_symbols', input_symbols)
+
+    # x = sp.symbols('x')
+    # expr = sp.sin(x)**2 + sp.cos(x)**2
+    # Will use np.sin and np.cos
+    f = sp.lambdify(input_symbols, numerators, "numpy")
     # todo: see scientific_code/fitzhue-nagamo for some nuances of `.lambdify`
 
     # Do a little test
-    print(f(np.array([0, 1, 2])))
+    # print(f(np.array([0, 1, 2])))
+    raise Exception('tbc')
 
     return f
 
@@ -123,3 +127,4 @@ def generate_efficient_code_ufunc(numerators, gcd_divisor, output_names):
 
 
 generate_efficient_code = generate_efficient_code_ufunc
+generate_efficient_code = generate_efficient_code_laumbdify_numpy
